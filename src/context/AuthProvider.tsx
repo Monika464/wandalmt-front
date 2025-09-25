@@ -1,6 +1,5 @@
-import { createContext, useState, useEffect, ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import AuthContext from "./AuthContext";
-import { useAuth } from "../hooks/useAuth";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -15,6 +14,7 @@ interface User {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Przywracanie stanu po odświeżeniu
   useEffect(() => {
@@ -25,6 +25,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(JSON.parse(savedUser));
       setToken(savedToken);
     }
+    setLoading(false);
   }, []);
 
   const login = (userData: User, token: string) => {
@@ -43,7 +44,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout }}>
-      {children}
+      {loading ? <div>Ładowanie...</div> : children}
     </AuthContext.Provider>
   );
 };

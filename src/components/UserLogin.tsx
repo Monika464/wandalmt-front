@@ -1,40 +1,39 @@
 // src/components/Login.jsx
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 import api from "../utils/api";
-import type { User } from "../types";
+import axios from "axios";
 
-export default function UserLogin({
-  onLogin,
-}: {
-  onLogin: (user: User) => void;
-}) {
+const UserLogin = () => {
   //export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-
-    console.log("Submitting login for:", email, password);
 
     try {
       const response = await api.post("/login", { email, password });
       const { user, token } = response.data;
 
-      console.log("Login successful:", user, token);
+      console.log("Login successful", user);
 
-      // Zapisz token w localStorage
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      login(user, token);
 
-      // Wywołaj callback, aby powiadomić App o zalogowaniu
-      // onLogin(user);
-      onLogin(user);
-    } catch (err) {
-      console.log("Login error details:", err);
-      setError(err.response?.data?.error || "Błąd logowania");
+      navigate("/userpanel");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err) && err.response) {
+        setError(err.response.data.error || "Błąd logowania");
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Nieznany błąd");
+      }
     }
   };
 
@@ -63,7 +62,10 @@ export default function UserLogin({
         >
           Zaloguj
         </button>
+        {error && <p>{error}</p>}
       </form>
     </div>
   );
-}
+};
+
+export default UserLogin;
