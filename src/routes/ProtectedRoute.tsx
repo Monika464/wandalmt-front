@@ -12,18 +12,16 @@ export default function ProtectedRoute({
   children,
   requiredRole,
 }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
-
-  if (loading) return <div>Ładowanie...</div>;
+  const { user } = useAuth();
 
   if (!user) {
     // jeśli brak zalogowanego usera, przekieruj na stronę logowania
-    return <Navigate to="/userlogin" replace />;
+    return <Navigate to="/homepage" replace />;
   }
 
   if (requiredRole && user.role !== requiredRole) {
     // jeśli user nie ma wymaganej roli
-    return <Navigate to="/userlogin" replace />;
+    return <Navigate to="/homepage" replace />;
   }
 
   return children;
