@@ -1,10 +1,11 @@
-// UserPanel.tsx
-
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../store/slices/authSlice"; // <-- import akcji logout
+import type { AppDispatch, RootState } from "../store";
 import LogoutButton from "./LogoutButton";
-import { useAuth } from "../hooks/useAuth";
 
 const UserPanel = () => {
-  const { user } = useAuth();
+  //const dispatch = useDispatch<AppDispatch>();
+  const { user, status, error } = useSelector((state: RootState) => state.auth);
   return (
     <div>
       <h1>Witaj, {user ? user.name : "Gościu"}!</h1>
@@ -14,6 +15,24 @@ const UserPanel = () => {
 };
 
 export default UserPanel;
+// UserPanel.tsx
+
+// import LogoutButton from "./LogoutButton";
+// import { useAuth } from "../hooks/useAuth";
+
+// const UserPanel = () => {
+//   const { user } = useAuth();
+//   return (
+//     <div>
+//       <h1>Witaj, {user ? user.name : "Gościu"}!</h1>
+//       {user && <LogoutButton />}
+//     </div>
+//   );
+// };
+
+// export default UserPanel;
+
+//stary:
 
 // // src/components/UserPanel.tsx
 

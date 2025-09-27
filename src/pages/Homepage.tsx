@@ -1,4 +1,3 @@
-import React from "react";
 import PageNav from "./PageNav";
 import LogoutButton from "../components/LogoutButton";
 

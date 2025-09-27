@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:3000/auth", // zmień na adres swojego backendu
+  baseURL: "http://localhost:3000/auth",
+  withCredentials: true,
 });
 
 console.log("API baseURL:", api.defaults.baseURL);
