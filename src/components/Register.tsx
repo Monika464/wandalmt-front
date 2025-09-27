@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import api from "../utils/api";
 import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 type Role = "user" | "admin";
 
@@ -15,7 +16,7 @@ interface RegisterFormData {
 }
 
 const Register = () => {
-  const { user: currentUser, token } = useAuth(); // aktualnie zalogowany użytkownik
+  const { user: currentUser, token, login } = useAuth(); // aktualnie zalogowany użytkownik
   const [formData, setFormData] = useState<RegisterFormData>({
     name: "",
     surname: "",
@@ -26,6 +27,8 @@ const Register = () => {
 
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+
+  const navigate = useNavigate();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -55,9 +58,23 @@ const Register = () => {
             : {},
       });
 
-      setSuccess(
-        `Użytkownik został pomyślnie zarejestrowany jako ${formData.role}!`
-      );
+      //   setSuccess(
+      //     `Użytkownik został pomyślnie zarejestrowany jako ${formData.role}!`
+      //   );
+      // Złap wartość role w stałą – TypeScript będzie spokojny
+      const role: Role = formData.role;
+
+      // Jeżeli to user – zaloguj automatycznie
+      if (formData.role === "user") {
+        const { user, token } = response.data; // backend zwraca user + token
+        login(user, token); // z useAuth
+        navigate("/userpanel");
+      }
+
+      if (formData.role === "admin") {
+        // admin – nie logujemy, tylko komunikat
+        setSuccess("Admin został pomyślnie zarejestrowany!");
+      }
 
       setFormData({
         name: "",
@@ -66,9 +83,26 @@ const Register = () => {
         password: "",
         role: "user",
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.log("co za blad", err);
-      setError(err.response?.data?.error || "Błąd podczas rejestracji");
+      if (
+        err &&
+        typeof err === "object" &&
+        "response" in err &&
+        err.response &&
+        typeof err.response === "object" &&
+        "data" in err.response &&
+        err.response.data &&
+        typeof err.response.data === "object" &&
+        "error" in err.response.data
+      ) {
+        setError(
+          (err.response as { data: { error: string } }).data.error ||
+            "Błąd podczas rejestracji"
+        );
+      } else {
+        setError("Błąd podczas rejestracji");
+      }
     }
   };
 
