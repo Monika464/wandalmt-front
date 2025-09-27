@@ -19,6 +19,9 @@ const PageNav = () => {
         <li>
           <NavLink to="/shop">Shop</NavLink>
         </li>
+        <li>
+          <NavLink to="/register">Register</NavLink>
+        </li>
       </ul>
     </div>
   );

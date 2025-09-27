@@ -8,6 +8,7 @@ import AdminPanel from "./components/AdminPanel";
 import Homepage from "./pages/Homepage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import "./App.css";
+import Register from "./components/Register";
 
 const App = () => {
   return (
@@ -43,7 +44,7 @@ const App = () => {
               }
             />
 
-            {/* <Route path="/adminpanel" element={<AdminPanel />} /> */}
+            <Route path="/register" element={<Register />} />
           </Routes>
         </BrowserRouter>
       </div>
