@@ -1,13 +1,16 @@
-import React from "react";
-import type { User } from "../types";
+// AdminPanel.tsx
 
-interface AdminLoginProps {
-  onLogin: (loggedInUser: User) => void;
-}
+import LogoutButton from "./LogoutButton";
+import { useAuth } from "../hooks/useAuth";
 
-const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
-  // component logic
-  return <div>admin panel</div>;
+const AdminPanel = () => {
+  const { user } = useAuth();
+  return (
+    <div>
+      <h1>Witaj, {user ? user.name : "Gościu"}!</h1>
+      {user && <LogoutButton />}
+    </div>
+  );
 };
 
-export default AdminLogin;
+export default AdminPanel;

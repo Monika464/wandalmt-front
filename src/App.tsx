@@ -8,23 +8,8 @@ import AdminPanel from "./components/AdminPanel";
 import Homepage from "./pages/Homepage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import "./App.css";
-import type { User } from "./types";
 
 const App = () => {
-  // const [user, setUser] = useState<User | null>(() => {
-  //   const storedUser = localStorage.getItem("user");
-  //   return storedUser ? JSON.parse(storedUser) : null;
-  // });
-  // console.log("App user state:", user);
-  // const handleLogin = (loggedInUser: User) => {
-  //   setUser(loggedInUser); // zapisz dane użytkownika w stanie
-  // };
-
-  // const handleLogout = () => {
-  //   setUser(null);
-  //   localStorage.removeItem("token");
-  //   localStorage.removeItem("user");
-  // };
   return (
     <>
       <div>
@@ -49,8 +34,16 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/adminpanel"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminPanel />
+                </ProtectedRoute>
+              }
+            />
 
-            <Route path="/adminpanel" element={<AdminPanel />} />
+            {/* <Route path="/adminpanel" element={<AdminPanel />} /> */}
           </Routes>
         </BrowserRouter>
       </div>

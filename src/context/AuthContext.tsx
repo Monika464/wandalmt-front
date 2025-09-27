@@ -6,6 +6,7 @@ import type { User } from "../types";
 interface AuthContextType {
   user: User | null;
   token: string | null;
+  loading: boolean;
   login: (userData: User, token: string) => void;
   logout: () => void;
 }
