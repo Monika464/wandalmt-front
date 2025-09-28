@@ -14,7 +14,7 @@ const Login = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Dispatching login for:", email);
+    //console.log("Dispatching login for:", email);
     dispatch(login({ email, password })).then((result) => {
       if (login.fulfilled.match(result)) {
         if (result.payload.user.role === "admin") {

@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../utils/api";
-import axios from "axios";
 
 type Role = "user" | "admin";
 
@@ -33,9 +32,9 @@ const initialState: AuthState = {
 export const login = createAsyncThunk(
   "auth/login",
   async (credentials: { email: string; password: string }) => {
-    console.log("Logging in with credentials:", credentials);
-    const res = await api.post("/login", credentials);
-    console.log("Login response data:", res.data);
+    //console.log("Logging in with credentials:", credentials);
+    const res = await api.post("/auth/login", credentials);
+    //console.log("Login response data:", res.data);
     return res.data; // { user, token }
   }
 );
@@ -49,7 +48,7 @@ export const registerUser = createAsyncThunk(
     email: string;
     password: string;
   }) => {
-    const res = await api.post("/register", newUser);
+    const res = await api.post("/auth/register", newUser);
     return res.data; // { user, token }
   }
 );
@@ -94,31 +93,6 @@ export const registerAdmin = createAsyncThunk(
     }
   }
 );
-// export const registerAdmin = createAsyncThunk(
-//   "auth/registerAdmin",
-//   async (
-//     newAdmin: {
-//       name: string;
-//       surname: string;
-//       email: string;
-//       password: string;
-//     },
-//     { getState, rejectWithValue }
-//   ) => {
-//     try {
-//       const state = getState() as { auth: AuthState };
-//       const token = state.auth.token;
-//       if (!token) return rejectWithValue("Brak tokena autoryzacyjnego");
-
-//       const res = await api.post("/register-admin", newAdmin, {
-//         headers: { Authorization: `Bearer ${token}` },
-//       });
-//       return res.data; // zwykle: { user } albo { message: "created" }
-//     } catch (err: any) {
-//       return rejectWithValue(err.response?.data?.error || err.message);
-//     }
-//   }
-// );
 
 // Logout thunk
 export const logout = createAsyncThunk("auth/logout", async () => {

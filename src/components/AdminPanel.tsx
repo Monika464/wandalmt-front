@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import LogoutButton from "./LogoutButton";
 //import { useAuth } from "../hooks/useAuth";
 import type { RootState } from "../store";
+import UserManagement from "./usermanagement/UserManagement";
 
 const AdminPanel = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -11,6 +12,7 @@ const AdminPanel = () => {
     <div>
       <h1>Witaj, {user ? user.name : "Gościu"}!</h1>
       {user && <LogoutButton />}
+      <UserManagement />
     </div>
   );
 };
