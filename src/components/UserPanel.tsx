@@ -1,11 +1,11 @@
-import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../store/slices/authSlice"; // <-- import akcji logout
-import type { AppDispatch, RootState } from "../store";
+import { useSelector } from "react-redux";
+
+import type { RootState } from "../store";
 import LogoutButton from "./LogoutButton";
 
 const UserPanel = () => {
   //const dispatch = useDispatch<AppDispatch>();
-  const { user, status, error } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state.auth);
   return (
     <div>
       <h1>Witaj, {user ? user.name : "Gościu"}!</h1>
