@@ -8,7 +8,7 @@ import Shop from "./components/Shop";
 import Homepage from "./pages/Homepage";
 //import ProtectedRoute from "./routes/ProtectedRoute";
 import "./App.css";
-//import Register from "./components/Register";
+import Register from "./components/Register";
 import Login from "./components/Login";
 
 const App = () => {
@@ -44,8 +44,8 @@ const App = () => {
                 </ProtectedRoute>
               }
             /> */}
-            {/* 
-            <Route path="/register" element={<Register />} /> */}
+
+            <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="*" element={<Navigate to="/homepage" />} />
           </Routes>

@@ -1,12 +1,15 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../utils/api";
+import axios from "axios";
+
+type Role = "user" | "admin";
 
 interface User {
   _id: string;
   name: string;
   surname: string;
   email: string;
-  role: "user" | "admin";
+  role: Role;
 }
 
 interface AuthState {
@@ -16,9 +19,12 @@ interface AuthState {
   error: string | null;
 }
 
+const storedUser = localStorage.getItem("user");
+const storedToken = localStorage.getItem("token");
+
 const initialState: AuthState = {
-  user: null,
-  token: null,
+  user: storedUser ? JSON.parse(storedUser) : null,
+  token: storedToken || null,
   status: "idle",
   error: null,
 };
@@ -48,32 +54,78 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-// Wylogowanie
-export const logout = createAsyncThunk(
-  "auth/logout",
-  async (_, { getState }) => {
+// REGISTER ADMIN — używa tokenu z getState i NIE ma efektu logowania
+
+export const registerAdmin = createAsyncThunk(
+  "auth/registerAdmin",
+  async (
+    data: { name: string; surname: string; email: string; password: string },
+    thunkAPI
+  ) => {
     try {
-      const state = getState() as { auth: AuthState };
-      console.log("Current auth state:", state);
+      console.log("RegisterAdmin payload:", data);
+      const state = thunkAPI.getState() as { auth: AuthState };
       const token = state.auth.token;
-      console.log("Logging out with token:", token);
 
-      if (!token) throw new Error("Brak tokena");
-      const endpoint =
-        state.auth.user?.role === "admin" ? "/logout-admin" : "/logout";
+      if (!token) {
+        console.error("Brak tokena w stanie Redux");
+        return thunkAPI.rejectWithValue("Brak tokena autoryzacyjnego");
+      }
 
-      await api.post(
-        endpoint,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      return null;
-    } catch (error) {
-      console.error("Logout error:", error);
-      throw error;
+      // Wyślij żądanie z tokenem w nagłówku
+      const response = await api.post("/register-admin", data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("RegisterAdmin success:", response.data);
+
+      return response.data;
+      //const response = await api.post("/register-admin", data);
+
+      // ważne: NIE zapisuj tu nowego admina do localStorage
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || err.message || "Nieznany błąd";
+
+      console.error("RegisterAdmin error:", errorMessage, err.response);
+      return thunkAPI.rejectWithValue(errorMessage);
     }
   }
 );
+// export const registerAdmin = createAsyncThunk(
+//   "auth/registerAdmin",
+//   async (
+//     newAdmin: {
+//       name: string;
+//       surname: string;
+//       email: string;
+//       password: string;
+//     },
+//     { getState, rejectWithValue }
+//   ) => {
+//     try {
+//       const state = getState() as { auth: AuthState };
+//       const token = state.auth.token;
+//       if (!token) return rejectWithValue("Brak tokena autoryzacyjnego");
+
+//       const res = await api.post("/register-admin", newAdmin, {
+//         headers: { Authorization: `Bearer ${token}` },
+//       });
+//       return res.data; // zwykle: { user } albo { message: "created" }
+//     } catch (err: any) {
+//       return rejectWithValue(err.response?.data?.error || err.message);
+//     }
+//   }
+// );
+
+// Logout thunk
+export const logout = createAsyncThunk("auth/logout", async () => {
+  // Optionally, you can perform API logout here
+
+  return;
+});
 
 const authSlice = createSlice({
   name: "auth",
@@ -106,21 +158,45 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.status = "succeeded";
-        // automatyczne logowanie po rejestracji
-        state.user = action.payload.user;
-        state.token = action.payload.token;
-        state.error = null;
-        // Zapis do localStorage
-        localStorage.setItem("user", JSON.stringify(action.payload.user));
-        localStorage.setItem("token", action.payload.token);
+
+        if (action.payload || action.payload.token) {
+          // automatyczne logowanie po rejestracji
+          state.user = action.payload.user;
+          state.token = action.payload.token;
+          state.error = null;
+          // Zapis do localStorage
+          localStorage.setItem("user", JSON.stringify(action.payload.user));
+          localStorage.setItem("token", action.payload.token);
+        } else {
+          state.error = null;
+        }
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message || "Błąd rejestracji";
       })
 
+      // REGISTER ADMIN — nie nadpisujemy auth (tylko status/error)
+      .addCase(registerAdmin.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(registerAdmin.fulfilled, (state) => {
+        state.status = "succeeded";
+        state.error = null;
+        // nie zmieniamy state.user ani token
+      })
+      .addCase(registerAdmin.rejected, (state, action) => {
+        state.status = "failed";
+        // action.payload może zawierać string dzięki rejectWithValue
+        state.error =
+          (action.payload as string) ||
+          action.error.message ||
+          "Błąd rejestracji admina";
+      })
+
       // LOGOUT
       .addCase(logout.fulfilled, (state) => {
+        console.log("Logout reducer triggered");
         state.user = null;
         state.token = null;
         state.status = "idle";
@@ -131,3 +207,4 @@ const authSlice = createSlice({
 });
 
 export default authSlice.reducer;
+//export { registerUser, registerAdmin, login, logout };
