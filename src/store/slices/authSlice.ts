@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../utils/api";
+import type { BackendError } from "../../types";
+import axios, { AxiosError } from "axios";
 
 type Role = "user" | "admin";
 
@@ -84,9 +86,18 @@ export const registerAdmin = createAsyncThunk(
       //const response = await api.post("/register-admin", data);
 
       // ważne: NIE zapisuj tu nowego admina do localStorage
-    } catch (err: any) {
-      const errorMessage =
-        err.response?.data?.message || err.message || "Nieznany błąd";
+    } catch (err) {
+      // Typowanie błędu jako AxiosError<BackendError>
+      let errorMessage: string = "Wystąpił błąd";
+      if (axios.isAxiosError(err)) {
+        const axiosError = err as AxiosError<BackendError>;
+        errorMessage =
+          axiosError.response?.data?.message ||
+          axiosError.message ||
+          errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
 
       console.error("RegisterAdmin error:", errorMessage, err.response);
       return thunkAPI.rejectWithValue(errorMessage);

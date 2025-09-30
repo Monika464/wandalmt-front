@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../utils/api";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+import type { BackendError } from "../../types";
 
 type Role = "user" | "admin";
 
@@ -77,8 +78,6 @@ export const deleteUser = createAsyncThunk(
   }
 );
 
-//dezaktywowanie
-
 // Aktywuj/dezaktywuj użytkownika
 export const toggleUserStatus = createAsyncThunk(
   "users/toggleStatus",
@@ -101,10 +100,23 @@ export const toggleUserStatus = createAsyncThunk(
       );
 
       return { userId, newStatus };
-    } catch (err: any) {
-      return rejectWithValue(
-        err.response?.data?.message || "Błąd zmiany statusu"
-      );
+    } catch (err) {
+      // Typowanie błędu jako AxiosError<BackendError>
+      let errorMessage: string = "Wystąpił błąd";
+      if (axios.isAxiosError(err)) {
+        const axiosError = err as AxiosError<BackendError>;
+        errorMessage =
+          axiosError.response?.data?.message ||
+          axiosError.message ||
+          errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      console.error("RegisterAdmin error:", errorMessage, err.response);
+      return rejectWithValue(errorMessage);
+      //   return rejectWithValue(
+      //     err.response?.data?.message || "Błąd zmiany statusu"
+      //   );
     }
   }
 );
