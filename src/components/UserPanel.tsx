@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 
 import type { RootState } from "../store";
-import LogoutButton from "./LogoutButton";
+import LogoutButton from "./auth/LogoutButton";
 
 const UserPanel = () => {
   //const dispatch = useDispatch<AppDispatch>();

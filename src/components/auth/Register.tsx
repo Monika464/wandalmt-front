@@ -1,8 +1,8 @@
 // src/components/Register.tsx
 import { useState, type FormEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { registerUser, registerAdmin } from "../store/slices/authSlice";
-import type { AppDispatch, RootState } from "../store";
+import { registerUser, registerAdmin } from "../../store/slices/authSlice";
+import type { AppDispatch, RootState } from "../../store";
 import { useNavigate } from "react-router-dom";
 
 type Role = "user" | "admin";

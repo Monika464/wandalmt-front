@@ -8,8 +8,9 @@ import AdminPanel from "./components/AdminPanel";
 import Homepage from "./pages/Homepage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import "./App.css";
-import Register from "./components/Register";
-import Login from "./components/Login";
+import Register from "./components/auth/Register";
+import Login from "./components/auth/Login";
+import ProductItem from "./components/products/ProductItem";
 
 const App = () => {
   return (

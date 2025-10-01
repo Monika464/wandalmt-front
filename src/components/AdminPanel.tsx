@@ -1,6 +1,6 @@
 // AdminPanel.tsx
 import { useSelector } from "react-redux";
-import LogoutButton from "./LogoutButton";
+import LogoutButton from "./auth/LogoutButton";
 //import { useAuth } from "../hooks/useAuth";
 import type { RootState } from "../store";
 import UserManagement from "./usermanagement/UserManagement";

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { logout } from "../store/slices/authSlice"; // <-- import akcji logout
-import type { AppDispatch } from "../store";
+import { logout } from "../../store/slices/authSlice"; // <-- import akcji logout
+import type { AppDispatch } from "../../store";
 
 export default function LogoutButton() {
   const dispatch = useDispatch<AppDispatch>();
