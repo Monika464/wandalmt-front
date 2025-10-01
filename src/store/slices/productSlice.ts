@@ -18,7 +18,8 @@ const initialState: ProductState = {
   error: null,
 };
 
-// Thunky do API
+// fetch products
+
 export const fetchProducts = createAsyncThunk(
   "admin/products/fetchAll",
   async () => {
@@ -28,19 +29,46 @@ export const fetchProducts = createAsyncThunk(
   }
 );
 
+//create product
+
 export const createProduct = createAsyncThunk(
   "products/create",
-  async (productData: Product) => {
-    const res = await api.post("/admin/products", productData);
-    return res.data;
+  async (productData: Product, { getState }) => {
+    const state = getState() as { auth?: { token?: string } };
+    const token = state.auth?.token;
+    console.log(
+      "Creating product with data:",
+      productData,
+      "and token:",
+      token
+    );
+    const res = await api.post("/admin/products", productData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data as Product;
   }
 );
 
+// edit product
+
 export const editProduct = createAsyncThunk(
   "products/edit",
-  async ({ id, productData }: { id: string; productData: Product }) => {
-    const res = await api.put(`/admin/products/${id}`, productData);
-    return res.data;
+  async (
+    { id, productData }: { id: string; productData: Product },
+    { getState }
+  ) => {
+    const state = getState() as { auth?: { token?: string } };
+    const token = state.auth?.token;
+
+    const res = await api.put(`/admin/products/${id}`, productData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return res.data.product as Product;
   }
 );
 
@@ -104,5 +132,5 @@ const productSlice = createSlice({
   },
 });
 
-export const { clearSelected } = productSlice.actions;
+//export const { clearSelected } = productSlice.actions;
 export default productSlice.reducer;

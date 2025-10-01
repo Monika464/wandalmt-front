@@ -4,6 +4,7 @@ import LogoutButton from "./auth/LogoutButton";
 //import { useAuth } from "../hooks/useAuth";
 import type { RootState } from "../store";
 import UserManagement from "./usermanagement/UserManagement";
+import CreateProductForm from "./products/CreateProductForm";
 
 const AdminPanel = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -13,6 +14,7 @@ const AdminPanel = () => {
       <h1>Witaj, {user ? user.name : "Gościu"}!</h1>
       {user && <LogoutButton />}
       <UserManagement />
+      <CreateProductForm />
     </div>
   );
 };

@@ -3,6 +3,7 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../store/index";
 import { deleteProduct } from "../../store/slices/productSlice";
+import { formatCurrency } from "../../utils/formatcurremcy";
 
 interface Props {
   _id: string;
@@ -40,7 +41,7 @@ const ProductItem: React.FC<Props> = ({
       />
       <h2 className="text-lg font-semibold">{title}</h2>
       <p className="text-sm text-gray-600">{description}</p>
-      <p className="font-bold">{price} zł</p>
+      <p className="font-bold">{formatCurrency(price)}</p>
       <div className="flex gap-2 mt-2">
         <button
           onClick={() => onEdit(_id)}
