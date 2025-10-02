@@ -19,5 +19,24 @@ export interface Product {
   status?: string;
 }
 
+export interface IChapter {
+  _id?: string; // MongoDB ObjectId jako string
+  title: string;
+  description?: string;
+  videoUrl?: string;
+}
+
+export interface IResource {
+  _id?: string; // MongoDB ObjectId jako string
+  title: string;
+  content: string;
+  imageUrl: string;
+  videoUrl?: string;
+  productId: string; // ID produktu powiązanego z tym resource
+  chapters: IChapter[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 // typ do tworzenia (bez id)
 export type NewProduct = Omit<Product, "_id">;

@@ -14,6 +14,7 @@ const AdminPanel = () => {
       <h1>Witaj, {user ? user.name : "Gościu"}!</h1>
       {user && <LogoutButton />}
       <UserManagement />
+      CREATE PRODUCT
       <CreateProductForm />
     </div>
   );

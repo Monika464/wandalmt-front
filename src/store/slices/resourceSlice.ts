@@ -1,14 +1,44 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  createAsyncThunk,
+  type PayloadAction,
+} from "@reduxjs/toolkit";
 import api from "../../utils/api"; // axios instance
+import type { IChapter } from "../../types";
+import type { IResource } from "../../types";
+
+interface ResourceState {
+  resourcesByProductId: Record<string, IResource>;
+  selected: IResource | null;
+  loading: boolean;
+  error: string | null;
+}
+
+const initialState: ResourceState = {
+  resourcesByProductId: {},
+  selected: null,
+  loading: false,
+  error: null,
+};
 
 // 📌 Pobierz resource dla produktu
 export const fetchResource = createAsyncThunk(
   "resources/fetchOne",
   async (productId: string) => {
     const res = await api.get(`/admin/resources/${productId}`);
-    return res.data;
+    console.log("Fetched resource:", res.data);
+    return res.data as IResource;
   }
 );
+
+// export const fetchResource = createAsyncThunk(
+//   "resources/fetchOne",
+//   async (productId: string) => {
+//     const res = await api.get(`/admin/resources/${productId}`);
+//     console.log("Fetched resource:", res.data);
+//     return res.data;
+//   }
+// );
 
 // 📌 Utwórz resource (powiązany z produktem)
 export const createResource = createAsyncThunk(
@@ -64,14 +94,29 @@ export const deleteChapter = createAsyncThunk(
   }
 );
 
+// 📌 Edytuj chapter w resource
+export const editChapter = createAsyncThunk(
+  "resources/editChapter",
+  async ({
+    resourceId,
+    chapterId,
+    chapterData,
+  }: {
+    resourceId: string;
+    chapterId: string;
+    chapterData: any;
+  }) => {
+    const res = await api.put(
+      `/admin/resources/${resourceId}/chapters/${chapterId}`,
+      chapterData
+    );
+    return res.data; // powinien zwracać cały resource po edycji chapter
+  }
+);
+
 const resourceSlice = createSlice({
   name: "resources",
-  initialState: {
-    items: [] as any[], // lista zasobów
-    selected: null as any, // aktualnie wybrany zasób
-    loading: false,
-    error: null as string | null,
-  },
+  initialState,
   reducers: {
     clearSelectedResource: (state) => {
       state.selected = null;
@@ -83,10 +128,15 @@ const resourceSlice = createSlice({
       .addCase(fetchResource.pending, (state) => {
         state.loading = true;
       })
-      .addCase(fetchResource.fulfilled, (state, action) => {
-        state.loading = false;
-        state.selected = action.payload;
-      })
+      .addCase(
+        fetchResource.fulfilled,
+        (state, action: PayloadAction<IResource>) => {
+          const resource = action.payload;
+          state.loading = false;
+          state.selected = resource;
+          state.resourcesByProductId[resource.productId] = resource;
+        }
+      )
       .addCase(fetchResource.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Error fetching resource";
@@ -121,6 +171,15 @@ const resourceSlice = createSlice({
           state.selected = action.payload;
         }
       })
+      // 📌 editChapter
+      .addCase(editChapter.fulfilled, (state, action) => {
+        if (state.selected && state.selected._id === action.payload._id) {
+          state.selected = action.payload;
+        }
+        state.items = state.items.map((res) =>
+          res._id === action.payload._id ? action.payload : res
+        );
+      })
 
       // 📌 deleteChapter
       .addCase(deleteChapter.fulfilled, (state, action) => {
@@ -129,7 +188,7 @@ const resourceSlice = createSlice({
           state.selected._id === action.payload.resourceId
         ) {
           state.selected.chapters = state.selected.chapters.filter(
-            (ch: any) => ch._id !== action.payload.chapterId
+            (ch: IChapter) => ch._id !== action.payload.chapterId
           );
         }
       });
