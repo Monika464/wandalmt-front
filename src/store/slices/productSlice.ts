@@ -4,7 +4,7 @@ import {
   type PayloadAction,
 } from "@reduxjs/toolkit";
 import api from "../../utils/api"; // axios instance
-import type { Product } from "../../types";
+import type { NewProduct, Product } from "../../types";
 
 interface ProductState {
   products: Product[];
@@ -33,21 +33,25 @@ export const fetchProducts = createAsyncThunk(
 
 export const createProduct = createAsyncThunk(
   "products/create",
-  async (productData: Product, { getState }) => {
-    const state = getState() as { auth?: { token?: string } };
-    const token = state.auth?.token;
-    console.log(
-      "Creating product with data:",
-      productData,
-      "and token:",
-      token
-    );
-    const res = await api.post("/admin/products", productData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return res.data as Product;
+  async (productData: NewProduct, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as { auth?: { token?: string } };
+      const token = state.auth?.token;
+
+      const res = await api.post("/admin/products", productData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return res.data.product as Product;
+    } catch (err: any) {
+      console.error(
+        "❌ Error in createProduct thunk:",
+        err.response?.data || err.message
+      );
+      return rejectWithValue(err.response?.data || "Unknown error");
+    }
   }
 );
 

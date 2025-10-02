@@ -17,12 +17,12 @@ const EditProductForm: React.FC<Props> = ({ product, onClose }) => {
   const [description, setDescription] = useState(product.description);
   const [price, setPrice] = useState(product.price);
   const [imageUrl, setImageUrl] = useState(product.imageUrl);
-  const [content, setContent] = useState(product.content);
+  //const [content, setContent] = useState(product.content);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title || !description || price <= 0 || !imageUrl || !content) {
+    if (!title || !description || price <= 0 || !imageUrl) {
       alert("Wypełnij wszystkie pola poprawnie");
       return;
     }
@@ -36,7 +36,6 @@ const EditProductForm: React.FC<Props> = ({ product, onClose }) => {
             description,
             price,
             imageUrl,
-            content,
             _id: "",
           },
         })
@@ -83,12 +82,12 @@ const EditProductForm: React.FC<Props> = ({ product, onClose }) => {
         onChange={(e) => setImageUrl(e.target.value)}
         className="border p-2 rounded"
       />
-      <textarea
+      {/* <textarea
         placeholder="Treść"
         value={content}
         onChange={(e) => setContent(e.target.value)}
         className="border p-2 rounded"
-      />
+      /> */}
       <div className="flex gap-2">
         <button type="submit" className="bg-blue-500 text-white p-2 rounded">
           Zapisz zmiany
