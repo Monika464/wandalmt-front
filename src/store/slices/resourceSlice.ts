@@ -8,6 +8,7 @@ import type { IChapter } from "../../types";
 import type { IResource } from "../../types";
 
 interface ResourceState {
+  items: IResource[];
   resourcesByProductId: Record<string, IResource>;
   selected: IResource | null;
   loading: boolean;
@@ -15,6 +16,7 @@ interface ResourceState {
 }
 
 const initialState: ResourceState = {
+  items: [],
   resourcesByProductId: {},
   selected: null,
   loading: false,

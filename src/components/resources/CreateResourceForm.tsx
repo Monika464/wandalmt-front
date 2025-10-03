@@ -13,13 +13,13 @@ const CreateResourceForm: React.FC<Props> = ({ productId, onClose }) => {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  //const [imageUrl, setImageUrl] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title || !content || !imageUrl) {
+    if (!title || !content) {
       alert("Wypełnij wszystkie wymagane pola (title, content, imageUrl)");
       return;
     }
@@ -32,7 +32,7 @@ const CreateResourceForm: React.FC<Props> = ({ productId, onClose }) => {
       alert("Resource został utworzony!");
       setTitle("");
       setContent("");
-      setImageUrl("");
+      // setImageUrl("");
       setVideoUrl("");
       onClose();
     } catch (err) {
@@ -60,13 +60,13 @@ const CreateResourceForm: React.FC<Props> = ({ productId, onClose }) => {
         onChange={(e) => setContent(e.target.value)}
         className="border p-2 rounded w-full"
       />
-      <input
+      {/* <input
         type="text"
         placeholder="Image URL"
         value={imageUrl}
         onChange={(e) => setImageUrl(e.target.value)}
         className="border p-2 rounded w-full"
-      />
+      /> */}
       <input
         type="text"
         placeholder="Video URL (opcjonalnie)"

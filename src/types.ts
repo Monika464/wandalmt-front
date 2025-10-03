@@ -30,12 +30,19 @@ export interface IResource {
   _id?: string; // MongoDB ObjectId jako string
   title: string;
   content: string;
-  imageUrl: string;
   videoUrl?: string;
   productId: string; // ID produktu powiązanego z tym resource
   chapters: IChapter[];
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface ProductItemProps extends Product {
+  resource: IResource | null;
+  onEdit: () => void;
+  onCreateResource: () => void;
+  onEditResource: (resource: IResource) => void;
+  onViewResource: () => void;
 }
 
 // typ do tworzenia (bez id)

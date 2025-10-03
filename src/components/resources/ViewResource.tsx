@@ -12,13 +12,13 @@ const ViewResource: React.FC<Props> = ({ resource, onClose }) => {
       <h2 className="text-xl font-bold mb-2">{resource.title}</h2>
       <p className="mb-2">{resource.content}</p>
 
-      {resource.imageUrl && (
+      {/* {resource.imageUrl && (
         <img
           src={resource.imageUrl}
           alt={resource.title}
           className="w-full h-48 object-cover rounded mb-2"
         />
-      )}
+      )} */}
 
       {resource.videoUrl && (
         <video controls className="w-full rounded mb-4">

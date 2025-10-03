@@ -19,7 +19,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
 
   const [title, setTitle] = useState(resource.title);
   const [content, setContent] = useState(resource.content || "");
-  const [imageUrl, setImageUrl] = useState(resource.imageUrl || "");
+  //const [imageUrl, setImageUrl] = useState(resource.imageUrl || "");
   const [videoUrl, setVideoUrl] = useState(resource.videoUrl || "");
 
   const [chapters, setChapters] = useState<IChapter[]>(resource.chapters || []);
@@ -36,7 +36,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
       await dispatch(
         editResource({
           id: resource._id,
-          resourceData: { title, content, imageUrl, videoUrl },
+          resourceData: { title, content, videoUrl },
         })
       ).unwrap();
       alert("Resource updated!");
@@ -113,13 +113,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
         onChange={(e) => setContent(e.target.value)}
         className="border p-2 rounded mb-2 w-full"
       />
-      <input
-        type="text"
-        placeholder="Image URL"
-        value={imageUrl}
-        onChange={(e) => setImageUrl(e.target.value)}
-        className="border p-2 rounded mb-2 w-full"
-      />
+
       <input
         type="text"
         placeholder="Video URL"
