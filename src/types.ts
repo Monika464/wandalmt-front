@@ -9,7 +9,6 @@ export interface User {
   role: "user" | "admin";
 }
 
-// typ pełny (to co zwraca backend)
 export interface Product {
   _id: string;
   title: string;
