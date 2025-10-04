@@ -57,17 +57,13 @@ export const fetchProductById = createAsyncThunk(
         },
       });
 
-      console.log("Fetched product by ID:", res.data);
+      // console.log("Fetched product by ID:", res.data);
       return res.data;
     } catch (error: any) {
-      console.error("❌ Error in fetchProductById thunk:", error);
-
-      // jeśli backend zwraca response z status i message
-      if (error.response) {
-        return rejectWithValue(error.response.data);
+      if (error.response && error.response.status === 401) {
+        return rejectWithValue("Musisz się zalogować jako admin");
       }
-
-      return rejectWithValue({ message: error.message });
+      return rejectWithValue(error.message);
     }
   }
 );

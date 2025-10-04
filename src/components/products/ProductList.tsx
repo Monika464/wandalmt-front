@@ -10,6 +10,7 @@ import type { Product } from "../../types";
 import type { IResource } from "../../types";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../store";
+import { useNavigate } from "react-router-dom";
 
 // ...
 const ProductList: React.FC = () => {
@@ -31,6 +32,8 @@ const ProductList: React.FC = () => {
   const [viewingResource, setViewingResource] = useState<IResource | null>(
     null
   );
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(fetchProducts());
@@ -82,7 +85,7 @@ const ProductList: React.FC = () => {
       {products.map((product) => {
         const resource = resourcesByProductId[product._id];
 
-        console.log("Resource dla produktu:", product._id, resource);
+        //console.log("Resource dla produktu:", product._id, resource);
 
         return (
           <div key={product._id} className="relative">
@@ -137,6 +140,12 @@ const ProductList: React.FC = () => {
                 />
               </div>
             )}
+            <button
+              onClick={() => navigate(`/admin/products/${product._id}`)}
+              className="px-3 py-1 bg-blue-500 text-white rounded"
+            >
+              Show detail
+            </button>
           </div>
         );
       })}

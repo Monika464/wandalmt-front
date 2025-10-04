@@ -23,6 +23,15 @@ const initialState: ResourceState = {
   error: null,
 };
 
+interface AddChapterPayload {
+  resourceId: string;
+  chapterData: {
+    title: string;
+    description: string;
+    videoUrl: string;
+  };
+}
+
 // 📌 Pobierz resource dla produktu
 export const fetchResource = createAsyncThunk(
   "resources/fetchOne",
@@ -82,12 +91,30 @@ export const deleteResource = createAsyncThunk(
 // 📌 Dodaj chapter do resource
 export const addChapter = createAsyncThunk(
   "resources/addChapter",
-  async ({ resourceId, chapter }: { resourceId: string; chapter: any }) => {
-    const res = await api.post(
-      `/admin/resources/${resourceId}/chapters`,
-      chapter
-    );
-    return res.data;
+  async (
+    { resourceId, chapterData }: AddChapterPayload,
+    { getState, rejectWithValue }
+  ) => {
+    try {
+      const state = getState() as { auth?: { token?: string } };
+      const token = state.auth?.token;
+
+      const res = await api.post(
+        `/admin/resources/${resourceId}/chapters`,
+        chapterData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      return res.data;
+    } catch (err: any) {
+      console.error(
+        "❌ Error in addChapter thunk:",
+        err.response?.data || err.message
+      );
+      return rejectWithValue(err.response?.data || "Unknown error");
+    }
   }
 );
 

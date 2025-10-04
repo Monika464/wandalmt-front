@@ -26,7 +26,7 @@ const CreateResourceForm: React.FC<Props> = ({ productId, onClose }) => {
 
     try {
       await dispatch(
-        createResource({ productId, title, content, imageUrl, videoUrl })
+        createResource({ productId, title, content, videoUrl })
       ).unwrap();
 
       alert("Resource został utworzony!");
