@@ -28,7 +28,17 @@ export const fetchResource = createAsyncThunk(
   "resources/fetchOne",
   async (productId: string) => {
     const res = await api.get(`/admin/resources/${productId}`);
-    console.log("Fetched resource:", res.data);
+    //console.log("Fetched resource:", res.data);
+    return res.data as IResource;
+  }
+);
+
+// 📌 Pobierz pojedynczy resource po jego ID (np. na stronie edycji zasobu)
+export const fetchResourceById = createAsyncThunk(
+  "resources/fetchById",
+  async (resourceId: string) => {
+    const res = await api.get(`/admin/resources/id/${resourceId}`);
+    // console.log("Fetched resource by ID:", res.data);
     return res.data as IResource;
   }
 );
@@ -142,6 +152,22 @@ const resourceSlice = createSlice({
       .addCase(fetchResource.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Error fetching resource";
+      })
+      .addCase(fetchResourceById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        fetchResourceById.fulfilled,
+        (state, action: PayloadAction<IResource>) => {
+          state.loading = false;
+          state.selected = action.payload;
+          state.resourcesByProductId[action.payload.productId] = action.payload;
+        }
+      )
+      .addCase(fetchResourceById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to fetch resource";
       })
 
       // 📌 createResource

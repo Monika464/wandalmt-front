@@ -41,10 +41,6 @@ const ProductList: React.FC = () => {
   const handleCloseEditResource = () => setEditingResource(null);
   const handleCloseViewResource = () => {
     setViewingResource(null);
-    // dodatkowo oczyść selected w stanie globalnym,}
-    // możesz dać action np. clearSelectedResource()
-    // albo ustawić selected na null w slice
-    // dispatch(clearSelectedResource());
   };
   useEffect(() => {
     products.forEach((p) => dispatch(fetchResource(p._id)));
@@ -57,9 +53,6 @@ const ProductList: React.FC = () => {
   const resourcesByProductId = useSelector(
     (state: RootState) => state.resources.resourcesByProductId
   );
-  // const { selected: viewingResource } = useSelector(
-  //   (state: RootState) => state.resources
-  // );
 
   if (loading) return <p>Ładowanie...</p>;
   if (error) return <p className="text-red-500">{error}</p>;

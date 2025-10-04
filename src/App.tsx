@@ -11,6 +11,8 @@ import "./App.css";
 import Register from "./components/auth/Register";
 import Login from "./components/auth/Login";
 import ProductItem from "./components/products/ProductItem";
+import ProductResourcePage from "./pages/ProductResourcePage";
+import ResourceEditPage from "./pages/ResourceEditPage";
 
 const App = () => {
   return (
@@ -21,6 +23,18 @@ const App = () => {
             <Route path="/" element={<Navigate to="/homepage" />} />
             <Route path="/homepage" element={<Homepage />} />
             <Route path="/shop" element={<Shop />} />
+
+            {/* Strona produktu + jego zasób */}
+            <Route
+              path="/admin/products/:productId"
+              element={<ProductResourcePage />}
+            />
+
+            {/* Edycja zasobu */}
+            <Route
+              path="/admin/resources/:resourceId/edit"
+              element={<ResourceEditPage />}
+            />
 
             {/* <Route path="/userlogin" element={<UserLogin />} />
             <Route path="/adminlogin" element={<AdminLogin />} /> */}

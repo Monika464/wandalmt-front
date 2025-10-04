@@ -8,15 +8,29 @@ import type { NewProduct, Product } from "../../types";
 
 interface ProductState {
   products: Product[];
+  byId: Record<string, Product>;
   loading: boolean;
   error: string | null;
 }
 
 const initialState: ProductState = {
   products: [],
+  byId: {},
   loading: false,
   error: null,
 };
+
+// interface ProductState {
+//   products: Product[];
+//   loading: boolean;
+//   error: string | null;
+// }
+
+// const initialState: ProductState = {
+//   products: [],
+//   loading: false,
+//   error: null,
+// };
 
 // fetch products
 
@@ -24,11 +38,39 @@ export const fetchProducts = createAsyncThunk(
   "admin/products/fetchAll",
   async () => {
     const res = await api.get("/admin/products");
-    console.log("Fetched products:", res.data);
+    //console.log("Fetched products:", res.data);
     return res.data as Product[];
   }
 );
 
+//FETCH SINGLE PRODUCT
+
+export const fetchProductById = createAsyncThunk(
+  "products/fetchById",
+  async (id: string, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as { auth?: { token?: string } };
+      const token = state.auth?.token;
+      const res = await api.get(`/admin/products/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Fetched product by ID:", res.data);
+      return res.data;
+    } catch (error: any) {
+      console.error("❌ Error in fetchProductById thunk:", error);
+
+      // jeśli backend zwraca response z status i message
+      if (error.response) {
+        return rejectWithValue(error.response.data);
+      }
+
+      return rejectWithValue({ message: error.message });
+    }
+  }
+);
 //create product
 
 export const createProduct = createAsyncThunk(
@@ -118,6 +160,24 @@ const productSlice = createSlice({
       })
       .addCase(createProduct.fulfilled, (state, action) => {
         state.products.push(action.payload);
+      })
+
+      //fetch single product
+
+      .addCase(fetchProductById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        fetchProductById.fulfilled,
+        (state, action: PayloadAction<Product>) => {
+          state.loading = false;
+          state.byId[action.payload._id] = action.payload;
+        }
+      )
+      .addCase(fetchProductById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? "Error fetching product";
       })
 
       // 📌 editProduct
