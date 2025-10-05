@@ -93,7 +93,8 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
       ).unwrap();
 
       // upewniamy się, że chapters to tablica
-      setChapters(updatedResource.chapters || []);
+      //setChapters(updatedResource.chapters || []);
+      setChapters((prev) => prev.filter((ch) => ch._id !== chapterId));
     } catch (err) {
       console.error(err);
       alert("Error deleting chapter");
