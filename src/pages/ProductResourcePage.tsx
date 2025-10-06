@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { fetchProductById } from "../store/slices/productSlice";
 import { fetchResource } from "../store/slices/resourceSlice";
 
@@ -39,11 +39,20 @@ export default function ProductResourcePage() {
   const [viewingResource, setViewingResource] = useState<IResource | null>(
     null
   );
+  const [refreshView, setRefreshView] = useState(false);
+
   const handleCloseEditProduct = () => setEditingProductId(null);
   const handleCloseCreateResource = () => setCreatingResourceProduct(null);
-  const handleCloseEditResource = () => setEditingResource(null);
+  const handleCloseEditResource = () => {
+    setEditingResource(null);
+    handleRefreshView();
+  };
   const handleCloseViewResource = () => {
     setViewingResource(null);
+  };
+
+  const handleRefreshView = () => {
+    setRefreshView((prev) => !prev);
   };
 
   useEffect(() => {
@@ -52,7 +61,7 @@ export default function ProductResourcePage() {
       dispatch(fetchProductById(productId));
       dispatch(fetchResource(productId));
     }
-  }, [productId, dispatch]);
+  }, [productId, dispatch, refreshView]);
 
   if (!product) return <p>Ładowanie produktu...</p>;
 

@@ -9,9 +9,16 @@ import {
   deleteChapter,
 } from "../../store/slices/resourceSlice";
 
+// interface Props {
+//   resource: IResource;
+//   onClose: () => void;
+// }
+
 interface Props {
   resource: IResource;
   onClose: () => void;
+
+  onUpdated?: (updated: IResource) => void;
 }
 
 const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
@@ -30,7 +37,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
   });
 
   const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
-
+  const [isEditingResource, setIsEditingResource] = useState(true);
   // Save resource changes
   // Save resource changes and close form
   const handleSaveResource = async () => {
@@ -42,7 +49,9 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
         })
       ).unwrap();
       alert("Resource updated!");
-      onClose(); // <--- zamyka edycję tego resource
+      // onClose(); // <--- zamyka edycję tego resource
+
+      setIsEditingResource(false);
     } catch (err) {
       console.error(err);
       alert("Error updating resource");
@@ -106,7 +115,56 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
       <h2 className="text-xl font-bold mb-4">Edit Resource</h2>
 
       {/* Resource fields */}
-      <input
+      {isEditingResource ? (
+        <>
+          <input
+            type="text"
+            placeholder="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="border p-2 rounded mb-2 w-full"
+          />
+          <textarea
+            placeholder="Content"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="border p-2 rounded mb-2 w-full"
+          />
+          <input
+            type="text"
+            placeholder="Video URL"
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+            className="border p-2 rounded mb-2 w-full"
+          />
+          <button
+            onClick={handleSaveResource}
+            className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
+          >
+            Save Resource
+          </button>
+        </>
+      ) : (
+        <>
+          <p>
+            <strong>Title:</strong> {title}
+          </p>
+          <p>
+            <strong>Content:</strong> {content}
+          </p>
+          <p>
+            <strong>Video URL:</strong> {videoUrl}
+          </p>
+          <button
+            onClick={() => setIsEditingResource(true)}
+            className="bg-yellow-500 text-white px-4 py-2 rounded mb-4"
+          >
+            Edit Resource
+          </button>
+        </>
+      )}
+
+      {/* <input
         type="text"
         placeholder="Title"
         value={title}
@@ -131,7 +189,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
         className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
       >
         Save Resource
-      </button>
+      </button> */}
 
       <hr className="my-4" />
 
@@ -269,6 +327,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
       >
         Close Resource
       </button>
+      {/* //ten przycisk zamykajac nie odswieza widoku z productresurcepage*/}
     </div>
   );
 };
