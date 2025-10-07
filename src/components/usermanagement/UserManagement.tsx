@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../store";
 import {
@@ -20,14 +20,14 @@ const UserManagement = () => {
     (state: RootState) => state.users
   );
 
-  console.log(
-    "UserManagement render - users:",
-    users,
-    "status:",
-    status,
-    "error:",
-    error
-  );
+  // console.log(
+  //   "UserManagement render - users:",
+  //   users,
+  //   "status:",
+  //   status,
+  //   "error:",
+  //   error
+  // );
 
   useEffect(() => {
     dispatch(fetchUsers());

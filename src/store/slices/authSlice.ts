@@ -192,4 +192,12 @@ const authSlice = createSlice({
 });
 
 export default authSlice.reducer;
+
+function dispatch(arg0: any) {
+  throw new Error("Function not implemented.");
+}
+
+function setToken(savedToken: string): any {
+  throw new Error("Function not implemented.");
+}
 //export { registerUser, registerAdmin, login, logout };

@@ -1,6 +1,18 @@
 import UserRow from "./UserRow";
 
-const UserList = ({ users, onToggleStatus, onDelete }) => {
+import type { User } from "../../types";
+
+interface UserListProps {
+  users: User[];
+  onToggleStatus: (userId: string) => void;
+  onDelete: (userId: string) => void;
+}
+
+const UserList: React.FC<UserListProps> = ({
+  users,
+  onToggleStatus,
+  onDelete,
+}) => {
   return (
     <table className="table-auto w-full border-collapse border border-gray-300">
       <thead>
@@ -26,27 +38,3 @@ const UserList = ({ users, onToggleStatus, onDelete }) => {
 };
 
 export default UserList;
-
-// import UserRow from "./UserRow";
-
-// const UserList = ({ users }) => {
-//   return (
-//     <table className="table-auto w-full">
-//       <thead>
-//         <tr>
-//           <th>Imię</th>
-//           <th>Email</th>
-//           <th>Status</th>
-//           <th>Akcje</th>
-//         </tr>
-//       </thead>
-//       <tbody>
-//         {users.map((user) => (
-//           <UserRow key={user._id} user={user} />
-//         ))}
-//       </tbody>
-//     </table>
-//   );
-// };
-
-// export default UserList;

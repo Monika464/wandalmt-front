@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchProductById } from "../store/slices/productSlice";
 import { fetchResource } from "../store/slices/resourceSlice";
 
@@ -13,24 +13,16 @@ import CreateResourceForm from "../components/resources/CreateResourceForm";
 
 export default function ProductResourcePage() {
   const { productId } = useParams<{ productId: string }>();
-  // console.log("ProductId from params:", productId);
-
   const dispatch = useDispatch<AppDispatch>();
 
-  // product z mapy byId
   const product: Product | undefined = useSelector((state: RootState) =>
     productId ? state.products.byId[productId] : undefined
   );
 
-  //console.log("Product in ProductResourcePage:", product);
-
-  // resource z mapy resourcesByProductId
   const resource: IResource | undefined = useSelector((state: RootState) =>
     productId ? state.resources.resourcesByProductId[productId] : undefined
   );
 
-  // console.log("Resource in ProductResourcePage:", resource);
-  const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [creatingResourceProduct, setCreatingResourceProduct] =
     useState<Product | null>(null);
   const [editingResource, setEditingResource] = useState<IResource | null>(
@@ -40,30 +32,65 @@ export default function ProductResourcePage() {
     null
   );
   const [refreshView, setRefreshView] = useState(false);
-
-  const handleCloseEditProduct = () => setEditingProductId(null);
-  const handleCloseCreateResource = () => setCreatingResourceProduct(null);
-  const handleCloseEditResource = () => {
-    setEditingResource(null);
-    handleRefreshView();
-  };
-  const handleCloseViewResource = () => {
-    setViewingResource(null);
-  };
-
-  const handleRefreshView = () => {
-    setRefreshView((prev) => !prev);
-  };
+  const [hasFetched, setHasFetched] = useState(false);
 
   useEffect(() => {
-    // console.log("🔥 useEffect fired with productId:", productId);
-    if (productId) {
-      dispatch(fetchProductById(productId));
-      dispatch(fetchResource(productId));
-    }
-  }, [productId, dispatch, refreshView]);
+    if (!productId || hasFetched) return;
 
-  if (!product) return <p>Ładowanie produktu...</p>;
+    console.log("🔄 INITIATING INITIAL DATA FETCH FOR:", productId);
+    setHasFetched(true);
+
+    const fetchData = async () => {
+      try {
+        console.log("📥 Fetching product and resource...");
+        await Promise.all([
+          dispatch(fetchProductById(productId)),
+          dispatch(fetchResource(productId)),
+        ]);
+        console.log("✅ Initial data fetch completed");
+      } catch (error) {
+        console.error("❌ Error in initial fetch:", error);
+      }
+    };
+
+    fetchData();
+  }, [productId, dispatch, hasFetched]);
+
+  // Refresh when refreshView changes
+  useEffect(() => {
+    if (!productId || !hasFetched) return;
+
+    console.log("🔄 REFRESHING DATA");
+    dispatch(fetchResource(productId));
+  }, [refreshView, productId, dispatch, hasFetched]);
+
+  // Poprawiony warunek ładowania
+  // const isLoading =
+  //   !hasFetched || productState.loading || resourceState.loading.fetch;
+
+  // if (isLoading) {
+  //   console.log(
+  //     "🔄 LOADING - hasFetched:",
+  //     hasFetched,
+  //     "productLoading:",
+  //     productState.loading,
+  //     "resourceLoading:",
+  //     resourceState.loading.fetch
+  //   );
+  //   return <p>Ładowanie produktu...</p>;
+  // }
+
+  if (!product) {
+    console.log("❌ NO PRODUCT FOUND");
+    return <p>Nie znaleziono produktu</p>;
+  }
+
+  console.log(
+    "✅ RENDERING - Product:",
+    product.title,
+    "Resource:",
+    resource?.title || "No resource"
+  );
 
   return (
     <div className="p-4">
@@ -80,42 +107,49 @@ export default function ProductResourcePage() {
         <h2 className="text-lg">Zasób:</h2>
         {resource ? (
           <div>
-            <p>{resource.title}</p>
+            <p>
+              <strong>Tytuł:</strong> {resource.title}
+            </p>
+            <p>
+              <strong>Opis:</strong> {resource.description}
+            </p>
+            <div className="mt-2">
+              <button
+                onClick={() => setEditingResource(resource)}
+                className="px-3 py-1 bg-purple-500 text-white rounded mr-2"
+              >
+                Edytuj zasób
+              </button>
+              <button
+                onClick={() => setViewingResource(resource)}
+                className="px-3 py-1 bg-blue-500 text-white rounded"
+              >
+                Pokaż zasób
+              </button>
+            </div>
           </div>
         ) : (
-          <p>Brak zasobu dla tego produktu</p>
-        )}
-        {!resource && (
-          <button
-            onClick={() => setCreatingResourceProduct(product)}
-            className="px-3 py-1 bg-green-500 text-white rounded"
-          >
-            Dodaj zasób
-          </button>
+          <div>
+            <p className="text-yellow-600">Brak zasobu dla tego produktu</p>
+            <button
+              onClick={() => setCreatingResourceProduct(product)}
+              className="px-3 py-1 bg-green-500 text-white rounded mt-2"
+            >
+              Dodaj zasób
+            </button>
+          </div>
         )}
 
-        {resource && (
-          <>
-            <button
-              onClick={() => setEditingResource(resource)}
-              className="px-3 py-1 bg-purple-500 text-white rounded"
-            >
-              Edytuj zasób
-            </button>
-
-            <button
-              onClick={() => setViewingResource(resource)}
-              className="px-3 py-1 bg-blue-500 text-white rounded"
-            >
-              Pokaż zasób
-            </button>
-          </>
-        )}
+        {/* Modale */}
         {creatingResourceProduct?._id === product._id && (
           <div className="mt-4 p-4 border rounded-lg bg-gray-50">
             <CreateResourceForm
               productId={creatingResourceProduct._id}
-              onClose={handleCloseCreateResource}
+              onClose={() => setCreatingResourceProduct(null)}
+              onSuccess={() => {
+                setCreatingResourceProduct(null);
+                setRefreshView((prev) => !prev);
+              }}
             />
           </div>
         )}
@@ -124,7 +158,10 @@ export default function ProductResourcePage() {
           <div className="mt-4 p-4 border rounded-lg bg-gray-50">
             <EditResourceForm
               resource={editingResource}
-              onClose={handleCloseEditResource}
+              onClose={() => {
+                setEditingResource(null);
+                setRefreshView((prev) => !prev);
+              }}
             />
           </div>
         )}
@@ -133,7 +170,7 @@ export default function ProductResourcePage() {
           <div className="mt-4 p-4 border rounded-lg bg-gray-100">
             <ViewResource
               resource={viewingResource}
-              onClose={handleCloseViewResource}
+              onClose={() => setViewingResource(null)}
             />
           </div>
         )}

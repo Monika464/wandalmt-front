@@ -5,6 +5,7 @@ import {
 } from "@reduxjs/toolkit";
 import api from "../../utils/api"; // axios instance
 import type { NewProduct, Product } from "../../types";
+import axios from "axios";
 
 interface ProductState {
   products: Product[];
@@ -47,7 +48,7 @@ export const fetchProducts = createAsyncThunk(
 
 export const fetchProductById = createAsyncThunk(
   "products/fetchById",
-  async (id: string, { getState, rejectWithValue }) => {
+  async (id: string, { getState, rejectWithValue, signal }) => {
     try {
       const state = getState() as { auth?: { token?: string } };
       const token = state.auth?.token;
@@ -55,13 +56,15 @@ export const fetchProductById = createAsyncThunk(
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        signal,
       });
 
       // console.log("Fetched product by ID:", res.data);
       return res.data;
     } catch (error: any) {
-      if (error.response && error.response.status === 401) {
-        return rejectWithValue("Musisz się zalogować jako admin");
+      if (axios.isCancel(error) || error.name === "CanceledError") {
+        console.warn("Request cancelled");
+        return;
       }
       return rejectWithValue(error.message);
     }
@@ -164,13 +167,22 @@ const productSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(
-        fetchProductById.fulfilled,
-        (state, action: PayloadAction<Product>) => {
-          state.loading = false;
-          state.byId[action.payload._id] = action.payload;
+      .addCase(fetchProductById.fulfilled, (state, action) => {
+        const product = action.payload;
+        if (product && product._id) {
+          state.byId[product._id] = product;
         }
-      )
+        //state.status = "succeeded";
+        state.loading = false;
+        state.error = null;
+      })
+      // .addCase(
+      //   fetchProductById.fulfilled,
+      //   (state, action: PayloadAction<Product>) => {
+      //     state.loading = false;
+      //     state.byId[action.payload._id] = action.payload;
+      //   }
+      // )
       .addCase(fetchProductById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message ?? "Error fetching product";

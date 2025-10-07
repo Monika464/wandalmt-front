@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { fetchResource } from "../../store/slices/resourceSlice";
-import CreateResourceForm from "../resources/CreateResourceForm";
-import EditResourceForm from "../resources/EditResourceForm";
-import ViewResource from "../resources/ViewResource";
+//import CreateResourceForm from "../resources/CreateResourceForm";
+//import EditResourceForm from "../resources/EditResourceForm";
+//import ViewResource from "../resources/ViewResource";
 import EditProductForm from "./EditProductForm";
 import ProductItem from "./ProductItem";
 import { fetchProducts } from "../../store/slices/productSlice";
-import type { Product } from "../../types";
-import type { IResource } from "../../types";
+//import type { Product } from "../../types";
+//import type { IResource } from "../../types";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../store";
 import { useNavigate } from "react-router-dom";
@@ -24,14 +24,14 @@ const ProductList: React.FC = () => {
   // );
 
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
-  const [creatingResourceProduct, setCreatingResourceProduct] =
-    useState<Product | null>(null);
-  const [editingResource, setEditingResource] = useState<IResource | null>(
-    null
-  );
-  const [viewingResource, setViewingResource] = useState<IResource | null>(
-    null
-  );
+  // const [creatingResourceProduct, setCreatingResourceProduct] =
+  //   useState<Product | null>(null);
+  // const [editingResource, setEditingResource] = useState<IResource | null>(
+  //   null
+  // );
+  // const [viewingResource, setViewingResource] = useState<IResource | null>(
+  //   null
+  // );
 
   const navigate = useNavigate();
 
@@ -40,11 +40,11 @@ const ProductList: React.FC = () => {
   }, [dispatch]);
 
   const handleCloseEditProduct = () => setEditingProductId(null);
-  const handleCloseCreateResource = () => setCreatingResourceProduct(null);
-  const handleCloseEditResource = () => setEditingResource(null);
-  const handleCloseViewResource = () => {
-    setViewingResource(null);
-  };
+  //const handleCloseCreateResource = () => setCreatingResourceProduct(null);
+  //const handleCloseEditResource = () => setEditingResource(null);
+  // const handleCloseViewResource = () => {
+  //   setViewingResource(null);
+  // };
   useEffect(() => {
     products.forEach((p) => dispatch(fetchResource(p._id)));
   }, [products, dispatch]);
@@ -60,21 +60,21 @@ const ProductList: React.FC = () => {
   if (loading) return <p>Ładowanie...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
-  const handleViewResource = (productId: string) => {
-    const resource = resourcesByProductId[productId];
+  // const handleViewResource = (productId: string) => {
+  //   const resource = resourcesByProductId[productId];
 
-    if (resource) {
-      // jeśli zasób już jest w store
-      setViewingResource(resource);
-    } else {
-      // jeśli jeszcze nie ma → dispatch i ustaw po pobraniu
-      dispatch(fetchResource(productId)).then((action) => {
-        if (fetchResource.fulfilled.match(action)) {
-          setViewingResource(action.payload);
-        }
-      });
-    }
-  };
+  //   if (resource) {
+  //     // jeśli zasób już jest w store
+  //     setViewingResource(resource);
+  //   } else {
+  //     // jeśli jeszcze nie ma → dispatch i ustaw po pobraniu
+  //     dispatch(fetchResource(productId)).then((action) => {
+  //       if (fetchResource.fulfilled.match(action)) {
+  //         setViewingResource(action.payload);
+  //       }
+  //     });
+  //   }
+  // };
 
   // const handleViewResource = (productId: string) => {
   //   dispatch(fetchResource(productId));
@@ -93,17 +93,17 @@ const ProductList: React.FC = () => {
               {...product}
               resource={resource || null}
               onEdit={() => setEditingProductId(product._id)}
-              onCreateResource={() => setCreatingResourceProduct(product)}
-              onEditResource={(resource) => setEditingResource(resource)}
-              onViewResource={() => handleViewResource(product._id)}
+              // onCreateResource={() => setCreatingResourceProduct(product)}
+              //onEditResource={(resource) => setEditingResource(resource)}
+              // onViewResource={() => handleViewResource(product._id)}
             />
-
+            {/* 
             {viewingResource && viewingResource.productId === product._id && (
               <ViewResource
                 resource={viewingResource}
                 onClose={handleCloseViewResource}
               />
-            )}
+            )} */}
 
             {editingProductId === product._id && (
               <div className="mt-4 p-4 border rounded-lg bg-gray-50">
@@ -114,24 +114,24 @@ const ProductList: React.FC = () => {
               </div>
             )}
 
-            {creatingResourceProduct?._id === product._id && (
+            {/* {creatingResourceProduct?._id === product._id && (
               <div className="mt-4 p-4 border rounded-lg bg-gray-50">
                 <CreateResourceForm
                   productId={creatingResourceProduct._id}
                   onClose={handleCloseCreateResource}
                 />
               </div>
-            )}
+            )} */}
 
-            {editingResource && editingResource.productId === product._id && (
+            {/* {editingResource && editingResource.productId === product._id && (
               <div className="mt-4 p-4 border rounded-lg bg-gray-50">
                 <EditResourceForm
                   resource={editingResource}
                   onClose={handleCloseEditResource}
                 />
               </div>
-            )}
-
+            )} */}
+            {/* 
             {viewingResource && viewingResource.productId === product._id && (
               <div className="mt-4 p-4 border rounded-lg bg-gray-100">
                 <ViewResource
@@ -139,7 +139,7 @@ const ProductList: React.FC = () => {
                   onClose={handleCloseViewResource}
                 />
               </div>
-            )}
+            )} */}
             <button
               onClick={() => navigate(`/admin/products/${product._id}`)}
               className="px-3 py-1 bg-blue-500 text-white rounded"

@@ -6,20 +6,44 @@ import {
 import api from "../../utils/api"; // axios instance
 import type { IChapter } from "../../types";
 import type { IResource } from "../../types";
+import axios from "axios";
+
+// interface ResourceState {
+//   items: IResource[];
+//   resourcesByProductId: Record<string, IResource>;
+//   selected: IResource | null;
+//   loading: boolean;
+//   error: string | null;
+// }
 
 interface ResourceState {
   items: IResource[];
   resourcesByProductId: Record<string, IResource>;
   selected: IResource | null;
-  loading: boolean;
+  loading: {
+    fetch: boolean;
+    fetchById: boolean;
+    create: boolean;
+  };
   error: string | null;
 }
 
+// const initialState: ResourceState = {
+//   items: [],
+//   resourcesByProductId: {},
+//   selected: null,
+//   loading: false,
+//   error: null,
+// };
 const initialState: ResourceState = {
   items: [],
   resourcesByProductId: {},
   selected: null,
-  loading: false,
+  loading: {
+    fetch: false,
+    fetchById: false,
+    create: false,
+  },
   error: null,
 };
 
@@ -35,20 +59,110 @@ interface AddChapterPayload {
 // 📌 Pobierz resource dla produktu
 export const fetchResource = createAsyncThunk(
   "resources/fetchOne",
-  async (productId: string) => {
-    const res = await api.get(`/admin/resources/${productId}`);
-    //console.log("Fetched resource:", res.data);
-    return res.data as IResource;
+  async (productId: string, { getState, rejectWithValue, signal }) => {
+    //console.log("🚀 fetchResource START for product:", productId);
+
+    try {
+      const state = getState() as { auth?: { token?: string } };
+      const token = state.auth?.token;
+
+      // 🔥 SZCZEGÓŁOWE DEBUGOWANIE
+      // console.log("🔍 DEBUG THUNK STATE:");
+      // console.log("- Product ID:", productId);
+      // console.log("- Token from state:", token);
+      // console.log("- Token length:", token?.length);
+      // console.log(
+      //   "- Token === localStorage:",
+      //   token === localStorage.getItem("token")
+      // );
+      // console.log("- Signal aborted:", signal?.aborted);
+
+      // if (!token) {
+      //   console.error("❌ NO TOKEN IN REDUX STATE");
+      //   return rejectWithValue("No authentication token");
+      // }
+
+      // console.log("📞 Making API request...");
+      const res = await api.get(`/admin/resources/${productId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        signal,
+      });
+
+      // console.log("✅ API RESPONSE SUCCESS:");
+      // console.log("- Status:", res.status);
+      // console.log("- Data:", res.data);
+
+      return res.data;
+    } catch (error: any) {
+      // console.error("❌ API REQUEST FAILED:");
+      // console.log("- Error name:", error.name);
+      // console.log("- Error message:", error.message);
+      // console.log("- Response status:", error.response?.status);
+      // console.log("- Response data:", error.response?.data);
+      // console.log("- Is canceled:", axios.isCancel(error));
+
+      if (axios.isCancel(error) || error.name === "CanceledError") {
+        console.warn("Request was cancelled");
+        return rejectWithValue("Request cancelled");
+      }
+
+      return rejectWithValue(error.response?.data || error.message);
+    }
   }
 );
 
+///
+// export const fetchResource = createAsyncThunk(
+//   "resources/fetchOne",
+//   async (productId: string, { getState, rejectWithValue, signal }) => {
+//     try {
+//       const state = getState() as { auth?: { token?: string } };
+//       const token = state.auth?.token;
+//       const res = await api.get(`/admin/resources/${productId}`, {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//         },
+//         signal, // 🔥 tu przekazujemy sygnał anulowania
+//       });
+//       return res.data;
+//     } catch (error: any) {
+//       if (axios.isCancel(error) || error.name === "CanceledError") {
+//         console.warn("Request cancelled");
+//         return;
+//       }
+//       return rejectWithValue(error.message);
+//     }
+//   }
+// );
+///
+
 // 📌 Pobierz pojedynczy resource po jego ID (np. na stronie edycji zasobu)
+
 export const fetchResourceById = createAsyncThunk(
   "resources/fetchById",
-  async (resourceId: string) => {
-    const res = await api.get(`/admin/resources/id/${resourceId}`);
-    // console.log("Fetched resource by ID:", res.data);
-    return res.data as IResource;
+  async (resourceId: string, { getState, rejectWithValue, signal }) => {
+    // console.log(`🔄 Fetching resource ${resourceId}`);
+    try {
+      const state = getState() as { auth?: { token?: string } };
+      const token = state.auth?.token;
+
+      const res = await api.get(`/admin/resources/id/${resourceId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        signal,
+      });
+      // console.log("Fetched resource by ID:", res.data);
+      return res.data as IResource;
+    } catch (error: any) {
+      if (axios.isCancel(error) || error.name === "CanceledError") {
+        console.warn("Request cancelled");
+        return;
+      }
+      return rejectWithValue(error.message);
+    }
   }
 );
 
@@ -152,64 +266,105 @@ export const editChapter = createAsyncThunk(
     return res.data; // powinien zwracać cały resource po edycji chapter
   }
 );
-
 const resourceSlice = createSlice({
   name: "resources",
   initialState,
   reducers: {
     clearSelectedResource: (state) => {
       state.selected = null;
+      state.error = null;
+    },
+    setLoading: (
+      state,
+      action: PayloadAction<{
+        fetch?: boolean;
+        fetchById?: boolean;
+        create?: boolean;
+      }>
+    ) => {
+      if (action.payload.fetch !== undefined)
+        state.loading.fetch = action.payload.fetch;
+      if (action.payload.fetchById !== undefined)
+        state.loading.fetchById = action.payload.fetchById;
+      if (action.payload.create !== undefined)
+        state.loading.create = action.payload.create;
     },
   },
   extraReducers: (builder) => {
     builder
       // 📌 fetchResource
       .addCase(fetchResource.pending, (state) => {
-        state.loading = true;
+        //console.log("🔄 fetchResource pending");
+        state.loading.fetch = true;
+        state.error = null;
       })
       .addCase(
         fetchResource.fulfilled,
         (state, action: PayloadAction<IResource>) => {
           const resource = action.payload;
-          state.loading = false;
+          // console.log("✅ fetchResource fulfilled:", action.payload._id);
+          state.loading.fetch = false;
+          state.error = null;
           state.selected = resource;
-          state.resourcesByProductId[resource.productId] = resource;
+          state.resourcesByProductId[action.payload.productId] = action.payload;
         }
       )
       .addCase(fetchResource.rejected, (state, action) => {
-        state.loading = false;
+        // console.log("❌ fetchResource rejected:", action.error);
+        state.loading.fetch = false;
         state.error = action.error.message || "Error fetching resource";
       })
+
+      // 📌 fetchResourceById
       .addCase(fetchResourceById.pending, (state) => {
-        state.loading = true;
+        state.loading.fetchById = true;
         state.error = null;
       })
       .addCase(
         fetchResourceById.fulfilled,
         (state, action: PayloadAction<IResource>) => {
-          state.loading = false;
+          state.loading.fetchById = false;
+          state.error = null;
           state.selected = action.payload;
           state.resourcesByProductId[action.payload.productId] = action.payload;
         }
       )
       .addCase(fetchResourceById.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || "Failed to fetch resource";
+        state.loading.fetchById = false;
+        state.error = (action.payload as string) || "Failed to fetch resource";
       })
 
       // 📌 createResource
+      .addCase(createResource.pending, (state) => {
+        state.loading.create = true;
+        state.error = null;
+      })
       .addCase(createResource.fulfilled, (state, action) => {
+        state.loading.create = false;
+        state.error = null;
         state.items.push(action.payload);
+      })
+      .addCase(createResource.rejected, (state, action) => {
+        state.loading.create = false;
+        state.error = action.error.message || "Error creating resource";
       })
 
       // 📌 editResource
+      .addCase(editResource.pending, (state) => {
+        state.loading.create = true; // lub dodaj nowy flag dla edit
+      })
       .addCase(editResource.fulfilled, (state, action) => {
+        state.loading.create = false;
         state.items = state.items.map((res) =>
           res._id === action.payload._id ? action.payload : res
         );
         if (state.selected && state.selected._id === action.payload._id) {
           state.selected = action.payload;
         }
+      })
+      .addCase(editResource.rejected, (state, action) => {
+        state.loading.create = false;
+        state.error = action.error.message || "Error editing resource";
       })
 
       // 📌 deleteResource
@@ -226,6 +381,7 @@ const resourceSlice = createSlice({
           state.selected = action.payload;
         }
       })
+
       // 📌 editChapter
       .addCase(editChapter.fulfilled, (state, action) => {
         if (state.selected && state.selected._id === action.payload._id) {
@@ -250,5 +406,119 @@ const resourceSlice = createSlice({
   },
 });
 
-export const { clearSelectedResource } = resourceSlice.actions;
+export const { clearSelectedResource, setLoading } = resourceSlice.actions;
 export default resourceSlice.reducer;
+
+/////
+// const resourceSlice = createSlice({
+//   name: "resources",
+//   initialState,
+//   reducers: {
+//     clearSelectedResource: (state) => {
+//       state.selected = null;
+//       state.error = null;
+//     },
+//     setLoading: (state, action: PayloadAction<boolean>) => {
+//       state.loading = action.payload;
+//     },
+//   },
+//   extraReducers: (builder) => {
+//     builder
+//       // 📌 fetchResource
+//       .addCase(fetchResource.pending, (state) => {
+//         console.log("🔄 fetchResource pending");
+//         state.loading = true;
+//         state.error = null;
+//       })
+//       .addCase(
+//         fetchResource.fulfilled,
+//         (state, action: PayloadAction<IResource>) => {
+//           const resource = action.payload;
+//           console.log("✅ fetchResource fulfilled:", action.payload._id);
+//           state.loading = false;
+//           state.error = null;
+//           state.selected = resource;
+//           state.resourcesByProductId[action.payload.productId] = action.payload;
+//           // state.resourcesByProductId[resource.productId] = resource;
+//         }
+//       )
+//       .addCase(fetchResource.rejected, (state, action) => {
+//         console.log("❌ fetchResource rejected:", action.error);
+//         state.loading = false;
+//         state.error = action.error.message || "Error fetching resource";
+//       })
+//       .addCase(fetchResourceById.pending, (state) => {
+//         state.loading = true;
+//         state.error = null;
+//       })
+//       .addCase(
+//         fetchResourceById.fulfilled,
+//         (state, action: PayloadAction<IResource>) => {
+//           state.loading = false;
+//           state.error = null;
+//           state.selected = action.payload;
+//           state.resourcesByProductId[action.payload.productId] = action.payload;
+//         }
+//       )
+//       .addCase(fetchResourceById.rejected, (state, action) => {
+//         state.loading = false;
+//         state.error = (action.payload as string) || "Failed to fetch resource";
+//         //state.error = action.error.message || "Failed to fetch resource";
+//       })
+
+//       // 📌 createResource
+//       .addCase(createResource.fulfilled, (state, action) => {
+//         state.items.push(action.payload);
+//       })
+
+//       // 📌 editResource
+//       .addCase(editResource.fulfilled, (state, action) => {
+//         state.items = state.items.map((res) =>
+//           res._id === action.payload._id ? action.payload : res
+//         );
+//         if (state.selected && state.selected._id === action.payload._id) {
+//           state.selected = action.payload;
+//         }
+//       })
+
+//       // 📌 deleteResource
+//       .addCase(deleteResource.fulfilled, (state, action) => {
+//         state.items = state.items.filter((res) => res._id !== action.payload);
+//         if (state.selected && state.selected._id === action.payload) {
+//           state.selected = null;
+//         }
+//       })
+
+//       // 📌 addChapter
+//       .addCase(addChapter.fulfilled, (state, action) => {
+//         if (state.selected && state.selected._id === action.payload._id) {
+//           state.selected = action.payload;
+//         }
+//       })
+//       // 📌 editChapter
+//       .addCase(editChapter.fulfilled, (state, action) => {
+//         if (state.selected && state.selected._id === action.payload._id) {
+//           state.selected = action.payload;
+//         }
+//         state.items = state.items.map((res) =>
+//           res._id === action.payload._id ? action.payload : res
+//         );
+//       })
+
+//       // 📌 deleteChapter
+//       .addCase(deleteChapter.fulfilled, (state, action) => {
+//         if (
+//           state.selected &&
+//           state.selected._id === action.payload.resourceId
+//         ) {
+//           state.selected.chapters = state.selected.chapters.filter(
+//             (ch: IChapter) => ch._id !== action.payload.chapterId
+//           );
+//         }
+//       });
+//   },
+// });
+
+// export const { clearSelectedResource } = resourceSlice.actions;
+// export default resourceSlice.reducer;
+//

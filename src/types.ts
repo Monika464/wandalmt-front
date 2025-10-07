@@ -4,9 +4,11 @@ export interface BackendError {
 }
 
 export interface User {
+  _id: string;
   name: string;
   email: string;
   role: "user" | "admin";
+  active: boolean;
 }
 
 export interface Product {
@@ -39,9 +41,9 @@ export interface IResource {
 export interface ProductItemProps extends Product {
   resource: IResource | null;
   onEdit: () => void;
-  onCreateResource: () => void;
-  onEditResource: (resource: IResource) => void;
-  onViewResource: () => void;
+  //onCreateResource: () => void;
+  // onEditResource: (resource: IResource) => void;
+  //onViewResource: () => void;
 }
 
 // typ do tworzenia (bez id)

@@ -1,6 +1,15 @@
-import React from "react";
+import type { User } from "../../types";
+interface UserRowProps {
+  user: User;
+  onToggleStatus: (userId: string, newStatus: boolean) => void;
+  onDelete: (userId: string) => void;
+}
 
-const UserRow = ({ user, onToggleStatus, onDelete }) => {
+const UserRow: React.FC<UserRowProps> = ({
+  user,
+  onToggleStatus,
+  onDelete,
+}) => {
   const handleToggleStatus = () => {
     const newStatus = user.active ? false : true;
     onToggleStatus(user._id, newStatus);
@@ -54,42 +63,3 @@ const UserRow = ({ user, onToggleStatus, onDelete }) => {
 };
 
 export default UserRow;
-
-// import { useDispatch } from "react-redux";
-// //import { deleteUser, deactivateUser } from "../userSlice";
-
-// const UserRow = ({ user }) => {
-//   const dispatch = useDispatch();
-
-//   // const handleDelete = () => {
-//   //   dispatch(deleteUser(user._id));
-//   // };
-
-//   // const handleDeactivate = () => {
-//   //   dispatch(deactivateUser(user._id));
-//   // };
-
-//   return (
-//     <tr>
-//       <td>{user.name}</td>
-//       <td>{user.email}</td>
-//       <td>{user.active ? "Aktywny" : "Nieaktywny"}</td>
-//       <td>
-//         {/* <button
-//           onClick={handleDeactivate}
-//           className="mr-2 bg-yellow-400 px-2 py-1"
-//         >
-//           Dezaktywuj
-//         </button>
-//         <button
-//           onClick={handleDelete}
-//           className="bg-red-500 px-2 py-1 text-white"
-//         >
-//           Usuń
-//         </button> */}
-//       </td>
-//     </tr>
-//   );
-// };
-
-// export default UserRow;
