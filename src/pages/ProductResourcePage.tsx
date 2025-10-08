@@ -13,6 +13,8 @@ import CreateResourceForm from "../components/resources/CreateResourceForm";
 
 export default function ProductResourcePage() {
   const { productId } = useParams<{ productId: string }>();
+
+  console.log("id changed:", productId);
   const dispatch = useDispatch<AppDispatch>();
 
   const product: Product | undefined = useSelector((state: RootState) =>
@@ -32,13 +34,17 @@ export default function ProductResourcePage() {
     null
   );
   const [refreshView, setRefreshView] = useState(false);
-  const [hasFetched, setHasFetched] = useState(false);
+
+  // useEffect(() => {
+  //   console.log("MOUNT ProductResourcePage", productId);
+  //   return () => console.log("UNMOUNT ProductResourcePage", productId);
+  // }, [productId]);
 
   useEffect(() => {
-    if (!productId || hasFetched) return;
+    console.log("🏷️ productId, hasfectched", productId);
+    if (!productId) return;
 
-    console.log("🔄 INITIATING INITIAL DATA FETCH FOR:", productId);
-    setHasFetched(true);
+    // console.log("🔄 INITIATING INITIAL DATA FETCH FOR:", productId);
 
     const fetchData = async () => {
       try {
@@ -54,15 +60,15 @@ export default function ProductResourcePage() {
     };
 
     fetchData();
-  }, [productId, dispatch, hasFetched]);
+  }, [productId, dispatch]);
 
   // Refresh when refreshView changes
   useEffect(() => {
-    if (!productId || !hasFetched) return;
+    if (!productId) return;
 
-    console.log("🔄 REFRESHING DATA");
+    //console.log("🔄 REFRESHING DATA");
     dispatch(fetchResource(productId));
-  }, [refreshView, productId, dispatch, hasFetched]);
+  }, [refreshView, productId, dispatch]);
 
   // Poprawiony warunek ładowania
   // const isLoading =
@@ -81,16 +87,16 @@ export default function ProductResourcePage() {
   // }
 
   if (!product) {
-    console.log("❌ NO PRODUCT FOUND");
+    //console.log("❌ NO PRODUCT FOUND");
     return <p>Nie znaleziono produktu</p>;
   }
 
-  console.log(
-    "✅ RENDERING - Product:",
-    product.title,
-    "Resource:",
-    resource?.title || "No resource"
-  );
+  // console.log(
+  //   "✅ RENDERING - Product:",
+  //   product.title,
+  //   "Resource:",
+  //   resource?.title || "No resource"
+  // );
 
   return (
     <div className="p-4">

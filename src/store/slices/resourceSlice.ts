@@ -65,6 +65,7 @@ export const fetchResource = createAsyncThunk(
     try {
       const state = getState() as { auth?: { token?: string } };
       const token = state.auth?.token;
+      console.log("Token from state resource:", token);
 
       // 🔥 SZCZEGÓŁOWE DEBUGOWANIE
       // console.log("🔍 DEBUG THUNK STATE:");
@@ -83,6 +84,7 @@ export const fetchResource = createAsyncThunk(
       // }
 
       // console.log("📞 Making API request...");
+      console.log("Fetching resource for product ID:", productId);
       const res = await api.get(`/admin/resources/${productId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -93,7 +95,7 @@ export const fetchResource = createAsyncThunk(
       // console.log("✅ API RESPONSE SUCCESS:");
       // console.log("- Status:", res.status);
       // console.log("- Data:", res.data);
-
+      console.log("Fetched resource :", res.data, res.status);
       return res.data;
     } catch (error: any) {
       // console.error("❌ API REQUEST FAILED:");

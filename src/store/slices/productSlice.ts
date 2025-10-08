@@ -49,9 +49,12 @@ export const fetchProducts = createAsyncThunk(
 export const fetchProductById = createAsyncThunk(
   "products/fetchById",
   async (id: string, { getState, rejectWithValue, signal }) => {
+    console.log("Fetching product by ID:", id);
     try {
       const state = getState() as { auth?: { token?: string } };
+
       const token = state.auth?.token;
+      console.log("Token from state product", token);
       const res = await api.get(`/admin/products/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -59,7 +62,7 @@ export const fetchProductById = createAsyncThunk(
         signal,
       });
 
-      // console.log("Fetched product by ID:", res.data);
+      console.log("Fetched product by ID:", res.data, res.status);
       return res.data;
     } catch (error: any) {
       if (axios.isCancel(error) || error.name === "CanceledError") {
