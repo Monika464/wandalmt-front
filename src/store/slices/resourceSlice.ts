@@ -25,11 +25,7 @@ interface ResourceState {
   total: number;
   page: number;
   pageSize: number;
-  loading: {
-    fetch: boolean;
-    fetchById: boolean;
-    create: boolean;
-  };
+  loading: boolean;
   error: string | null;
 }
 
@@ -52,11 +48,7 @@ const initialState: ResourceState = {
   total: 0,
   page: 1,
   pageSize: 20,
-  loading: {
-    fetch: false,
-    fetchById: false,
-    create: false,
-  },
+  loading: false,
   error: null,
 };
 
@@ -310,20 +302,8 @@ const resourceSlice = createSlice({
       state.selected = null;
       state.error = null;
     },
-    setLoading: (
-      state,
-      action: PayloadAction<{
-        fetch?: boolean;
-        fetchById?: boolean;
-        create?: boolean;
-      }>
-    ) => {
-      if (action.payload.fetch !== undefined)
-        state.loading.fetch = action.payload.fetch;
-      if (action.payload.fetchById !== undefined)
-        state.loading.fetchById = action.payload.fetchById;
-      if (action.payload.create !== undefined)
-        state.loading.create = action.payload.create;
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.loading = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -331,13 +311,13 @@ const resourceSlice = createSlice({
       // 📌 fetchResource
       .addCase(fetchResources.pending, (state) => {
         //console.log("🔄 fetchResource pending");
-        state.loading.fetch = true;
+        state.loading = true;
         state.error = null;
       })
       .addCase(
         fetchResources.fulfilled,
         (state, action: PayloadAction<IResourceListResponse>) => {
-          state.loading.fetch = false;
+          state.loading = false;
           state.items = action.payload.items;
           state.total = action.payload.total;
           state.page = action.payload.page;
@@ -352,13 +332,13 @@ const resourceSlice = createSlice({
       )
       .addCase(fetchResources.rejected, (state, action) => {
         // console.log("❌ fetchResource rejected:", action.error);
-        state.loading.fetch = false;
+        state.loading = false;
         state.error = action.error.message || "Error fetching resource";
       })
 
       // 📌 fetchResourceById
       .addCase(fetchResourceById.pending, (state) => {
-        state.loading.fetchById = true;
+        state.loading = true;
         state.error = null;
       })
       .addCase(
@@ -367,7 +347,7 @@ const resourceSlice = createSlice({
           state: WritableDraft<ResourceState>,
           action: PayloadAction<IResource>
         ) => {
-          state.loading.fetchById = false;
+          state.loading = false;
           state.error = null;
           state.selected = action.payload;
           // state.resourcesByProductId[action.payload.productId] = action.payload;
@@ -375,13 +355,13 @@ const resourceSlice = createSlice({
         }
       )
       .addCase(fetchResourceById.rejected, (state, action) => {
-        state.loading.fetchById = false;
+        state.loading = false;
         state.error = (action.payload as string) || "Failed to fetch resource";
       })
       // 📌 fetchResourceByProductId
 
       .addCase(fetchResourceByProductId.pending, (state) => {
-        state.loading.fetchById = true;
+        state.loading = true;
         state.error = null;
       })
       .addCase(
@@ -390,38 +370,38 @@ const resourceSlice = createSlice({
           state: WritableDraft<ResourceState>,
           action: PayloadAction<IResource>
         ) => {
-          state.loading.fetchById = false;
+          state.loading = false;
           state.error = null;
           state.selected = action.payload;
           state.resourcesByProductId[action.payload.productId] = action.payload;
         }
       )
       .addCase(fetchResourceByProductId.rejected, (state, action) => {
-        state.loading.fetchById = false;
+        state.loading = false;
         state.error = (action.payload as string) || "Failed to fetch resource";
       })
 
       // 📌 createResource
       .addCase(createResource.pending, (state) => {
-        state.loading.create = true;
+        state.loading = true;
         state.error = null;
       })
       .addCase(createResource.fulfilled, (state, action) => {
-        state.loading.create = false;
+        state.loading = false;
         state.error = null;
         state.items.push(action.payload);
       })
       .addCase(createResource.rejected, (state, action) => {
-        state.loading.create = false;
+        state.loading = false;
         state.error = action.error.message || "Error creating resource";
       })
 
       // 📌 editResource
       .addCase(editResource.pending, (state) => {
-        state.loading.create = true; // lub dodaj nowy flag dla edit
+        state.loading = true; // lub dodaj nowy flag dla edit
       })
       .addCase(editResource.fulfilled, (state, action) => {
-        state.loading.create = false;
+        state.loading = false;
         state.items = state.items.map((res) =>
           res._id === action.payload._id ? action.payload : res
         );
@@ -430,7 +410,7 @@ const resourceSlice = createSlice({
         }
       })
       .addCase(editResource.rejected, (state, action) => {
-        state.loading.create = false;
+        state.loading = false;
         state.error = action.error.message || "Error editing resource";
       })
 
