@@ -49,12 +49,12 @@ export const fetchProducts = createAsyncThunk(
 export const fetchProductById = createAsyncThunk(
   "products/fetchById",
   async (id: string, { getState, rejectWithValue, signal }) => {
-    console.log("Fetching product by ID:", id);
+    //console.log("Fetching product by ID:", id);
     try {
       const state = getState() as { auth?: { token?: string } };
 
       const token = state.auth?.token;
-      console.log("Token from state product", token);
+      //console.log("Token from state product", token);
       const res = await api.get(`/admin/products/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -62,7 +62,7 @@ export const fetchProductById = createAsyncThunk(
         signal,
       });
 
-      console.log("Fetched product by ID:", res.data, res.status);
+      //console.log("Fetched product by ID:", res.data, res.status);
       return res.data;
     } catch (error: any) {
       if (axios.isCancel(error) || error.name === "CanceledError") {
@@ -126,8 +126,8 @@ export const deleteProduct = createAsyncThunk(
   async (id: string, { getState }) => {
     console.log("Deleting product with id:", id);
 
-    const state = getState() as { auth?: { token?: string } }; // Replace with RootState if available
-    const token = state.auth?.token; // 🔹 zakładam, że masz slice auth
+    const state = getState() as { auth?: { token?: string } };
+    const token = state.auth?.token;
 
     await api.delete(`/admin/products/${id}`, {
       headers: {

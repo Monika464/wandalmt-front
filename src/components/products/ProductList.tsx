@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchResource } from "../../store/slices/resourceSlice";
+//import { fetchResource } from "../../store/slices/resourceSlice";
 //import CreateResourceForm from "../resources/CreateResourceForm";
 //import EditResourceForm from "../resources/EditResourceForm";
 //import ViewResource from "../resources/ViewResource";
@@ -40,50 +40,26 @@ const ProductList: React.FC = () => {
   }, [dispatch]);
 
   const handleCloseEditProduct = () => setEditingProductId(null);
-  //const handleCloseCreateResource = () => setCreatingResourceProduct(null);
-  //const handleCloseEditResource = () => setEditingResource(null);
-  // const handleCloseViewResource = () => {
-  //   setViewingResource(null);
-  // };
-  useEffect(() => {
-    products.forEach((p) => dispatch(fetchResource(p._id)));
-  }, [products, dispatch]);
+
+  // useEffect(() => {
+  //   products.forEach((p) => dispatch(fetchResource(p._id)));
+  // }, [products, dispatch]);
 
   // const handleViewResource = (productId: string) => {
   //   dispatch(fetchResource(productId));
   //   console.log("Viewing resource for productId:", productId);
   // };
-  const resourcesByProductId = useSelector(
-    (state: RootState) => state.resources.resourcesByProductId
-  );
+  // const resourcesByProductId = useSelector(
+  //   (state: RootState) => state.resources.resourcesByProductId
+  // );
 
   if (loading) return <p>Ładowanie...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
-  // const handleViewResource = (productId: string) => {
-  //   const resource = resourcesByProductId[productId];
-
-  //   if (resource) {
-  //     // jeśli zasób już jest w store
-  //     setViewingResource(resource);
-  //   } else {
-  //     // jeśli jeszcze nie ma → dispatch i ustaw po pobraniu
-  //     dispatch(fetchResource(productId)).then((action) => {
-  //       if (fetchResource.fulfilled.match(action)) {
-  //         setViewingResource(action.payload);
-  //       }
-  //     });
-  //   }
-  // };
-
-  // const handleViewResource = (productId: string) => {
-  //   dispatch(fetchResource(productId));
-  // };
-
   return (
     <div>
       {products.map((product) => {
-        const resource = resourcesByProductId[product._id];
+        // const resource = resourcesByProductId[product._id];
 
         //console.log("Resource dla produktu:", product._id, resource);
 
@@ -91,7 +67,7 @@ const ProductList: React.FC = () => {
           <div key={product._id} className="relative">
             <ProductItem
               {...product}
-              resource={resource || null}
+              // resource={resource || null}
               onEdit={() => setEditingProductId(product._id)}
               // onCreateResource={() => setCreatingResourceProduct(product)}
               //onEditResource={(resource) => setEditingResource(resource)}

@@ -13,6 +13,8 @@ import Login from "./components/auth/Login";
 import ProductItem from "./components/products/ProductItem";
 import ProductResourcePage from "./pages/ProductResourcePage";
 import ResourceEditPage from "./pages/ResourceEditPage";
+import ResourceListComponent from "./components/resources/ResourceList";
+import UserManagement from "./components/usermanagement/UserManagement";
 
 const App = () => {
   return (
@@ -35,6 +37,11 @@ const App = () => {
               path="/admin/resources/:resourceId/edit"
               element={<ResourceEditPage />}
             />
+            <Route
+              path="/admin/resources"
+              element={<ResourceListComponent />}
+            />
+            <Route path="/admin/users" element={<UserManagement />} />
 
             {/* <Route path="/userlogin" element={<UserLogin />} />
             <Route path="/adminlogin" element={<AdminLogin />} /> */}

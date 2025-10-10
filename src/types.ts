@@ -38,8 +38,15 @@ export interface IResource {
   updatedAt?: string;
 }
 
+export interface IResourceListResponse {
+  items: IResource[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 export interface ProductItemProps extends Product {
-  resource: IResource | null;
+  //resource: IResource | null;
   onEdit: () => void;
   //onCreateResource: () => void;
   // onEditResource: (resource: IResource) => void;

@@ -2,7 +2,8 @@ import { useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { fetchProductById } from "../store/slices/productSlice";
-import { fetchResource } from "../store/slices/resourceSlice";
+import { fetchResourceByProductId } from "../store/slices/resourceSlice";
+import { fetchResources } from "../store/slices/resourceSlice";
 
 import type { Product, IResource } from "../types";
 import type { RootState, AppDispatch } from "../store";
@@ -14,7 +15,7 @@ import CreateResourceForm from "../components/resources/CreateResourceForm";
 export default function ProductResourcePage() {
   const { productId } = useParams<{ productId: string }>();
 
-  console.log("id changed:", productId);
+  //console.log("id changed:", productId);
   const dispatch = useDispatch<AppDispatch>();
 
   const product: Product | undefined = useSelector((state: RootState) =>
@@ -24,6 +25,8 @@ export default function ProductResourcePage() {
   const resource: IResource | undefined = useSelector((state: RootState) =>
     productId ? state.resources.resourcesByProductId[productId] : undefined
   );
+
+  //console.log("resurce from state:", resource);
 
   const [creatingResourceProduct, setCreatingResourceProduct] =
     useState<Product | null>(null);
@@ -35,68 +38,33 @@ export default function ProductResourcePage() {
   );
   const [refreshView, setRefreshView] = useState(false);
 
-  // useEffect(() => {
-  //   console.log("MOUNT ProductResourcePage", productId);
-  //   return () => console.log("UNMOUNT ProductResourcePage", productId);
-  // }, [productId]);
-
   useEffect(() => {
-    console.log("🏷️ productId, hasfectched", productId);
     if (!productId) return;
-
-    // console.log("🔄 INITIATING INITIAL DATA FETCH FOR:", productId);
 
     const fetchData = async () => {
       try {
-        console.log("📥 Fetching product and resource...");
         await Promise.all([
           dispatch(fetchProductById(productId)),
-          dispatch(fetchResource(productId)),
+          dispatch(fetchResourceByProductId(productId)),
+          // .unwrap()
+          // .then(() => console.log("✅ thunk resolved"))
+          // .catch((e) => console.error("❌ thunk rejected", e)),
+
+          //dispatch(fetchResources(productId)),
         ]);
-        console.log("✅ Initial data fetch completed");
+        //console.log("✅ Initial data fetch completed");
       } catch (error) {
         console.error("❌ Error in initial fetch:", error);
       }
     };
 
     fetchData();
-  }, [productId, dispatch]);
-
-  // Refresh when refreshView changes
-  useEffect(() => {
-    if (!productId) return;
-
-    //console.log("🔄 REFRESHING DATA");
-    dispatch(fetchResource(productId));
-  }, [refreshView, productId, dispatch]);
-
-  // Poprawiony warunek ładowania
-  // const isLoading =
-  //   !hasFetched || productState.loading || resourceState.loading.fetch;
-
-  // if (isLoading) {
-  //   console.log(
-  //     "🔄 LOADING - hasFetched:",
-  //     hasFetched,
-  //     "productLoading:",
-  //     productState.loading,
-  //     "resourceLoading:",
-  //     resourceState.loading.fetch
-  //   );
-  //   return <p>Ładowanie produktu...</p>;
-  // }
+  }, [productId, dispatch, refreshView]);
 
   if (!product) {
     //console.log("❌ NO PRODUCT FOUND");
     return <p>Nie znaleziono produktu</p>;
   }
-
-  // console.log(
-  //   "✅ RENDERING - Product:",
-  //   product.title,
-  //   "Resource:",
-  //   resource?.title || "No resource"
-  // );
 
   return (
     <div className="p-4">
@@ -146,7 +114,6 @@ export default function ProductResourcePage() {
           </div>
         )}
 
-        {/* Modale */}
         {creatingResourceProduct?._id === product._id && (
           <div className="mt-4 p-4 border rounded-lg bg-gray-50">
             <CreateResourceForm
