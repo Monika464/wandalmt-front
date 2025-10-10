@@ -66,7 +66,7 @@ export default function ResourceListComponent() {
           onClick={() =>
             dispatch(fetchResources({ q: search, page: 1 }))
               .unwrap()
-              .then(() => console.log("✅ thunk resolved", q))
+              .then(() => console.log("✅ thunk resolved"))
               .catch((e) => console.error("❌ thunk rejected", e))
           }
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"

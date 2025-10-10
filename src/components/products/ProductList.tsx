@@ -11,6 +11,7 @@ import { fetchProducts } from "../../store/slices/productSlice";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../store";
 import { useNavigate } from "react-router-dom";
+import CreateProductForm from "./CreateProductForm";
 
 // ...
 const ProductList: React.FC = () => {
@@ -24,6 +25,7 @@ const ProductList: React.FC = () => {
   // );
 
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
   // const [creatingResourceProduct, setCreatingResourceProduct] =
   //   useState<Product | null>(null);
   // const [editingResource, setEditingResource] = useState<IResource | null>(
@@ -125,6 +127,19 @@ const ProductList: React.FC = () => {
           </div>
         );
       })}
+      <br></br>
+      <br></br>
+      <br></br>
+      <button
+        onClick={() => setShowForm((prev) => !prev)}
+        className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+      >
+        {showForm ? "Close Create Product" : "Open Create Product"}
+      </button>
+      {showForm && <CreateProductForm />}
+      <br></br>
+      <br></br>
+      <br></br>
     </div>
   );
 };

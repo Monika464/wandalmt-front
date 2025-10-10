@@ -119,7 +119,7 @@ export default function ProductResourcePage() {
             <CreateResourceForm
               productId={creatingResourceProduct._id}
               onClose={() => setCreatingResourceProduct(null)}
-              onSuccess={() => {
+              onSuccess={async () => {
                 setCreatingResourceProduct(null);
                 setRefreshView((prev) => !prev);
               }}

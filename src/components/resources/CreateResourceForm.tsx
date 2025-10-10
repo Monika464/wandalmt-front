@@ -8,7 +8,11 @@ interface Props {
   onClose: () => void;
 }
 
-const CreateResourceForm: React.FC<Props> = ({ productId, onClose }) => {
+const CreateResourceForm: React.FC<Props> = ({
+  productId,
+  onClose,
+  onSuccess,
+}) => {
   const dispatch = useDispatch<AppDispatch>();
 
   const [title, setTitle] = useState("");
@@ -35,6 +39,7 @@ const CreateResourceForm: React.FC<Props> = ({ productId, onClose }) => {
       // setImageUrl("");
       setVideoUrl("");
       onClose();
+      onSuccess();
     } catch (err) {
       console.error(err);
       alert("Błąd podczas tworzenia resource");
