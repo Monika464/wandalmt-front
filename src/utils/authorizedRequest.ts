@@ -1,6 +1,7 @@
-import axios, { AxiosRequestConfig } from "axios";
-import { RootState } from "../store"; // lub ścieżka do Twojego store
-import { api } from "./api"; // Twój skonfigurowany axios instance
+import axios, { type AxiosRequestConfig } from "axios";
+import type { RootState } from "../store"; // lub ścieżka do Twojego store
+// lub ścieżka do Twojego store
+import api from "./api";
 
 /**
  * Wspólny helper do wykonywania zapytań z autoryzacją i obsługą anulowania.

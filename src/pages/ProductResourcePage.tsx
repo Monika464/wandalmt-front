@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { fetchProductById } from "../store/slices/productSlice";
 import { fetchResourceByProductId } from "../store/slices/resourceSlice";
-import { fetchResources } from "../store/slices/resourceSlice";
+//import { fetchResources } from "../store/slices/resourceSlice";
 
 import type { Product, IResource } from "../types";
 import type { RootState, AppDispatch } from "../store";
