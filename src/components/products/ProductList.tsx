@@ -10,8 +10,11 @@ import { fetchProducts } from "../../store/slices/productSlice";
 //import type { IResource } from "../../types";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../store";
+
 import { useNavigate } from "react-router-dom";
 import CreateProductForm from "./CreateProductForm";
+import SearchBar from "./SearchContainer";
+import SearchContainer from "./SearchContainer";
 
 // ...
 const ProductList: React.FC = () => {
@@ -26,6 +29,7 @@ const ProductList: React.FC = () => {
 
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [search, setSearch] = useState("");
   // const [creatingResourceProduct, setCreatingResourceProduct] =
   //   useState<Product | null>(null);
   // const [editingResource, setEditingResource] = useState<IResource | null>(
@@ -37,9 +41,13 @@ const ProductList: React.FC = () => {
 
   const navigate = useNavigate();
 
+  const handleSearch = () => {
+    dispatch(fetchProducts({ search }));
+  };
+
   useEffect(() => {
-    dispatch(fetchProducts());
-  }, [dispatch]);
+    dispatch(fetchProducts({}));
+  }, [dispatch, search]);
 
   const handleCloseEditProduct = () => setEditingProductId(null);
 
@@ -60,73 +68,39 @@ const ProductList: React.FC = () => {
 
   return (
     <div>
-      {products.map((product) => {
-        // const resource = resourcesByProductId[product._id];
+      <br></br>
+      <SearchContainer>
+        {products.map((product) => {
+          // const resource = resourcesByProductId[product._id];
 
-        //console.log("Resource dla produktu:", product._id, resource);
+          //console.log("Resource dla produktu:", product._id, resource);
 
-        return (
-          <div key={product._id} className="relative">
-            <ProductItem
-              {...product}
-              // resource={resource || null}
-              onEdit={() => setEditingProductId(product._id)}
-              // onCreateResource={() => setCreatingResourceProduct(product)}
-              //onEditResource={(resource) => setEditingResource(resource)}
-              // onViewResource={() => handleViewResource(product._id)}
-            />
-            {/* 
-            {viewingResource && viewingResource.productId === product._id && (
-              <ViewResource
-                resource={viewingResource}
-                onClose={handleCloseViewResource}
+          return (
+            <div key={product._id} className="relative">
+              <ProductItem
+                {...product}
+                onEdit={() => setEditingProductId(product._id)}
               />
-            )} */}
 
-            {editingProductId === product._id && (
-              <div className="mt-4 p-4 border rounded-lg bg-gray-50">
-                <EditProductForm
-                  product={product}
-                  onClose={handleCloseEditProduct}
-                />
-              </div>
-            )}
+              {editingProductId === product._id && (
+                <div className="mt-4 p-4 border rounded-lg bg-gray-50">
+                  <EditProductForm
+                    product={product}
+                    onClose={handleCloseEditProduct}
+                  />
+                </div>
+              )}
 
-            {/* {creatingResourceProduct?._id === product._id && (
-              <div className="mt-4 p-4 border rounded-lg bg-gray-50">
-                <CreateResourceForm
-                  productId={creatingResourceProduct._id}
-                  onClose={handleCloseCreateResource}
-                />
-              </div>
-            )} */}
-
-            {/* {editingResource && editingResource.productId === product._id && (
-              <div className="mt-4 p-4 border rounded-lg bg-gray-50">
-                <EditResourceForm
-                  resource={editingResource}
-                  onClose={handleCloseEditResource}
-                />
-              </div>
-            )} */}
-            {/* 
-            {viewingResource && viewingResource.productId === product._id && (
-              <div className="mt-4 p-4 border rounded-lg bg-gray-100">
-                <ViewResource
-                  resource={viewingResource}
-                  onClose={handleCloseViewResource}
-                />
-              </div>
-            )} */}
-            <button
-              onClick={() => navigate(`/admin/products/${product._id}`)}
-              className="px-3 py-1 bg-blue-500 text-white rounded"
-            >
-              Show detail
-            </button>
-          </div>
-        );
-      })}
+              <button
+                onClick={() => navigate(`/admin/products/${product._id}`)}
+                className="px-3 py-1 bg-blue-500 text-white rounded"
+              >
+                Show detail
+              </button>
+            </div>
+          );
+        })}
+      </SearchContainer>
       <br></br>
       <br></br>
       <br></br>

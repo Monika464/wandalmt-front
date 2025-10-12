@@ -4,11 +4,11 @@ import {
   type PayloadAction,
   type WritableDraft,
 } from "@reduxjs/toolkit";
-import api from "../../utils/api"; // axios instance
+//import api from "../../utils/api"; // axios instance
 import type { IChapter, IResourceListResponse } from "../../types";
 import type { IResource } from "../../types";
-import type { RootState } from "../../store";
-import axios from "axios";
+//import type { RootState } from "../../store";
+//import axios from "axios";
 import { authorizedRequest } from "../../utils/authorizedRequest";
 
 interface FetchParams {
@@ -173,7 +173,7 @@ export const fetchResourceById = createAsyncThunk<IResource, string>(
         method: "GET",
       });
 
-      console.log("✅ Fetched resource by ID:", resource);
+      // console.log("✅ Fetched resource by ID:", resource);
       return resource;
     } catch (error: any) {
       console.error("❌ Error in fetchResourceById:", error);
@@ -217,7 +217,7 @@ export const fetchResourceByProductId = createAsyncThunk<IResource, string>(
         method: "GET",
       });
 
-      console.log("✅ Fetched resource by product ID:", resource);
+      //console.log("✅ Fetched resource by product ID:", resource);
       return resource;
     } catch (error: any) {
       console.error("❌ Error in fetchResourceByProductId:", error);

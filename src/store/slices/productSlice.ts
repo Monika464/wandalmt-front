@@ -22,6 +22,13 @@ const initialState: ProductState = {
   error: null,
 };
 
+interface FetchParams {
+  page?: number;
+  q?: string;
+  sortField?: string;
+  sortOrder?: string;
+}
+
 // interface ProductState {
 //   products: Product[];
 //   loading: boolean;
@@ -36,14 +43,61 @@ const initialState: ProductState = {
 
 // fetch products
 
-export const fetchProducts = createAsyncThunk(
+// export const fetchProducts = createAsyncThunk(
+//   "admin/products/fetchAll",
+//   async () => {
+//     const res = await api.get("/admin/products");
+//     //console.log("Fetched products:", res.data);
+//     return res.data as Product[];
+//   }
+// );
+
+export const fetchProducts = createAsyncThunk<Product[], { search?: string }>(
   "admin/products/fetchAll",
-  async () => {
-    const res = await api.get("/admin/products");
-    //console.log("Fetched products:", res.data);
-    return res.data as Product[];
+  async ({ search } = {}) => {
+    try {
+      const searchParams = new URLSearchParams();
+
+      if (search) searchParams.set("q", search);
+
+      const queryString = searchParams.toString()
+        ? `?${searchParams.toString()}`
+        : "";
+
+      const res = await api.get(`/admin/products${queryString}`);
+
+      return res.data as Product[];
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      throw error;
+    }
   }
 );
+// export const fetchProducts = createAsyncThunk<Product[], FetchParams>(
+//   "admin/products/fetchAll",
+//   async (params = {}) => {
+//     try {
+//       const searchParams = new URLSearchParams();
+
+//       if (params.page) searchParams.set("page", String(params.page));
+//       if (params.q) searchParams.set("q", params.q);
+//       if (params.sortField) searchParams.set("sortField", params.sortField);
+//       if (params.sortOrder) searchParams.set("sortOrder", params.sortOrder);
+
+//       const queryString = searchParams.toString()
+//         ? `?${searchParams.toString()}`
+//         : "";
+
+//       // użycie helpera authorizedRequest
+//       const res = await authorizedRequest.get(`/admin/products${queryString}`);
+
+//       return res.data as Product[];
+//     } catch (error) {
+//       console.error("Error fetching products:", error);
+//       throw error; // ważne, aby thunk mógł przechwycić błąd
+//     }
+//   }
+// );
 
 //FETCH SINGLE PRODUCT
 export const fetchProductById = createAsyncThunk(

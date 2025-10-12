@@ -19,7 +19,7 @@ export default function ResourceListComponent() {
   );
   const [deleteInput, setDeleteInput] = useState("");
 
-  console.log("serach", search);
+  //console.log("serach", search);
 
   useEffect(() => {
     dispatch(fetchResources({ page, pageSize, q: search }));
