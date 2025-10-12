@@ -13,7 +13,7 @@ import type { AppDispatch, RootState } from "../../store";
 
 import { useNavigate } from "react-router-dom";
 import CreateProductForm from "./CreateProductForm";
-import SearchBar from "./SearchContainer";
+
 import SearchContainer from "./SearchContainer";
 
 // ...
@@ -23,45 +23,17 @@ const ProductList: React.FC = () => {
   const { products, loading, error } = useSelector(
     (state: RootState) => state.products
   );
-  // const { selected: viewingResource } = useSelector(
-  //   (state: RootState) => state.resources
-  // );
 
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [search, setSearch] = useState("");
-  // const [creatingResourceProduct, setCreatingResourceProduct] =
-  //   useState<Product | null>(null);
-  // const [editingResource, setEditingResource] = useState<IResource | null>(
-  //   null
-  // );
-  // const [viewingResource, setViewingResource] = useState<IResource | null>(
-  //   null
-  // );
 
   const navigate = useNavigate();
 
-  const handleSearch = () => {
-    dispatch(fetchProducts({ search }));
-  };
-
   useEffect(() => {
     dispatch(fetchProducts({}));
-  }, [dispatch, search]);
+  }, [dispatch]);
 
   const handleCloseEditProduct = () => setEditingProductId(null);
-
-  // useEffect(() => {
-  //   products.forEach((p) => dispatch(fetchResource(p._id)));
-  // }, [products, dispatch]);
-
-  // const handleViewResource = (productId: string) => {
-  //   dispatch(fetchResource(productId));
-  //   console.log("Viewing resource for productId:", productId);
-  // };
-  // const resourcesByProductId = useSelector(
-  //   (state: RootState) => state.resources.resourcesByProductId
-  // );
 
   if (loading) return <p>Ładowanie...</p>;
   if (error) return <p className="text-red-500">{error}</p>;

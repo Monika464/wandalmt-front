@@ -238,24 +238,6 @@ export const deleteProduct = createAsyncThunk<
   }
 });
 
-// export const deleteProduct = createAsyncThunk(
-//   "products/delete",
-//   async (id: string, { getState }) => {
-//     console.log("Deleting product with id:", id);
-
-//     const state = getState() as { auth?: { token?: string } };
-//     const token = state.auth?.token;
-
-//     await api.delete(`/admin/products/${id}`, {
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//       },
-//     });
-
-//     return id;
-//   }
-// );
-
 const productSlice = createSlice({
   name: "products",
   initialState,
