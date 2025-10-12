@@ -6,10 +6,10 @@ const Homepage = () => {
   return (
     <div>
       <PageNav />
-      <div>
+      {/* <div>
         <ProductList />
       </div>
-      <LogoutButton />
+      <LogoutButton /> */}
     </div>
   );
 };

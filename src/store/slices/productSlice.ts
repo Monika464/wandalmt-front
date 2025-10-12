@@ -3,7 +3,7 @@ import {
   createAsyncThunk,
   type PayloadAction,
 } from "@reduxjs/toolkit";
-import api from "../../utils/api"; // axios instance
+
 import type { NewProduct, Product } from "../../types";
 
 import { authorizedRequest } from "../../utils/authorizedRequest";
@@ -22,39 +22,9 @@ const initialState: ProductState = {
   error: null,
 };
 
-interface FetchParams {
-  page?: number;
-  q?: string;
-  sortField?: string;
-  sortOrder?: string;
-}
-
-// interface ProductState {
-//   products: Product[];
-//   loading: boolean;
-//   error: string | null;
-// }
-
-// const initialState: ProductState = {
-//   products: [],
-//   loading: false,
-//   error: null,
-// };
-
-// fetch products
-
-// export const fetchProducts = createAsyncThunk(
-//   "admin/products/fetchAll",
-//   async () => {
-//     const res = await api.get("/admin/products");
-//     //console.log("Fetched products:", res.data);
-//     return res.data as Product[];
-//   }
-// );
-
 export const fetchProducts = createAsyncThunk<Product[], { search?: string }>(
   "admin/products/fetchAll",
-  async ({ search } = {}) => {
+  async ({ search } = {}, thunkApi) => {
     try {
       const searchParams = new URLSearchParams();
 
@@ -64,80 +34,36 @@ export const fetchProducts = createAsyncThunk<Product[], { search?: string }>(
         ? `?${searchParams.toString()}`
         : "";
 
-      const res = await api.get(`/admin/products${queryString}`);
+      // użycie authorizedRequest
+      const data = await authorizedRequest<Product[]>(thunkApi, {
+        url: `/admin/products${queryString}`,
+        method: "GET",
+      });
 
-      return res.data as Product[];
+      return data;
     } catch (error) {
       console.error("Error fetching products:", error);
       throw error;
     }
   }
 );
-// export const fetchProducts = createAsyncThunk<Product[], FetchParams>(
-//   "admin/products/fetchAll",
-//   async (params = {}) => {
-//     try {
-//       const searchParams = new URLSearchParams();
-
-//       if (params.page) searchParams.set("page", String(params.page));
-//       if (params.q) searchParams.set("q", params.q);
-//       if (params.sortField) searchParams.set("sortField", params.sortField);
-//       if (params.sortOrder) searchParams.set("sortOrder", params.sortOrder);
-
-//       const queryString = searchParams.toString()
-//         ? `?${searchParams.toString()}`
-//         : "";
-
-//       // użycie helpera authorizedRequest
-//       const res = await authorizedRequest.get(`/admin/products${queryString}`);
-
-//       return res.data as Product[];
-//     } catch (error) {
-//       console.error("Error fetching products:", error);
-//       throw error; // ważne, aby thunk mógł przechwycić błąd
-//     }
-//   }
-// );
 
 //FETCH SINGLE PRODUCT
-export const fetchProductById = createAsyncThunk(
-  "products/fetchById",
-  async (id: string, thunkApi) => {
-    return await authorizedRequest<Product>(thunkApi, {
+export const fetchProductById = createAsyncThunk<
+  Product, // typ zwracany
+  string // typ argumentu (id produktu)
+>("products/fetchById", async (id, thunkApi) => {
+  try {
+    const data = await authorizedRequest<Product>(thunkApi, {
       url: `/admin/products/${id}`,
       method: "GET",
     });
+    return data;
+  } catch (error) {
+    console.error("Error fetching product by ID:", error);
+    return thunkApi.rejectWithValue(error);
   }
-);
-
-// export const fetchProductById = createAsyncThunk(
-//   "products/fetchById",
-//   async (id: string, { getState, rejectWithValue, signal }) => {
-//     //console.log("Fetching product by ID:", id);
-//     try {
-//       const state = getState() as { auth?: { token?: string } };
-
-//       const token = state.auth?.token;
-//       //console.log("Token from state product", token);
-//       const res = await api.get(`/admin/products/${id}`, {
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//         },
-//         signal,
-//       });
-
-//       //console.log("Fetched product by ID:", res.data, res.status);
-//       return res.data;
-//     } catch (error: any) {
-//       if (axios.isCancel(error) || error.name === "CanceledError") {
-//         console.warn("Request cancelled");
-//         return;
-//       }
-//       return rejectWithValue(error.message);
-//     }
-//   }
-// );
-//create product
+});
 
 export const createProduct = createAsyncThunk<
   Product, // typ zwracany przy sukcesie
@@ -157,32 +83,6 @@ export const createProduct = createAsyncThunk<
   }
 });
 
-// export const createProduct = createAsyncThunk(
-//   "products/create",
-//   async (productData: NewProduct, { getState, rejectWithValue }) => {
-//     try {
-//       const state = getState() as { auth?: { token?: string } };
-//       const token = state.auth?.token;
-
-//       const res = await api.post("/admin/products", productData, {
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//         },
-//       });
-
-//       return res.data.product as Product;
-//     } catch (err: any) {
-//       console.error(
-//         "❌ Error in createProduct thunk:",
-//         err.response?.data || err.message
-//       );
-//       return rejectWithValue(err.response?.data || "Unknown error");
-//     }
-//   }
-// );
-
-// edit product
-
 export const editProduct = createAsyncThunk<
   Product, // typ zwracany przy sukcesie
   { id: string; productData: Product } // argument thunk
@@ -200,27 +100,6 @@ export const editProduct = createAsyncThunk<
     return thunkApi.rejectWithValue(error);
   }
 });
-
-// export const editProduct = createAsyncThunk(
-//   "products/edit",
-//   async (
-//     { id, productData }: { id: string; productData: Product },
-//     { getState }
-//   ) => {
-//     const state = getState() as { auth?: { token?: string } };
-//     const token = state.auth?.token;
-
-//     const res = await api.put(`/admin/products/${id}`, productData, {
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//       },
-//     });
-
-//     return res.data.product as Product;
-//   }
-// );
-
-// 📌 Usuwanie produktu
 
 export const deleteProduct = createAsyncThunk<
   string, // zwracamy id usuniętego produktu

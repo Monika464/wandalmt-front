@@ -14,6 +14,7 @@ import ProductItem from "./components/products/ProductItem";
 import ProductResourcePage from "./pages/ProductResourcePage";
 import ResourceEditPage from "./pages/ResourceEditPage";
 import ResourceListComponent from "./components/resources/ResourceList";
+import ProductListComponent from "./components/products/ProductList";
 import UserManagement from "./components/usermanagement/UserManagement";
 
 const App = () => {
@@ -29,19 +30,46 @@ const App = () => {
             {/* Strona produktu + jego zasób */}
             <Route
               path="/admin/products/:productId"
-              element={<ProductResourcePage />}
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <ProductResourcePage />
+                </ProtectedRoute>
+              }
             />
 
             {/* Edycja zasobu */}
             <Route
               path="/admin/resources/:resourceId/edit"
-              element={<ResourceEditPage />}
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <ResourceEditPage />
+                </ProtectedRoute>
+              }
             />
             <Route
               path="/admin/resources"
-              element={<ResourceListComponent />}
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <ResourceListComponent />
+                </ProtectedRoute>
+              }
             />
-            <Route path="/admin/users" element={<UserManagement />} />
+            <Route
+              path="/admin/products"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <ProductListComponent />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <UserManagement />
+                </ProtectedRoute>
+              }
+            />
 
             {/* <Route path="/userlogin" element={<UserLogin />} />
             <Route path="/adminlogin" element={<AdminLogin />} /> */}
