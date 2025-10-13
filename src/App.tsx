@@ -10,11 +10,13 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import "./App.css";
 import Register from "./components/auth/Register";
 import Login from "./components/auth/Login";
-import ProductItem from "./components/products/ProductItem";
+//import ProductItem from "./components/products/ProductItem";
 import ProductResourcePage from "./pages/ProductResourcePage";
+import ProductResourcePublicPage from "./pages/ProducuResourcePublicPage";
 import ResourceEditPage from "./pages/ResourceEditPage";
-import ResourceListComponent from "./components/resources/ResourceList";
+import ResourceAdminListComponent from "./components/resources/ResourceList";
 import ProductListComponent from "./components/products/ProductList";
+import ProductListPublicComponent from "./components/products/ProductPublicList";
 import UserManagement from "./components/usermanagement/UserManagement";
 
 const App = () => {
@@ -27,7 +29,14 @@ const App = () => {
             <Route path="/homepage" element={<Homepage />} />
             <Route path="/shop" element={<Shop />} />
 
-            {/* Strona produktu + jego zasób */}
+            {/* Routy public */}
+            <Route path="/products" element={<ProductListPublicComponent />} />
+            <Route
+              path="products/:productId"
+              element={<ProductResourcePublicPage />}
+            />
+
+            {/* Routy admina */}
             <Route
               path="/admin/products/:productId"
               element={
@@ -37,7 +46,6 @@ const App = () => {
               }
             />
 
-            {/* Edycja zasobu */}
             <Route
               path="/admin/resources/:resourceId/edit"
               element={
@@ -50,7 +58,7 @@ const App = () => {
               path="/admin/resources"
               element={
                 <ProtectedRoute requiredRole="admin">
-                  <ResourceListComponent />
+                  <ResourceAdminListComponent />
                 </ProtectedRoute>
               }
             />
@@ -71,25 +79,22 @@ const App = () => {
               }
             />
 
-            {/* <Route path="/userlogin" element={<UserLogin />} />
-            <Route path="/adminlogin" element={<AdminLogin />} /> */}
+            <Route
+              path="/adminpanel"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminPanel />
+                </ProtectedRoute>
+              }
+            />
 
-            {/* <Route path="/userlogin" element={<UserLogin />} />
-            <Route path="/adminlogin" element={<AdminLogin />} /> */}
+            {/* Routy usera */}
 
             <Route
               path="/userpanel"
               element={
                 <ProtectedRoute requiredRole="user">
                   <UserPanel />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/adminpanel"
-              element={
-                <ProtectedRoute requiredRole="admin">
-                  <AdminPanel />
                 </ProtectedRoute>
               }
             />

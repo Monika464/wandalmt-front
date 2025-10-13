@@ -52,6 +52,9 @@ export interface ProductItemProps extends Product {
   // onEditResource: (resource: IResource) => void;
   //onViewResource: () => void;
 }
+export interface ProductPublicItemProps extends Product {
+  _id: string;
+}
 
 // typ do tworzenia (bez id)
 export type NewProduct = Omit<Product, "_id">;

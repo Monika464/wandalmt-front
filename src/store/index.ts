@@ -3,13 +3,17 @@ import authReducer from "./slices/authSlice";
 import userReducer from "./slices/userSlice";
 import productReducer from "./slices/productSlice";
 import resourceReducer from "./slices/resourceSlice";
+import productPublicReducer from "./slices/productPublicSlice";
+import resourcePublicReducer from "./slices/resourcePublicSlice";
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     users: userReducer,
     products: productReducer,
+    productsPublic: productPublicReducer,
     resources: resourceReducer,
+    resourcesPublic: resourcePublicReducer,
   },
   devTools: {
     trace: true, // pozwala śledzić, skąd wyszła akcja

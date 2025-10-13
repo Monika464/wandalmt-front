@@ -98,40 +98,6 @@ export const fetchResources = createAsyncThunk<
   }
 });
 
-// export const fetchResources = createAsyncThunk<
-//   IResourceListResponse, // ✅ typ danych, które thunk zwraca
-//   FetchParams // ✅ typ argumentu (page, q itd.)
-// >(
-//   "resources/fetchAll",
-//   async (params: FetchParams = {}, { getState, rejectWithValue, signal }) => {
-//     try {
-//       const state = getState() as RootState;
-//       const token = state.auth?.token;
-
-//       const searchParams = new URLSearchParams();
-//       if (params.page) searchParams.set("page", String(params.page));
-//       if (params.pageSize)
-//         searchParams.set("pageSize", String(params.pageSize));
-//       if (params.q) searchParams.set("q", params.q);
-//       if (params.sortField) searchParams.set("sortField", params.sortField);
-//       if (params.sortOrder) searchParams.set("sortOrder", params.sortOrder);
-
-//       const res = await api.get(`/admin/resources?${searchParams.toString()}`, {
-//         headers: { Authorization: `Bearer ${token}` },
-//         signal,
-//       });
-//       //console.log("response ze slice", res.data);
-//       return res.data; // { items, total, page, pageSize }
-//     } catch (error: any) {
-//       if (axios.isCancel(error) || error.name === "CanceledError") {
-//         console.warn("Request cancelled");
-//         return rejectWithValue("Request cancelled");
-//       }
-//       return rejectWithValue(error.response?.data || error.message);
-//     }
-//   }
-// );
-//
 // 📌 wszystkie resorce
 // export const fetchResource = createAsyncThunk(
 //   "resources/fetchOne",
