@@ -21,7 +21,7 @@ const ProductList: React.FC = () => {
   const { products, loading, error } = useSelector(
     (state: RootState) => state.productsPublic
   );
-  console.log("prod", products);
+
   //const [editingProductId, setEditingProductId] = useState<string | null>(null);
   //const [showForm, setShowForm] = useState(false);
 

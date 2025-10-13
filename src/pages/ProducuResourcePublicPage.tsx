@@ -20,11 +20,15 @@ export default function ProductResourcePage() {
     productId ? state.productsPublic.byId[productId] : undefined
   );
 
+  //console.log("hello", productId);
+
   const resource: IResource | undefined = useSelector((state: RootState) =>
     productId
       ? state.resourcesPublic.resourcesByProductId[productId]
       : undefined
   );
+
+  //console.log("resource", resource);
 
   const [viewingResource, setViewingResource] = useState<IResource | null>(
     null
@@ -98,7 +102,7 @@ export default function ProductResourcePage() {
         )}
 
         <div className="mt-4 p-4 border rounded-lg bg-gray-100">
-          <ViewPublicResource resource={resource} />
+          {resource ? <ViewPublicResource resource={resource} /> : "loading.."}
         </div>
         <AddToCartButton />
       </div>

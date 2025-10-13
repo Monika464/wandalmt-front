@@ -43,7 +43,7 @@ export const fetchProducts = createAsyncThunk<
   { search?: string } | void
 >("products/fetchAll", async (args) => {
   const search = args?.search ?? ""; // bezpieczne pobranie
-  console.log("search", search);
+  // console.log("search", search);
 
   const searchParams = new URLSearchParams();
   if (search) searchParams.set("q", search);
@@ -53,7 +53,7 @@ export const fetchProducts = createAsyncThunk<
     : "";
 
   const res = await api.get(`/products${queryString}`);
-  console.log("res", res.data);
+  //console.log("res", res.data);
   return res.data as Product[];
 });
 
@@ -79,8 +79,8 @@ const productPublicSlice = createSlice({
       .addCase(
         fetchProducts.fulfilled,
         (state, action: PayloadAction<Product[]>) => {
-          console.log("✅ fetchProducts.fulfilled został wywołany");
-          console.log("📦 Dane produktów:", action.payload);
+          //  console.log("✅ fetchProducts.fulfilled został wywołany");
+          // console.log("📦 Dane produktów:", action.payload);
           state.loading = false;
           state.products = action.payload;
         }
