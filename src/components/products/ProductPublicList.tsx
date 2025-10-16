@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-//import EditProductForm from "./EditProductForm";
 import ProductPublicItem from "./ProductPublicItem";
 import { fetchProducts } from "../../store/slices/productPublicSlice";
 
@@ -8,13 +7,10 @@ import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../store";
 
 import { useNavigate } from "react-router-dom";
-//import CreateProductForm from "./CreateProductForm";
-
-//import SearchContainer from "./SearchContainer";
 import AddToCartButton from "./AddToCartButton";
 import SearchPublicContainer from "./SearchContainerPublic";
+import Navbar from "../elements/Navbar";
 
-// ...
 const ProductList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
 
@@ -22,35 +18,24 @@ const ProductList: React.FC = () => {
     (state: RootState) => state.productsPublic
   );
 
-  //const [editingProductId, setEditingProductId] = useState<string | null>(null);
-  //const [showForm, setShowForm] = useState(false);
-
   const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(fetchProducts({}));
   }, [dispatch]);
 
-  //const handleCloseEditProduct = () => setEditingProductId(null);
-
   if (loading) return <p>Ładowanie...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <div>
+      <Navbar />
       <br></br>
       <SearchPublicContainer>
         {products.map((product) => {
-          // const resource = resourcesByProductId[product._id];
-
-          //console.log("id produktu:", product._id);
-
           return (
             <div key={product._id} className="relative">
-              <ProductPublicItem
-                {...product}
-                // onEdit={() => setEditingProductId(product._id)}
-              />
+              <ProductPublicItem {...product} />
 
               <button
                 onClick={() => navigate(`/products/${product._id}`)}
@@ -58,7 +43,13 @@ const ProductList: React.FC = () => {
               >
                 Show detail
               </button>
-              <AddToCartButton />
+              <AddToCartButton
+                product={{
+                  _id: product._id,
+                  title: product.title,
+                  price: product.price,
+                }}
+              />
             </div>
           );
         })}

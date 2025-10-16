@@ -18,6 +18,7 @@ import ResourceAdminListComponent from "./components/resources/ResourceList";
 import ProductListComponent from "./components/products/ProductList";
 import ProductListPublicComponent from "./components/products/ProductPublicList";
 import UserManagement from "./components/usermanagement/UserManagement";
+import Cart from "./components/products/Cart";
 
 const App = () => {
   return (
@@ -35,6 +36,8 @@ const App = () => {
               path="products/:productId"
               element={<ProductResourcePublicPage />}
             />
+
+            <Route path="/cart" element={<Cart />} />
 
             {/* Routy admina */}
             <Route

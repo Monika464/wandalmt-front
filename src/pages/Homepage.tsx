@@ -1,11 +1,9 @@
-import PageNav from "./PageNav";
-import LogoutButton from "../components/auth/LogoutButton";
-import ProductList from "../components/products/ProductList";
+import Navbar from "../components/elements/Navbar";
 
 const Homepage = () => {
   return (
     <div>
-      <PageNav />
+      <Navbar />
       {/* <div>
         <ProductList />
       </div>
