@@ -19,6 +19,8 @@ import ProductListComponent from "./components/products/ProductList";
 import ProductListPublicComponent from "./components/products/ProductPublicList";
 import UserManagement from "./components/usermanagement/UserManagement";
 import Cart from "./components/products/Cart";
+import CheckoutPage from "./pages/CheckoutPage";
+import ReturnPage from "./pages/ReturnPage";
 
 const App = () => {
   return (
@@ -38,6 +40,9 @@ const App = () => {
             />
 
             <Route path="/cart" element={<Cart />} />
+
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/return" element={<ReturnPage />} />
 
             {/* Routy admina */}
             <Route

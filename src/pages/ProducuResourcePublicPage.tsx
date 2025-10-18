@@ -9,6 +9,7 @@ import type { RootState, AppDispatch } from "../store";
 import { formatCurrency } from "../utils/formatcurremcy";
 import ViewPublicResource from "../components/resources/ViewPublicResource";
 import AddToCartButton from "../components/products/AddToCartButton";
+import CheckoutButton from "../components/products/CheckoutButton";
 
 export default function ProductResourcePage() {
   const { productId } = useParams<{ productId: string }>();
@@ -105,6 +106,7 @@ export default function ProductResourcePage() {
           {resource ? <ViewPublicResource resource={resource} /> : "loading.."}
         </div>
         <AddToCartButton />
+        <CheckoutButton />
       </div>
     </div>
   );
