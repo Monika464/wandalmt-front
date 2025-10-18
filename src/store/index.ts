@@ -18,8 +18,8 @@ export const store = configureStore({
     cart: cartReducer,
   },
   devTools: {
-    trace: true, // pozwala śledzić, skąd wyszła akcja
-    traceLimit: 25, // ile kroków w historii
+    trace: true,
+    traceLimit: 25,
   },
 });
 

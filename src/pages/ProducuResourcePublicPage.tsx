@@ -106,7 +106,7 @@ export default function ProductResourcePage() {
           {resource ? <ViewPublicResource resource={resource} /> : "loading.."}
         </div>
         <AddToCartButton />
-        <CheckoutButton />
+        <CheckoutButton productId={productId} />
       </div>
     </div>
   );

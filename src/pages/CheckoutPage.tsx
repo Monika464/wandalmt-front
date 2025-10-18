@@ -4,27 +4,35 @@ import {
   EmbeddedCheckout,
 } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
+import { useLocation } from "react-router-dom";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY!);
 
 const CheckoutPage: React.FC = () => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
 
-  console.log("CheckoutPage rendered");
+  const location = useLocation();
+  const { productId } = location.state as { productId: string };
+  console.log("Wybrany produkt:", productId);
 
   useEffect(() => {
+    if (!productId) return;
     fetch("http://localhost:3000/create-checkout-session", {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productId }),
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("data", data);
-        console.log("Received client secret:", data.client_secret);
+        console.log("Received session data:", data);
         setClientSecret(data.client_secret);
-      });
-  }, []);
+      })
+      .catch((err) => console.error("Error fetching session:", err));
+  }, [productId]);
 
-  if (!clientSecret) return <p>Ładowanie płatności...</p>;
+  if (!clientSecret) {
+    return <p>Ładowanie płatności...</p>;
+  }
 
   return (
     <div className="checkout-container">

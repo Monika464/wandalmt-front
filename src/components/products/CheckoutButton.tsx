@@ -1,11 +1,15 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const CheckoutButton: React.FC = () => {
+interface CheckoutButtonProps {
+  productId: string;
+}
+
+const CheckoutButton: React.FC<CheckoutButtonProps> = ({ productId }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate("/checkout");
+    navigate("/checkout", { state: { productId } });
   };
 
   return (
