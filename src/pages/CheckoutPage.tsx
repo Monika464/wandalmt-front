@@ -5,22 +5,34 @@ import {
 } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "../store";
+import { Navigate } from "react-router-dom";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY!);
 
 const CheckoutPage: React.FC = () => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
-
   const location = useLocation();
   const { productId } = location.state as { productId: string };
-  console.log("Wybrany produkt:", productId);
+  //console.log("Wybrany produkt:", productId);
+
+  const { user, token } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
-    if (!productId) return;
+    if (!productId || !user?._id) return;
+
     fetch("http://localhost:3000/create-checkout-session", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ productId }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      //body: JSON.stringify({ productId }),
+      body: JSON.stringify({
+        productId,
+        userId: user._id, // przekazujemy userId do backendu
+      }),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -28,12 +40,15 @@ const CheckoutPage: React.FC = () => {
         setClientSecret(data.client_secret);
       })
       .catch((err) => console.error("Error fetching session:", err));
-  }, [productId]);
+  }, [productId, user]);
 
   if (!clientSecret) {
     return <p>Ładowanie płatności...</p>;
   }
-
+  // Brak zalogowanego użytkownika → przekierowanie na /homepage
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
   return (
     <div className="checkout-container">
       <EmbeddedCheckoutProvider
