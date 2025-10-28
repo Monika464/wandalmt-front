@@ -40,15 +40,16 @@ const CheckoutPage: React.FC = () => {
         setClientSecret(data.client_secret);
       })
       .catch((err) => console.error("Error fetching session:", err));
-  }, [productId, user]);
+  }, [productId, user, token]);
 
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
   if (!clientSecret) {
     return <p>Ładowanie płatności...</p>;
   }
   // Brak zalogowanego użytkownika → przekierowanie na /homepage
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
+
   return (
     <div className="checkout-container">
       <EmbeddedCheckoutProvider

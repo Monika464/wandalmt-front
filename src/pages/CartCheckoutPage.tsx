@@ -21,13 +21,16 @@ const CartCheckoutPage: React.FC = () => {
   useEffect(() => {
     if (!cart?.length || !user?._id) return;
 
-    fetch("http://localhost:3000/create-cart-checkout-session", {
+    // console.log("User:", user);
+    // console.log("Token:", token);
+
+    fetch("http://localhost:3000/cart-checkout-session", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ cart, userId: user._id }),
+      body: JSON.stringify({ items: cart, userId: user._id }),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -35,7 +38,7 @@ const CartCheckoutPage: React.FC = () => {
         setClientSecret(data.client_secret);
       })
       .catch((err) => console.error("Error creating cart session:", err));
-  }, [cart, user]);
+  }, [cart, user, token]);
 
   if (!user) return <Navigate to="/login" replace />;
   if (!clientSecret) return <p>Ładowanie płatności...</p>;

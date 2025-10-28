@@ -105,7 +105,7 @@ export default function ProductResourcePage() {
         <div className="mt-4 p-4 border rounded-lg bg-gray-100">
           {resource ? <ViewPublicResource resource={resource} /> : "loading.."}
         </div>
-        <AddToCartButton />
+        <AddToCartButton product={product} />
         <CheckoutButton productId={productId} />
       </div>
     </div>
