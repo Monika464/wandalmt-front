@@ -36,7 +36,7 @@ const CheckoutPage: React.FC = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("Received session data:", data);
+        //console.log("Received session data:", data);
         setClientSecret(data.client_secret);
       })
       .catch((err) => console.error("Error fetching session:", err));

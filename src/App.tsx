@@ -21,8 +21,8 @@ import UserManagement from "./components/usermanagement/UserManagement";
 import Cart from "./components/products/Cart";
 import CheckoutPage from "./pages/CheckoutPage";
 import ReturnPage from "./pages/ReturnPage";
-import CartCheckoutPage from "./pages/CartCheckoutPage";
-import CartReturnPage from "./components/products/CartReturnPage";
+//import CartCheckoutPage from "./pages/CartCheckoutPage";
+import CartReturnPage from "./pages/CartReturnPage";
 
 const App = () => {
   return (
@@ -45,7 +45,7 @@ const App = () => {
 
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/return" element={<ReturnPage />} />
-            <Route path="/cart-checkout" element={<CartCheckoutPage />} />
+            {/* <Route path="/cart-checkout" element={<CartCheckoutPage />} /> */}
             <Route path="/cart-return" element={<CartReturnPage />} />
 
             {/* Routy admina */}

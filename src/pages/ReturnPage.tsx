@@ -1,92 +1,97 @@
-// import { useEffect, useState } from "react";
-
-// const Purchase = () => {
-//   const [status, setStatus] = useState<string | null>(null);
-//   const [error, setError] = useState<string | null>(null);
-
-//   useEffect(() => {
-//     const params = new URLSearchParams(window.location.search);
-//     const sessionId = params.get("session_id");
-
-//     if (!sessionId) {
-//       setError("Brak session_id w adresie URL");
-//       return;
-//     }
-
-//     const checkPurchase = async () => {
-//       try {
-//         const res = await fetch(
-//           `http://localhost:3000/api/purchase?session_id=${sessionId}`
-//         );
-//         if (!res.ok) throw new Error("Błąd podczas sprawdzania płatności");
-
-//         const data = await res.json();
-//         if (data.status === "complete") {
-//           setStatus("✅ Płatność zakończona pomyślnie!");
-//         } else {
-//           setStatus("⚙️ Płatność w trakcie przetwarzania...");
-//         }
-//       } catch (err) {
-//         console.error(err);
-//         setError("Błąd podczas sprawdzania płatności.");
-//       }
-//     };
-
-//     checkPurchase();
-//   }, []);
-
-//   if (error) return <h2 style={{ color: "red" }}>{error}</h2>;
-//   if (!status) return <h2>Sprawdzanie statusu płatności...</h2>;
-//   return <h2>{status}</h2>;
-// };
-
-// export default Purchase;
-
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import type { RootState } from "../store";
 
-interface Purchase {
+interface Return {
   productName: string;
   amount: number;
 }
 
 const ReturnPage: React.FC = () => {
   const [message, setMessage] = useState("Trwa sprawdzanie statusu...");
-  const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [purchases, setPurchases] = useState<Return[]>([]);
+  console.log("Rendering ReturnPage");
+
+  const navigate = useNavigate();
+
+  const { user, token } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const sessionId = params.get("session_id");
 
-    if (sessionId) {
-      fetch(`http://localhost:3000/purchase?session_id=${sessionId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          setMessage(
-            data.status === "complete"
-              ? "Płatność zakończona sukcesem 🎉"
-              : "Płatność nie została ukończona ❌"
-          );
-          setPurchases(data.items);
-        })
-        .catch(() => setMessage("Błąd podczas sprawdzania płatności"));
+    if (!sessionId) {
+      setMessage("Brak session_id w adresie URL");
+      return;
     }
-  }, []);
+
+    const verifyPayment = async () => {
+      try {
+        const statusRes = await fetch(
+          `http://localhost:3000/session-status?session_id=${sessionId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!statusRes.ok)
+          throw new Error("Błąd podczas sprawdzania płatności");
+
+        const statusData = await statusRes.json();
+
+        if (statusData.status === "complete") {
+          console.log("Status z backendu:", statusData);
+          setMessage("✅ Płatność zakończona sukcesem front!");
+
+          // 🔹 Przykładowe dane — możesz je rozbudować, jeśli chcesz pokazać więcej szczegółów
+          setPurchases([
+            {
+              productName: "Zamówienie zrealizowane",
+              amount: 0,
+            },
+          ]);
+        } else if (statusData.status === "pending") {
+          setMessage("⏳ Płatność w trakcie przetwarzania...");
+        } else {
+          setMessage("❌ Płatność nie powiodła się lub została anulowana.");
+        }
+      } catch (err) {
+        /*  */
+        console.error(err);
+        setMessage("❌ Wystąpił błąd podczas sprawdzania płatności.");
+      }
+    };
+
+    verifyPayment();
+  }, [token]);
 
   return (
-    <div>
-      <h2>{message}</h2>
+    <div className="p-6 text-center">
+      <h2 className="text-2xl font-bold mb-4">{message}</h2>
+
       {purchases.length > 0 && (
         <div>
-          <h3>Szczegóły zamówienia:</h3>
-          <ul>
+          <h3 className="text-xl font-semibold mb-2">Szczegóły zamówienia:</h3>
+          <ul className="list-disc pl-6 inline-block text-left">
             {purchases.map((item, index) => (
               <li key={index}>
-                {item.productName} — {(item.amount / 100).toFixed(2)} PLN
+                {item.productName}
+                {item.amount > 0 && ` — ${(item.amount / 100).toFixed(2)} PLN`}
               </li>
             ))}
           </ul>
         </div>
       )}
+
+      <button
+        onClick={() => navigate("/products")}
+        className="mt-6 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      >
+        Kontynuuj zakupy
+      </button>
     </div>
   );
 };

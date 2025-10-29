@@ -1,46 +1,100 @@
 import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { clearCart } from "../store/slices/cartSlice";
+import { useNavigate } from "react-router-dom";
+import type { RootState, AppDispatch } from "../store";
+
+interface PurchaseItem {
+  productName: string;
+  amount: number;
+}
 
 const CartReturnPage: React.FC = () => {
-  const [message, setMessage] = useState("Sprawdzanie statusu płatności...");
-  const [searchParams] = useSearchParams();
-  const dispatch = useDispatch();
+  console.log("Rendering CartReturnPage");
+  const [message, setMessage] = useState(
+    "Trwa sprawdzanie statusu płatności..."
+  );
+  const [purchases, setPurchases] = useState<PurchaseItem[]>([]);
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+
+  const { user, token } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
-    const sessionId = searchParams.get("session_id");
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("session_id");
+
     if (!sessionId) {
-      setMessage("❌ Brak identyfikatora sesji płatności");
+      setMessage("Brak session_id w adresie URL");
       return;
     }
 
-    fetch(`http://localhost:3000/cart-purchase?session_id=${sessionId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Cart return data:", data);
-        if (data.status === "complete") {
-          setMessage("✅ Płatność za koszyk zakończona sukcesem! 🎉");
+    const verifyPayment = async () => {
+      try {
+        const statusRes = await fetch(
+          `http://localhost:3000/cart-session-status?session_id=${sessionId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!statusRes.ok)
+          throw new Error("Błąd podczas sprawdzania płatności");
+
+        const statusData = await statusRes.json();
+
+        if (statusData.status === "complete") {
+          setMessage("✅ Płatność zakończona sukcesem front!");
+
+          // 🔹 Przykładowe dane — możesz je rozbudować, jeśli chcesz pokazać więcej szczegółów
+          setPurchases([
+            {
+              productName: "Zamówienie zrealizowane",
+              amount: 0,
+            },
+          ]);
+
           dispatch(clearCart());
+        } else if (statusData.status === "pending") {
+          setMessage("⏳ Płatność w trakcie przetwarzania...");
         } else {
-          setMessage("❌ Płatność nie została ukończona lub jest w toku.");
+          setMessage("❌ Płatność nie powiodła się lub została anulowana.");
         }
-      })
-      .catch(() =>
-        setMessage("Wystąpił błąd podczas sprawdzania statusu płatności.")
-      );
-  }, [dispatch, searchParams]);
+      } catch (err) {
+        console.error(err);
+        setMessage("❌ Wystąpił błąd podczas sprawdzania płatności.");
+      }
+    };
+
+    verifyPayment();
+  }, [dispatch, token]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen text-center">
-      <h1 className="text-2xl font-bold mb-4">Status płatności koszyka</h1>
-      <p>{message}</p>
-      <a
-        href="/products"
-        className="mt-6 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+    <div className="p-6 text-center">
+      <h2 className="text-2xl font-bold mb-4">{message}</h2>
+
+      {purchases.length > 0 && (
+        <div>
+          <h3 className="text-xl font-semibold mb-2">Szczegóły zamówienia:</h3>
+          <ul className="list-disc pl-6 inline-block text-left">
+            {purchases.map((item, index) => (
+              <li key={index}>
+                {item.productName}
+                {item.amount > 0 && ` — ${(item.amount / 100).toFixed(2)} PLN`}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <button
+        onClick={() => navigate("/products")}
+        className="mt-6 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
       >
-        Powrót do sklepu
-      </a>
+        Kontynuuj zakupy
+      </button>
     </div>
   );
 };

@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState, AppDispatch } from "../../store";
 
 interface CheckoutButtonProps {
   productId: string;
@@ -7,9 +9,42 @@ interface CheckoutButtonProps {
 
 const CheckoutButton: React.FC<CheckoutButtonProps> = ({ productId }) => {
   const navigate = useNavigate();
+  const { user, token } = useSelector((state: RootState) => state.auth);
+  const [loading, setLoading] = useState(false);
 
-  const handleClick = () => {
-    navigate("/checkout", { state: { productId } });
+  const handleClick = async () => {
+    //navigate("/checkout", { state: { productId } });
+    if (!user || !token) {
+      console.warn(
+        "Brak zalogowanego użytkownika – przekierowanie do logowania"
+      );
+      navigate("/login");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await fetch("http://localhost:3000/checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ productId, userId: user._id }),
+      });
+
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url; // klasyczny redirect Stripe
+      } else {
+        alert("Nie udało się rozpocząć płatności.");
+      }
+    } catch (err) {
+      console.error("Checkout error:", err);
+      alert("Wystąpił błąd podczas płatności.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
