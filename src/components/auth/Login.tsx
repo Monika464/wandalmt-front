@@ -2,16 +2,18 @@ import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "../../store";
 import { login } from "../../store/slices/authSlice";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 
 const Login = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { user, status, error } = useSelector((state: RootState) => state.auth);
+  const location = useLocation();
+  const { status, error } = useSelector((state: RootState) => state.auth);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const params = new URLSearchParams(location.search);
+  const redirectTo = params.get("redirect") || "/userpanel";
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     //console.log("Dispatching login for:", email);
@@ -21,7 +23,8 @@ const Login = () => {
           navigate("/adminpanel");
         }
         if (result.payload.user.role === "user") {
-          navigate("/userpanel");
+          //navigate("/userpanel");
+          navigate(redirectTo);
         }
       }
     });
@@ -45,6 +48,12 @@ const Login = () => {
         {status === "loading" ? "Logowanie..." : "Zaloguj"}
       </button>
       {error && <p>{error}</p>}
+      <p>
+        Nie masz konta?{" "}
+        <Link to={`/register?redirect=${encodeURIComponent(redirectTo)}`}>
+          Zarejestruj się
+        </Link>
+      </p>
     </form>
   );
 };

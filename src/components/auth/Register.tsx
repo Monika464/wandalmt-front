@@ -3,7 +3,7 @@ import { useState, type FormEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser, registerAdmin } from "../../store/slices/authSlice";
 import type { AppDispatch, RootState } from "../../store";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 type Role = "user" | "admin";
 
@@ -18,6 +18,10 @@ interface RegisterFormData {
 const Register = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const params = new URLSearchParams(location.search);
+  const redirectTo = params.get("redirect") || "/userpanel";
 
   const {
     user: currentUser,
@@ -70,7 +74,8 @@ const Register = () => {
             password: formData.password,
           })
         ).unwrap();
-        navigate("/userpanel");
+        //navigate("/login");
+        navigate(`/login?redirect=${encodeURIComponent(redirectTo)}`);
       }
 
       // Reset formularza
