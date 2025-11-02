@@ -19,7 +19,10 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({ productId }) => {
         "Brak zalogowanego użytkownika – przekierowanie do logowania"
       );
       //navigate("/login");
-      navigate(`/login?redirect=${encodeURIComponent("/products")}`);
+      //navigate(`/login?redirect=${encodeURIComponent("/products")}`);
+      navigate(
+        `/login?redirect=${encodeURIComponent(`/products/${productId}`)}`
+      );
       return;
     }
 
