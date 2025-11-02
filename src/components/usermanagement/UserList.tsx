@@ -4,7 +4,7 @@ import type { User } from "../../types";
 
 interface UserListProps {
   users: User[];
-  onToggleStatus: (userId: string) => void;
+  onToggleStatus: (userId: string, newStatus: boolean) => void;
   onDelete: (userId: string) => void;
 }
 

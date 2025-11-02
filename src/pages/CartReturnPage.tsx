@@ -18,7 +18,7 @@ const CartReturnPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  const { user, token } = useSelector((state: RootState) => state.auth);
+  const { token } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

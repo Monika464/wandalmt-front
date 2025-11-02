@@ -99,7 +99,7 @@ export const registerAdmin = createAsyncThunk(
         errorMessage = err.message;
       }
 
-      console.error("RegisterAdmin error:", errorMessage, err.response);
+      console.error("RegisterAdmin error:", errorMessage);
       return thunkAPI.rejectWithValue(errorMessage);
     }
   }
@@ -193,11 +193,11 @@ const authSlice = createSlice({
 
 export default authSlice.reducer;
 
-function dispatch(arg0: any) {
-  throw new Error("Function not implemented.");
-}
+// function dispatch(arg0: any) {
+//   throw new Error("Function not implemented.");
+// }
 
-function setToken(savedToken: string): any {
-  throw new Error("Function not implemented.");
-}
+// function setToken(savedToken: string): any {
+//   throw new Error("Function not implemented.");
+// }
 //export { registerUser, registerAdmin, login, logout };

@@ -9,20 +9,26 @@ import axios from "axios";
 import api from "../../utils/api";
 
 interface ResourceState {
-  resourcesByProductId: Record<string, any>;
+  resourcesByProductId: Record<string, IResource>;
+  selected: IResource | null;
   loading: boolean;
   error: string | null;
 }
 
 const initialState: ResourceState = {
   resourcesByProductId: {},
+  selected: null,
   loading: false,
   error: null,
 };
 
-export const fetchResourceByProductId = createAsyncThunk(
+export const fetchResourceByProductId = createAsyncThunk<
+  IResource,
+  string,
+  { rejectValue: string }
+>(
   "resources/fetchByProductId",
-  async (productId: string, { rejectWithValue, signal }) => {
+  async (productId, { rejectWithValue, signal }) => {
     //console.log(`🔄 Fetching resource ${resourceId}`);
     try {
       const res = await api.get(`/resources/${productId}`, {
@@ -33,7 +39,7 @@ export const fetchResourceByProductId = createAsyncThunk(
     } catch (error: any) {
       if (axios.isCancel(error) || error.name === "CanceledError") {
         console.warn("Request cancelled");
-        return;
+        throw error;
       }
       return rejectWithValue(error.message);
     }

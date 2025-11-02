@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { fetchProductById } from "../store/slices/productPublicSlice";
 import { fetchResourceByProductId } from "../store/slices/resourcePublicSlice";
 
@@ -28,23 +28,6 @@ export default function ProductResourcePage() {
       ? state.resourcesPublic.resourcesByProductId[productId]
       : undefined
   );
-
-  //console.log("resource", resource);
-
-  const [viewingResource, setViewingResource] = useState<IResource | null>(
-    null
-  );
-  //console.log("resurce from state:", resource);
-
-  //   const [creatingResourceProduct, setCreatingResourceProduct] =
-  //     useState<Product | null>(null);
-  //   const [editingResource, setEditingResource] = useState<IResource | null>(
-  //     null
-  //   );
-  //   const [viewingResource, setViewingResource] = useState<IResource | null>(
-  //     null
-  //   );
-  //   const [refreshView, setRefreshView] = useState(false);
 
   useEffect(() => {
     if (!productId) return;
@@ -106,7 +89,7 @@ export default function ProductResourcePage() {
           {resource ? <ViewPublicResource resource={resource} /> : "loading.."}
         </div>
         <AddToCartButton product={product} />
-        <CheckoutButton productId={productId} />
+        <CheckoutButton productId={productId!} />
       </div>
     </div>
   );

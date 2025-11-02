@@ -3,7 +3,6 @@ import type { ProductPublicItemProps } from "../../types";
 import { formatCurrency } from "../../utils/formatcurremcy";
 
 const ProductItem: React.FC<ProductPublicItemProps> = ({
-  _id,
   title,
   description,
   price,

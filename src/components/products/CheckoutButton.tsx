@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import type { RootState, AppDispatch } from "../../store";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store";
 
 interface CheckoutButtonProps {
   productId: string;
@@ -49,12 +49,15 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({ productId }) => {
   };
 
   return (
-    <button
-      onClick={handleClick}
-      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-    >
-      💳 Kup teraz
-    </button>
+    <>
+      <button
+        onClick={handleClick}
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+      >
+        💳 Kup teraz
+      </button>
+      {loading && <p>Przygotowanie płatności...</p>}
+    </>
   );
 };
 

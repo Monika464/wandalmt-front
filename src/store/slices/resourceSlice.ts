@@ -22,6 +22,7 @@ interface FetchParams {
 interface ResourceState {
   items: IResource[];
   resourcesByProductId: Record<string, IResource>;
+  resourcesById: Record<string, IResource>;
   selected: IResource | null;
   total: number;
   page: number;
@@ -30,21 +31,10 @@ interface ResourceState {
   error: string | null;
 }
 
-// interface ResourceState {
-//   items: IResource[];
-//   resourcesByProductId: Record<string, IResource>;
-//   selected: IResource | null;
-//   loading: {
-//     fetch: boolean;
-//     fetchById: boolean;
-//     create: boolean;
-//   };
-//   error: string | null;
-// }
-
 const initialState: ResourceState = {
   items: [],
   resourcesByProductId: {},
+  resourcesById: {},
   selected: null,
   total: 0,
   page: 1,
@@ -53,24 +43,12 @@ const initialState: ResourceState = {
   error: null,
 };
 
-// const initialState: ResourceState = {
-//   items: [],
-//   resourcesByProductId: {},
-//   selected: null,
-//   loading: {
-//     fetch: false,
-//     fetchById: false,
-//     create: false,
-//   },
-//   error: null,
-// };
-
 interface AddChapterPayload {
   resourceId: string;
   chapterData: {
     title: string;
-    description: string;
-    videoUrl: string;
+    description?: string;
+    videoUrl?: string;
   };
 }
 
@@ -493,7 +471,10 @@ const resourceSlice = createSlice({
           state.error = null;
           state.selected = action.payload;
           // state.resourcesByProductId[action.payload.productId] = action.payload;
-          state.id[action.payload.id] = action.payload;
+          //state.id[action.payload.id] = action.payload;
+          if (action.payload._id) {
+            state.resourcesById[action.payload._id] = action.payload;
+          }
         }
       )
       .addCase(fetchResourceById.rejected, (state, action) => {

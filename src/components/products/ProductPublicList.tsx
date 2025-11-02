@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import ProductPublicItem from "./ProductPublicItem";
 import { fetchProducts } from "../../store/slices/productPublicSlice";

@@ -1,7 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from "../../utils/api";
-import axios, { AxiosError } from "axios";
-import type { BackendError } from "../../types";
+
 import { authorizedRequest } from "../../utils/authorizedRequest";
 
 type Role = "user" | "admin";

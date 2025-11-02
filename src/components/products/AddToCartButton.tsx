@@ -17,7 +17,8 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({ product }) => {
   //console.log("pr", product);
 
   const handleAdd = () => {
-    dispatch(addToCart(product));
+    //dispatch(addToCart(product));
+    dispatch(addToCart({ ...product, quantity: 1 }));
     navigate("/cart");
   };
 

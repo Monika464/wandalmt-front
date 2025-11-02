@@ -6,6 +6,7 @@ import { createResource } from "../../store/slices/resourceSlice";
 interface Props {
   productId: string; // resource będzie powiązany z tym produktem
   onClose: () => void;
+  onSuccess: () => void;
 }
 
 const CreateResourceForm: React.FC<Props> = ({

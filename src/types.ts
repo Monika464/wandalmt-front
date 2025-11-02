@@ -28,11 +28,12 @@ export interface IChapter {
 }
 
 export interface IResource {
-  _id?: string; // MongoDB ObjectId jako string
+  _id?: string;
   title: string;
+  description: string;
   content: string;
   videoUrl?: string;
-  productId: string; // ID produktu powiązanego z tym resource
+  productId: string;
   chapters: IChapter[];
   createdAt?: string;
   updatedAt?: string;

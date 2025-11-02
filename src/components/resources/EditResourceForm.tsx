@@ -30,7 +30,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
 
   const [chapters, setChapters] = useState<IChapter[]>(resource.chapters || []);
   const [newChapter, setNewChapter] = useState<IChapter>({
-    id: "",
+    _id: "",
     title: "",
     description: "",
     videoUrl: "",
@@ -44,7 +44,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
     try {
       await dispatch(
         editResource({
-          id: resource._id,
+          id: resource._id!,
           resourceData: { title, content, videoUrl },
         })
       ).unwrap();
@@ -66,7 +66,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
     }
     try {
       const added = await dispatch(
-        addChapter({ resourceId: resource._id, chapterData: newChapter })
+        addChapter({ resourceId: resource._id!, chapterData: newChapter })
       ).unwrap();
       setChapters([...chapters, added.chapters[added.chapters.length - 1]]);
       setNewChapter({ title: "", description: "", videoUrl: "" });
@@ -81,7 +81,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
     try {
       const updatedResource = await dispatch(
         editChapter({
-          resourceId: resource._id,
+          resourceId: resource._id!,
           chapterId,
           chapterData: updated,
         })
@@ -97,8 +97,8 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
   const handleDeleteChapter = async (chapterId: string) => {
     if (!window.confirm("Na pewno chcesz usunąć ten rozdział?")) return;
     try {
-      const updatedResource = await dispatch(
-        deleteChapter({ resourceId: resource._id, chapterId })
+      await dispatch(
+        deleteChapter({ resourceId: resource._id!, chapterId })
       ).unwrap();
 
       // upewniamy się, że chapters to tablica
@@ -202,7 +202,9 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
             <p>{ch.description}</p>
             <button
               onClick={() =>
-                setEditingChapterId(editingChapterId === ch._id ? null : ch._id)
+                setEditingChapterId(
+                  editingChapterId === ch._id ? null : ch._id!
+                )
               }
               className="absolute top-2 right-2 bg-gray-400 text-white px-2 py-1 rounded"
             >

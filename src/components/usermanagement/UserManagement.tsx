@@ -7,11 +7,6 @@ import {
   toggleUserStatus,
 } from "../../store/slices/userSlice";
 import UserList from "./UserList";
-//import type IUser from "../../types/User";
-
-// interface IUserList {
-//   users: IUser[];
-// }
 
 const UserManagement = () => {
   const dispatch = useDispatch<AppDispatch>();

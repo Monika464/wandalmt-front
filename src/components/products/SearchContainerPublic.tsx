@@ -1,5 +1,5 @@
 // SearchContainer.tsx
-import { type ReactNode, useEffect, useState, useCallback } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { fetchProducts } from "../../store/slices/productPublicSlice";
 import { FiSearch } from "react-icons/fi";
@@ -12,15 +12,6 @@ interface Props {
 const SearchPublicContainer = ({ children }: Props) => {
   const dispatch = useDispatch<AppDispatch>();
   const [search, setSearch] = useState("");
-
-  // useEffect(() => {
-  //   const delay = setTimeout(() => {
-  //     // Jeśli pole jest puste → pobierz wszystkie produkty
-  //     dispatch(fetchProducts({ search: search.trim() }));
-  //   }, 500);
-
-  //   return () => clearTimeout(delay);
-  // }, [search, dispatch]);
 
   const handleSearch = () => {
     setSearch("");
