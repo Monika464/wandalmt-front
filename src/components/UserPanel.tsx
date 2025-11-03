@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 
 import type { RootState } from "../store";
-import LogoutButton from "./auth/LogoutButton";
+//import LogoutButton from "./auth/LogoutButton";
 
 const UserPanel = () => {
   //const dispatch = useDispatch<AppDispatch>();
@@ -9,7 +9,7 @@ const UserPanel = () => {
   return (
     <div>
       <h1>Witaj, {user ? user.name : "Gościu"}!</h1>
-      {user && <LogoutButton />}
+      {/* {user && <LogoutButton />} */}
     </div>
   );
 };

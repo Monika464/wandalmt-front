@@ -106,11 +106,58 @@ export const registerAdmin = createAsyncThunk(
 );
 
 // Logout thunk
-export const logout = createAsyncThunk("auth/logout", async () => {
-  // Optionally, you can perform API logout here
+// Logout user
+export const logoutUser = createAsyncThunk(
+  "auth/logoutUser",
+  async (_, thunkAPI) => {
+    try {
+      const state = thunkAPI.getState() as { auth: AuthState };
+      const token = state.auth.token;
 
-  return;
-});
+      if (!token) return;
+
+      await api.post(
+        "/auth/logout",
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      return;
+    } catch (error) {
+      console.error("Logout user error:", error);
+      return thunkAPI.rejectWithValue("Błąd przy wylogowaniu użytkownika");
+    }
+  }
+);
+
+// Logout admin
+export const logoutAdmin = createAsyncThunk(
+  "auth/logoutAdmin",
+  async (_, thunkAPI) => {
+    try {
+      const state = thunkAPI.getState() as { auth: AuthState };
+      const token = state.auth.token;
+
+      if (!token) return;
+
+      await api.post(
+        "/auth/logout-admin",
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      return;
+    } catch (error) {
+      console.error("Logout admin error:", error);
+      return thunkAPI.rejectWithValue("Błąd przy wylogowaniu admina");
+    }
+  }
+);
+// export const logout = createAsyncThunk("auth/logout", async () => {
+//   // Optionally, you can perform API logout here
+
+//   return;
+// });
 
 const authSlice = createSlice({
   name: "auth",
@@ -180,14 +227,28 @@ const authSlice = createSlice({
       })
 
       // LOGOUT
-      .addCase(logout.fulfilled, (state) => {
-        console.log("Logout reducer triggered");
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.token = null;
+        state.status = "idle";
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+      })
+      .addCase(logoutAdmin.fulfilled, (state) => {
         state.user = null;
         state.token = null;
         state.status = "idle";
         localStorage.removeItem("user");
         localStorage.removeItem("token");
       });
+    // .addCase(logout.fulfilled, (state) => {
+    //   console.log("Logout reducer triggered");
+    //   state.user = null;
+    //   state.token = null;
+    //   state.status = "idle";
+    //   localStorage.removeItem("user");
+    //   localStorage.removeItem("token");
+    // });
   },
 });
 
