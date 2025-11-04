@@ -6,6 +6,7 @@ import resourceReducer from "./slices/resourceSlice";
 import productPublicReducer from "./slices/productPublicSlice";
 import resourcePublicReducer from "./slices/resourcePublicSlice";
 import cartReducer from "./slices/cartSlice";
+import ordersReducer from "./slices/orderSlice";
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     resources: resourceReducer,
     resourcesPublic: resourcePublicReducer,
     cart: cartReducer,
+    orders: ordersReducer,
   },
   devTools: {
     trace: true,

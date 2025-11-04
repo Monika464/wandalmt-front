@@ -1,11 +1,8 @@
-import {
-  createSlice,
-  createAsyncThunk,
-  type PayloadAction,
-} from "@reduxjs/toolkit";
-import axios, { AxiosError } from "axios";
-import type { RootState } from "../index"; // <- dostosuj ścieżkę
-import { BackendError } from "../../types/BackendError"; // <- możesz utworzyć własny typ np. { message: string }
+// src/store/slices/orderSlice.ts
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+import type { RootState } from "../index";
+import api from "../../utils/api";
 
 export interface OrderProduct {
   product: {
@@ -23,157 +20,90 @@ export interface Order {
   _id: string;
   stripeSessionId: string;
   products: OrderProduct[];
-  user: {
-    email: string;
-    userId: string;
-  };
+  user: { email: string; userId: string };
   createdAt: string;
-  refundedAt?: string;
 }
 
-interface OrdersState {
-  orders: Order[];
+interface OrderState {
+  userOrders: Order[];
+  allOrders: Order[];
   loading: boolean;
   error: string | null;
 }
 
-const initialState: OrdersState = {
-  orders: [],
+const initialState: OrderState = {
+  userOrders: [],
+  allOrders: [],
   loading: false,
   error: null,
 };
 
-// 🔹 1. Pobierz zamówienia użytkownika
-export const getUserOrders = createAsyncThunk<
+// 🔹 Zamówienia użytkownika
+export const fetchUserOrders = createAsyncThunk<
   Order[],
   void,
-  { rejectValue: string }
->("orders/getUserOrders", async (_, thunkAPI) => {
+  { state: RootState }
+>("orders/fetchUserOrders", async (_, thunkAPI) => {
   try {
-    const token = localStorage.getItem("token");
-    const response = await axios.get("/api/orders/user", {
+    const token = thunkAPI.getState().auth.token;
+    const res = await api.get("/api/orders/user", {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data;
-  } catch (err) {
-    let errorMessage = "Błąd pobierania zamówień użytkownika";
-    if (axios.isAxiosError(err)) {
-      const axiosError = err as AxiosError<BackendError>;
-      errorMessage = axiosError.response?.data?.message || axiosError.message;
-    }
-    return thunkAPI.rejectWithValue(errorMessage);
+    return res.data;
+  } catch (err: any) {
+    return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
   }
 });
 
-// 🔹 2. Pobierz wszystkie zamówienia (dla admina)
-export const getAllOrders = createAsyncThunk<
+// 🔹 Zamówienia dla admina
+export const fetchAllOrders = createAsyncThunk<
   Order[],
   void,
-  { rejectValue: string }
->("orders/getAllOrders", async (_, thunkAPI) => {
+  { state: RootState }
+>("orders/fetchAllOrders", async (_, thunkAPI) => {
   try {
-    const token = localStorage.getItem("token");
-    const response = await axios.get("/api/orders", {
+    const token = thunkAPI.getState().auth.token;
+    const res = await api.get("/api/orders", {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data;
-  } catch (err) {
-    let errorMessage = "Błąd pobierania wszystkich zamówień";
-    if (axios.isAxiosError(err)) {
-      const axiosError = err as AxiosError<BackendError>;
-      errorMessage = axiosError.response?.data?.message || axiosError.message;
-    }
-    return thunkAPI.rejectWithValue(errorMessage);
+    return res.data;
+  } catch (err: any) {
+    return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
   }
 });
 
-// 🔹 3. Zwrot zamówienia
-export const refundOrder = createAsyncThunk<
-  Order,
-  string,
-  { rejectValue: string }
->("orders/refundOrder", async (orderId, thunkAPI) => {
-  try {
-    const token = localStorage.getItem("token");
-    const response = await axios.post(
-      `/api/orders/refund/${orderId}`,
-      {},
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    return response.data.order;
-  } catch (err) {
-    let errorMessage = "Błąd podczas zwrotu";
-    if (axios.isAxiosError(err)) {
-      const axiosError = err as AxiosError<BackendError>;
-      errorMessage = axiosError.response?.data?.message || axiosError.message;
-    }
-    return thunkAPI.rejectWithValue(errorMessage);
-  }
-});
-
-const ordersSlice = createSlice({
+const orderSlice = createSlice({
   name: "orders",
   initialState,
-  reducers: {
-    clearOrders(state) {
-      state.orders = [];
-      state.error = null;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
-      // getUserOrders
-      .addCase(getUserOrders.pending, (state) => {
+      // user orders
+      .addCase(fetchUserOrders.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
-      .addCase(
-        getUserOrders.fulfilled,
-        (state, action: PayloadAction<Order[]>) => {
-          state.loading = false;
-          state.orders = action.payload;
-        }
-      )
-      .addCase(getUserOrders.rejected, (state, action) => {
+      .addCase(fetchUserOrders.fulfilled, (state, action) => {
         state.loading = false;
-        state.error =
-          action.payload || "Nie udało się pobrać zamówień użytkownika";
+        state.userOrders = action.payload;
+      })
+      .addCase(fetchUserOrders.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       })
 
-      // getAllOrders
-      .addCase(getAllOrders.pending, (state) => {
+      // all orders
+      .addCase(fetchAllOrders.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
-      .addCase(
-        getAllOrders.fulfilled,
-        (state, action: PayloadAction<Order[]>) => {
-          state.loading = false;
-          state.orders = action.payload;
-        }
-      )
-      .addCase(getAllOrders.rejected, (state, action) => {
+      .addCase(fetchAllOrders.fulfilled, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Nie udało się pobrać zamówień admina";
+        state.allOrders = action.payload;
       })
-
-      // refundOrder
-      .addCase(refundOrder.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(refundOrder.fulfilled, (state, action: PayloadAction<Order>) => {
+      .addCase(fetchAllOrders.rejected, (state, action) => {
         state.loading = false;
-        state.orders = state.orders.map((order) =>
-          order._id === action.payload._id ? action.payload : order
-        );
-      })
-      .addCase(refundOrder.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || "Nie udało się wykonać zwrotu";
+        state.error = action.payload as string;
       });
   },
 });
 
-export const { clearOrders } = ordersSlice.actions;
-export default ordersSlice.reducer;
+export default orderSlice.reducer;
