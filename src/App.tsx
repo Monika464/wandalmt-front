@@ -23,6 +23,8 @@ import CheckoutPage from "./pages/CheckoutPage";
 import ReturnPage from "./pages/ReturnPage";
 //import CartCheckoutPage from "./pages/CartCheckoutPage";
 import CartReturnPage from "./pages/CartReturnPage";
+import UserOrders from "./components/orders/UserOrders";
+import UserResources from "./components/orders/UserResources";
 
 const App = () => {
   return (
@@ -107,6 +109,22 @@ const App = () => {
               element={
                 <ProtectedRoute requiredRole="user">
                   <UserPanel />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/userpanel/userorders"
+              element={
+                <ProtectedRoute requiredRole="user">
+                  <UserOrders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/userpanel/userresources"
+              element={
+                <ProtectedRoute requiredRole="user">
+                  <UserResources />
                 </ProtectedRoute>
               }
             />
