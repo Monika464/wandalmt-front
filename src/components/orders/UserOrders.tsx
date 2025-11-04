@@ -26,8 +26,7 @@ const UserOrders: React.FC = () => {
       {userOrders.map((order) => (
         <div key={order._id} className="p-3 border rounded mb-2">
           <p>
-            <strong>Data:</strong>{" "}
-            {new Date(order.user.createdAt).toLocaleString()}
+            <strong>Data:</strong> {new Date(order.createdAt).toLocaleString()}
           </p>
           {order.products.map((item, i) => (
             <div key={i}>

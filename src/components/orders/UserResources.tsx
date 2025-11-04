@@ -22,9 +22,7 @@ const UserResources: React.FC = () => {
         order.products.map((item, i) => (
           <div key={`${order._id}-${i}`} className="p-3 border-b">
             <h3>{item.product.title}</h3>
-            <p>
-              Data zakupu: {new Date(order.user.createdAt).toLocaleDateString()}
-            </p>
+            <p>Data zakupu: {new Date(order.createdAt).toLocaleDateString()}</p>
           </div>
         ))
       )}

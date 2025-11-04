@@ -32,7 +32,7 @@ const AdminFinancials: React.FC = () => {
       <ul>
         {allOrders.map((order) => (
           <li key={order._id}>
-            {new Date(order.user.createdAt).toLocaleDateString()} –{" "}
+            {new Date(order.createdAt).toLocaleDateString()} –{" "}
             {order.products
               .map((p) => `${p.product.title} (${p.product.price} zł)`)
               .join(", ")}
