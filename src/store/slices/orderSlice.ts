@@ -1,6 +1,6 @@
 // src/store/slices/orderSlice.ts
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+
 import type { RootState } from "../index";
 import api from "../../utils/api";
 
@@ -72,6 +72,27 @@ export const fetchAllOrders = createAsyncThunk<
   }
 });
 
+// src/store/slices/orderSlice.ts
+export const refundOrder = createAsyncThunk<
+  any,
+  string, // id zamówienia
+  { state: RootState }
+>("orders/refundOrder", async (orderId, thunkAPI) => {
+  try {
+    const token = thunkAPI.getState().auth.token;
+    const res = await api.post(
+      `/api/orders/refund/${orderId}`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return res.data;
+  } catch (err: any) {
+    return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
+  }
+});
+
 const orderSlice = createSlice({
   name: "orders",
   initialState,
@@ -100,6 +121,21 @@ const orderSlice = createSlice({
         state.allOrders = action.payload;
       })
       .addCase(fetchAllOrders.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(refundOrder.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(refundOrder.fulfilled, (state, action) => {
+        state.loading = false;
+        // aktualizacja statusu lokalnie
+        const refundedOrder = action.payload.order;
+        state.userOrders = state.userOrders.map((order) =>
+          order._id === refundedOrder._id ? refundedOrder : order
+        );
+      })
+      .addCase(refundOrder.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

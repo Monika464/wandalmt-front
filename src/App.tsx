@@ -25,6 +25,7 @@ import ReturnPage from "./pages/ReturnPage";
 import CartReturnPage from "./pages/CartReturnPage";
 import UserOrders from "./components/orders/UserOrders";
 import UserResources from "./components/orders/UserResources";
+import CreateProductForm from "./components/products/CreateProductForm";
 
 const App = () => {
   return (
@@ -98,6 +99,14 @@ const App = () => {
               element={
                 <ProtectedRoute requiredRole="admin">
                   <AdminPanel />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/createproduct"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <CreateProductForm />
                 </ProtectedRoute>
               }
             />
