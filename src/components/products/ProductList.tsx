@@ -42,36 +42,36 @@ const ProductList: React.FC = () => {
     <div>
       <br></br>
       <SearchContainer>
-        {products.map((product) => {
-          // const resource = resourcesByProductId[product._id];
+        {Array.isArray(products) &&
+          products
+            .filter(
+              (product): product is { _id: string } =>
+                !!product && !!product._id
+            )
+            .map((product) => (
+              <div key={product._id} className="relative">
+                <ProductItem
+                  {...product}
+                  onEdit={() => setEditingProductId(product._id)}
+                />
 
-          //console.log("Resource dla produktu:", product._id, resource);
+                {editingProductId === product._id && (
+                  <div className="mt-4 p-4 border rounded-lg bg-gray-50">
+                    <EditProductForm
+                      product={product}
+                      onClose={handleCloseEditProduct}
+                    />
+                  </div>
+                )}
 
-          return (
-            <div key={product._id} className="relative">
-              <ProductItem
-                {...product}
-                onEdit={() => setEditingProductId(product._id)}
-              />
-
-              {editingProductId === product._id && (
-                <div className="mt-4 p-4 border rounded-lg bg-gray-50">
-                  <EditProductForm
-                    product={product}
-                    onClose={handleCloseEditProduct}
-                  />
-                </div>
-              )}
-
-              <button
-                onClick={() => navigate(`/admin/products/${product._id}`)}
-                className="px-3 py-1 bg-blue-500 text-white rounded"
-              >
-                Show detail
-              </button>
-            </div>
-          );
-        })}
+                <button
+                  onClick={() => navigate(`/admin/products/${product._id}`)}
+                  className="px-3 py-1 bg-blue-500 text-white rounded"
+                >
+                  Show detail
+                </button>
+              </div>
+            ))}
       </SearchContainer>
       <br></br>
       <br></br>

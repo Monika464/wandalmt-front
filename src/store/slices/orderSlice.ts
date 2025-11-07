@@ -6,6 +6,7 @@ import api from "../../utils/api";
 
 export interface OrderProduct {
   product: {
+    _id: string;
     title: string;
     price: number;
     description: string;
@@ -15,6 +16,18 @@ export interface OrderProduct {
   };
   quantity: number;
 }
+export interface ResourceChapter {
+  title: string;
+  content?: string;
+  videoUrl?: string;
+}
+
+export interface Resource {
+  _id: string;
+  title: string;
+  description: string;
+  chapters?: ResourceChapter[];
+}
 
 export interface Order {
   _id: string;
@@ -22,6 +35,7 @@ export interface Order {
   products: OrderProduct[];
   user: { email: string; userId: string };
   createdAt: string;
+  userResources?: Resource[];
 }
 
 interface OrderState {
