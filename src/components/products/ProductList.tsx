@@ -68,7 +68,7 @@ const ProductList: React.FC = () => {
                   onClick={() => navigate(`/admin/products/${product._id}`)}
                   className="px-3 py-1 bg-blue-500 text-white rounded"
                 >
-                  Show detail
+                  Edytuj zasoby produktu
                 </button>
               </div>
             ))}
