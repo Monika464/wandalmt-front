@@ -10,6 +10,7 @@ import { formatCurrency } from "../utils/formatcurremcy";
 import ViewPublicResource from "../components/resources/ViewPublicResource";
 import AddToCartButton from "../components/products/AddToCartButton";
 import CheckoutButton from "../components/products/CheckoutButton";
+import Navbar from "../components/elements/Navbar";
 
 export default function ProductResourcePage() {
   const { productId } = useParams<{ productId: string }>();
@@ -58,39 +59,46 @@ export default function ProductResourcePage() {
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold">Produkt: {product.title}</h1>
-      <img
-        src={product.imageUrl}
-        alt={product.title}
-        className="h-40 object-cover rounded-md"
-      />
-      <p className="text-sm text-gray-600">{product.description}</p>
-      <p className="font-bold">{formatCurrency(product.price)}</p>
+    <>
+      <Navbar />
+      <div className="p-4">
+        <h1 className="text-xl font-bold">Produkt: {product.title}</h1>
+        <img
+          src={product.imageUrl}
+          alt={product.title}
+          className="h-40 object-cover rounded-md"
+        />
+        <p className="text-sm text-gray-600">{product.description}</p>
+        <p className="font-bold">{formatCurrency(product.price)}</p>
 
-      <div className="mt-4">
-        <h2 className="text-lg">Zasób:</h2>
-        {resource ? (
-          <div>
-            <p>
-              <strong>Tytuł:</strong> {resource.title}
-            </p>
-            <p>
-              <strong>Opis:</strong> {resource.description}
-            </p>
-          </div>
-        ) : (
-          <div>
-            <p className="text-yellow-600">Produkt w przygotowaniu</p>
-          </div>
-        )}
+        <div className="mt-4">
+          <h2 className="text-lg">Zasób:</h2>
+          {resource ? (
+            <div>
+              <p>
+                <strong>Tytuł:</strong> {resource.title}
+              </p>
+              <p>
+                <strong>Opis:</strong> {resource.description}
+              </p>
+            </div>
+          ) : (
+            <div>
+              <p className="text-yellow-600">Produkt w przygotowaniu</p>
+            </div>
+          )}
 
-        <div className="mt-4 p-4 border rounded-lg bg-gray-100">
-          {resource ? <ViewPublicResource resource={resource} /> : "loading.."}
+          <div className="mt-4 p-4 border rounded-lg bg-gray-100">
+            {resource ? (
+              <ViewPublicResource resource={resource} />
+            ) : (
+              "loading.."
+            )}
+          </div>
+          <AddToCartButton product={product} />
+          <CheckoutButton productId={productId!} />
         </div>
-        <AddToCartButton product={product} />
-        <CheckoutButton productId={productId!} />
       </div>
-    </div>
+    </>
   );
 }

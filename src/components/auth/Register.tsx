@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { registerUser, registerAdmin } from "../../store/slices/authSlice";
 import type { AppDispatch, RootState } from "../../store";
 import { useLocation, useNavigate } from "react-router-dom";
+import Navbar from "../elements/Navbar";
+import ReCAPTCHA from "react-google-recaptcha";
 
 type Role = "user" | "admin";
 
@@ -15,8 +17,9 @@ interface RegisterFormData {
   role: Role;
 }
 
-const Register = () => {
+const Register: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -50,6 +53,10 @@ const Register = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!captchaToken) {
+      alert("Potwierdź, że nie jesteś robotem.");
+      return;
+    }
     setSuccess("");
 
     try {
@@ -72,6 +79,7 @@ const Register = () => {
             surname: formData.surname,
             email: formData.email,
             password: formData.password,
+            captchaToken: captchaToken,
           })
         ).unwrap();
         //navigate("/login");
@@ -92,72 +100,80 @@ const Register = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 border rounded">
-      <h2 className="text-xl font-bold mb-4">Rejestracja</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          name="name"
-          placeholder="Imię"
-          value={formData.name}
-          onChange={handleChange}
-          className="border p-2 w-full rounded"
-          required
-        />
-        <input
-          type="text"
-          name="surname"
-          placeholder="Nazwisko"
-          value={formData.surname}
-          onChange={handleChange}
-          className="border p-2 w-full rounded"
-          required
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          className="border p-2 w-full rounded"
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Hasło"
-          value={formData.password}
-          onChange={handleChange}
-          className="border p-2 w-full rounded"
-          required
-        />
+    <>
+      <Navbar />
+      <div className="max-w-md mx-auto mt-10 p-6 border rounded">
+        <h2 className="text-xl font-bold mb-4">Rejestracja</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            name="name"
+            placeholder="Imię"
+            value={formData.name}
+            onChange={handleChange}
+            className="border p-2 w-full rounded"
+            required
+          />
+          <input
+            type="text"
+            name="surname"
+            placeholder="Nazwisko"
+            value={formData.surname}
+            onChange={handleChange}
+            className="border p-2 w-full rounded"
+            required
+          />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            className="border p-2 w-full rounded"
+            required
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Hasło"
+            value={formData.password}
+            onChange={handleChange}
+            className="border p-2 w-full rounded"
+            required
+          />
 
-        {/* Jeśli aktualny user jest adminem, pokazujemy wybór roli */}
-        <select
-          name="role"
-          value={formData.role}
-          onChange={handleChange}
-          className="border p-2 w-full rounded"
-          disabled={currentUser?.role !== "admin"}
-        >
-          <option value="user">User</option>
-          {currentUser?.role === "admin" && (
-            <option value="admin">Admin</option>
-          )}
-        </select>
+          {/* Jeśli aktualny user jest adminem, pokazujemy wybór roli */}
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            className="border p-2 w-full rounded"
+            disabled={currentUser?.role !== "admin"}
+          >
+            <option value="user">User</option>
+            {currentUser?.role === "admin" && (
+              <option value="admin">Admin</option>
+            )}
+          </select>
 
-        <button
-          type="submit"
-          className="bg-green-500 text-white px-4 py-2 rounded w-full"
-          disabled={status === "loading"}
-        >
-          {status === "loading" ? "Rejestrowanie..." : "Zarejestruj"}
-        </button>
+          <button
+            type="submit"
+            className="bg-green-500 text-white px-4 py-2 rounded w-full"
+            disabled={status === "loading"}
+          >
+            {status === "loading" ? "Rejestrowanie..." : "Zarejestruj"}
+          </button>
 
-        {error && <p className="text-red-500 mt-2">{error}</p>}
-        {success && <p className="text-green-600 mt-2">{success}</p>}
-      </form>
-    </div>
+          {error && <p className="text-red-500 mt-2">{error}</p>}
+          {success && <p className="text-green-600 mt-2">{success}</p>}
+
+          <ReCAPTCHA
+            sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+            onChange={(token) => setCaptchaToken(token || "")}
+          />
+        </form>
+      </div>
+    </>
   );
 };
 

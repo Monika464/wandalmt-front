@@ -3,6 +3,7 @@ import type { RootState, AppDispatch } from "../../store";
 import { login } from "../../store/slices/authSlice";
 import { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import Navbar from "../elements/Navbar";
 
 const Login = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -31,30 +32,34 @@ const Login = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Hasło"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button type="submit">
-        {status === "loading" ? "Logowanie..." : "Zaloguj"}
-      </button>
-      {error && <p>{error}</p>}
-      <p>
-        Nie masz konta?{" "}
-        <Link to={`/register?redirect=${encodeURIComponent(redirectTo)}`}>
-          Zarejestruj się
-        </Link>
-      </p>
-    </form>
+    <>
+      <Navbar />
+
+      <form onSubmit={handleSubmit}>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Hasło"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button type="submit">
+          {status === "loading" ? "Logowanie..." : "Zaloguj"}
+        </button>
+        {error && <p>{error}</p>}
+        <p>
+          Nie masz konta?{" "}
+          <Link to={`/register?redirect=${encodeURIComponent(redirectTo)}`}>
+            Zarejestruj się
+          </Link>
+        </p>
+      </form>
+    </>
   );
 };
 

@@ -34,7 +34,7 @@ export const fetchUsers = createAsyncThunk<IUser[]>(
         method: "GET",
       });
 
-      console.log("✅ Users fetched:", users);
+      //console.log("✅ Users fetched:", users);
       return users;
     } catch (error: any) {
       console.error("❌ Error fetching users:", error);

@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../utils/api";
-import type { BackendError } from "../../types";
+
 import axios, { AxiosError } from "axios";
 
 type Role = "user" | "admin";
@@ -30,16 +30,51 @@ const initialState: AuthState = {
   error: null,
 };
 
-// Logowanie
+interface BackendError {
+  error?: string;
+  message?: string;
+}
+
 export const login = createAsyncThunk(
   "auth/login",
-  async (credentials: { email: string; password: string }) => {
-    //console.log("Logging in with credentials:", credentials);
-    const res = await api.post("/auth/login", credentials);
-    //console.log("Login response data:", res.data);
-    return res.data; // { user, token }
+  async (credentials: { email: string; password: string }, thunkAPI) => {
+    try {
+      const res = await api.post("/auth/login", credentials);
+      return res.data; // { user, token }
+    } catch (err) {
+      let errorMessage = "Wystąpił błąd podczas logowania";
+
+      if (axios.isAxiosError(err)) {
+        const axiosError = err as AxiosError<BackendError>;
+        // Pobierz wiadomość z backendu (np. "Niepoprawny email lub hasło")
+        errorMessage =
+          axiosError.response?.data?.error ||
+          axiosError.response?.data?.message ||
+          errorMessage;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+
+      // Przekaż wiadomość do Reducera
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
   }
 );
+
+// // Logowanie
+// export const login = createAsyncThunk(
+//   "auth/login",
+//   async (credentials: { email: string; password: string }) => {
+//     try {
+//        const res = await api.post("/auth/login", credentials);
+//     //console.log("Login response data:", res.data);
+//     return res.data; // { user, token }
+//     } catch (error) {
+//       let errorMessage: string = "Wystąpił błąd podczas logowania";
+//     }
+
+//   }
+// );
 
 // Rejestracja usera
 export const registerUser = createAsyncThunk(
@@ -49,6 +84,7 @@ export const registerUser = createAsyncThunk(
     surname: string;
     email: string;
     password: string;
+    captchaToken: string | null;
   }) => {
     const res = await api.post("/auth/register", newUser);
     return res.data; // { user, token }
@@ -74,7 +110,7 @@ export const registerAdmin = createAsyncThunk(
       }
 
       // Wyślij żądanie z tokenem w nagłówku
-      const response = await api.post("/register-admin", data, {
+      const response = await api.post("auth/register-admin", data, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -181,7 +217,8 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.error.message || "Błąd logowania";
+        state.error = action.payload as string;
+        //state.error = action.error.message || "Błąd logowania";
       })
 
       // REGISTER USER

@@ -17,10 +17,11 @@ const AdminFinancials: React.FC = () => {
 
   // 🔹 Oblicz przychody z uwzględnieniem refundów
   const totalRevenue = allOrders.reduce((sum, order) => {
-    const orderValue = order.products.reduce(
-      (s, p) => s + p.product.price * (p.quantity || 1),
-      0
-    );
+    //console.log("Calculating order:", order, "sum", sum);
+    const orderValue = order.products.reduce((s, p) => {
+      //console.log("s", s, "p", p);
+      return s + p.product.price * (p.quantity || 1);
+    }, 0);
     // jeśli zamówienie zostało zrefundowane, odejmij jego wartość
     return sum + (order.refundedAt ? -orderValue : orderValue);
   }, 0);

@@ -19,17 +19,17 @@ const Navbar = () => {
     <nav className="flex justify-between bg-gray-200 p-3">
       <NavLink to="/cart">🛒 Koszyk ({cartCount})</NavLink>
       <br></br>
-      <NavLink to="/adminpanel">AdminPanel</NavLink>
+      {user?.role === "admin" && <NavLink to="/adminpanel">AdminPanel</NavLink>}
       <br></br>
-      <NavLink to="/userpanel">UserPanel</NavLink>
+      {user && <NavLink to="/userpanel">UserPanel</NavLink>}
       <br></br>
       <NavLink to="/products">Shop</NavLink>
       <br></br>
-      <NavLink to="/register">Register</NavLink>
+      {!user && <NavLink to="/register">Register</NavLink>}
       <br></br>
-      <NavLink to="/login">Login</NavLink>
+      {!user && <NavLink to="/login">Login</NavLink>}
       <br></br>
-      <button onClick={handleLogout}>Logout</button>
+      {user && <button onClick={handleLogout}>Logout</button>}
     </nav>
   );
 };
