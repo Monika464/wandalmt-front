@@ -27,6 +27,9 @@ import UserOrders from "./components/orders/UserOrders";
 import UserResources from "./components/orders/UserResources";
 import CreateProductForm from "./components/products/CreateProductForm";
 
+import SetNewPassword from "./components/auth/SetNewPassword";
+import PasswordResetRequest from "./components/auth/PasswordResetRequest";
+
 const App = () => {
   return (
     <>
@@ -51,6 +54,11 @@ const App = () => {
             {/* <Route path="/cart-checkout" element={<CartCheckoutPage />} /> */}
             <Route path="/cart-return" element={<CartReturnPage />} />
 
+            <Route path="/reset-password/:token" element={<SetNewPassword />} />
+            <Route
+              path="/reset-password-request"
+              element={<PasswordResetRequest />}
+            />
             {/* Routy admina */}
             <Route
               path="/admin/products/:productId"

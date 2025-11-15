@@ -57,6 +57,14 @@ const Login = () => {
           <Link to={`/register?redirect=${encodeURIComponent(redirectTo)}`}>
             Zarejestruj się
           </Link>
+          <Link
+            to={`/reset-password-request?redirect=${encodeURIComponent(
+              redirectTo
+            )}`}
+            style={{ marginLeft: "10px" }}
+          >
+            Zapomniałeś hasła?
+          </Link>
         </p>
       </form>
     </>

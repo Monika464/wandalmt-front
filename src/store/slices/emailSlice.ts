@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../utils/api";
+import { useEffect } from "react";
 
 interface EmailState {
   loading: boolean;
@@ -20,7 +21,7 @@ export const requestPasswordReset = createAsyncThunk(
   "email/requestPasswordReset",
   async (email: string, { rejectWithValue }) => {
     try {
-      const res = await api.post("/auth/request-reset", { email });
+      const res = await api.post("/email/request-reset", { email });
       return res.data.message;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.error || "Błąd resetu hasła");
@@ -38,7 +39,7 @@ export const resetPassword = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const res = await api.post("/auth/reset-password", payload);
+      const res = await api.post("/email/reset-password", payload);
       return res.data.message;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.error || "Błąd zmiany hasła");
