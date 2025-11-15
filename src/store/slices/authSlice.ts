@@ -12,12 +12,19 @@ interface User {
   email: string;
   role: Role;
 }
+// Typ błędu backendu
+interface BackendError {
+  error?: string;
+  message?: string;
+}
 
 interface AuthState {
   user: User | null;
   token: string | null;
-  status: "idle" | "loading" | "succeeded" | "failed";
+  loading: boolean;
+  success: string | null;
   error: string | null;
+  status: "idle" | "loading" | "succeeded" | "failed";
 }
 
 const storedUser = localStorage.getItem("user");
@@ -26,8 +33,10 @@ const storedToken = localStorage.getItem("token");
 const initialState: AuthState = {
   user: storedUser ? JSON.parse(storedUser) : null,
   token: storedToken || null,
-  status: "idle",
+  loading: false,
+  success: null,
   error: null,
+  status: "idle",
 };
 
 interface BackendError {
@@ -194,22 +203,73 @@ export const logoutAdmin = createAsyncThunk(
 
 //   return;
 // });
+/////////////////////////////////////////////////////////////////////
+// export const requestPasswordReset = createAsyncThunk(
+//   "auth/requestReset",
+//   async (email: string, { rejectWithValue }) => {
+//     try {
+//       const res = await api.post("/auth/request-reset", { email });
+//       return res.data.message;
+//     } catch (err: any) {
+//       return rejectWithValue(err.response?.data?.error || "Błąd resetu hasła");
+//     }
+//   }
+// );
+
+// export const resetPassword = createAsyncThunk(
+//   "auth/resetPassword",
+//   async (
+//     payload: { token: string; newPassword: string },
+//     { rejectWithValue }
+//   ) => {
+//     try {
+//       const res = await api.post("/auth/reset-password", payload);
+//       return res.data.message;
+//     } catch (err: any) {
+//       return rejectWithValue(err.response?.data?.error || "Błąd zmiany hasła");
+//     }
+//   }
+// );
+
+// export const changeEmail = createAsyncThunk(
+//   "auth/changeEmail",
+//   async (newEmail: string, { rejectWithValue }) => {
+//     try {
+//       const res = await api.patch(
+//         "auth/change-email",
+//         { newEmail },
+//         { withCredentials: true }
+//       );
+//       return res.data.message;
+//     } catch (err: any) {
+//       return rejectWithValue(
+//         err.response?.data?.error || "Błąd zmiany e-maila"
+//       );
+//     }
+//}
+//);
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {},
+  reducers: {
+    clearMessages(state) {
+      state.error = null;
+      state.success = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
       // LOGIN
       .addCase(login.pending, (state) => {
         state.status = "loading";
+        state.error = null;
       })
       .addCase(login.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.user = action.payload.user;
         state.token = action.payload.token;
-        state.error = null;
+        //state.error = null;
 
         // Zapis do localStorage
         localStorage.setItem("user", JSON.stringify(action.payload.user));
@@ -232,7 +292,7 @@ const authSlice = createSlice({
           // automatyczne logowanie po rejestracji
           state.user = action.payload.user;
           state.token = action.payload.token;
-          state.error = null;
+          //state.error = null;
           // Zapis do localStorage
           localStorage.setItem("user", JSON.stringify(action.payload.user));
           localStorage.setItem("token", action.payload.token);
@@ -265,19 +325,65 @@ const authSlice = createSlice({
 
       // LOGOUT
       .addCase(logoutUser.fulfilled, (state) => {
-        state.user = null;
-        state.token = null;
-        state.status = "idle";
+        Object.assign(state, initialState);
+        //state.user = null;
+        //state.token = null;
+        //state.status = "idle";
         localStorage.removeItem("user");
         localStorage.removeItem("token");
       })
       .addCase(logoutAdmin.fulfilled, (state) => {
-        state.user = null;
-        state.token = null;
-        state.status = "idle";
+        Object.assign(state, initialState);
+        //state.user = null;
+        //state.token = null;
+        //state.status = "idle";
         localStorage.removeItem("user");
         localStorage.removeItem("token");
       });
+    // RESET PASSWORD
+    // .addCase(requestPasswordReset.pending, (state) => {
+    //   state.loading = true;
+    //   state.error = null;
+    //   state.success = null;
+    // })
+    // .addCase(requestPasswordReset.fulfilled, (state, action) => {
+    //   state.loading = false;
+    //   state.success = action.payload;
+    // })
+    // .addCase(requestPasswordReset.rejected, (state, action) => {
+    //   state.loading = false;
+    //   state.error = action.payload as string;
+    // })
+
+    // // SET NEW PASSWORD
+    // .addCase(resetPassword.pending, (state) => {
+    //   state.loading = true;
+    //   state.error = null;
+    //   state.success = null;
+    // })
+    // .addCase(resetPassword.fulfilled, (state, action) => {
+    //   state.loading = false;
+    //   state.success = action.payload;
+    // })
+    // .addCase(resetPassword.rejected, (state, action) => {
+    //   state.loading = false;
+    //   state.error = action.payload as string;
+    // })
+
+    // // CHANGE EMAIL
+    // .addCase(changeEmail.pending, (state) => {
+    //   state.loading = true;
+    //   state.error = null;
+    //   state.success = null;
+    // })
+    // .addCase(changeEmail.fulfilled, (state, action) => {
+    //   state.loading = false;
+    //   state.success = action.payload;
+    // })
+    // .addCase(changeEmail.rejected, (state, action) => {
+    //   state.loading = false;
+    //   state.error = action.payload as string;
+    // });
     // .addCase(logout.fulfilled, (state) => {
     //   console.log("Logout reducer triggered");
     //   state.user = null;
@@ -288,7 +394,7 @@ const authSlice = createSlice({
     // });
   },
 });
-
+export const { clearMessages } = authSlice.actions;
 export default authSlice.reducer;
 
 // function dispatch(arg0: any) {

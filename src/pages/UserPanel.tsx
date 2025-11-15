@@ -1,10 +1,12 @@
 import { useSelector } from "react-redux";
 
 import type { RootState } from "../store";
-import UserOrders from "../components/orders/UserOrders";
-import UserResources from "../components/orders/UserResources";
+//import UserOrders from "../components/orders/UserOrders";
+//import UserResources from "../components/orders/UserResources";
 import Navbar from "../components/elements/Navbar";
 import { Link } from "react-router-dom";
+import { ChangeEmail } from "../components/auth/ChangeEmail";
+import { PasswordReset } from "../components/auth/PasswordReset";
 //import LogoutButton from "./auth/LogoutButton";
 
 const UserPanel = () => {
@@ -30,6 +32,8 @@ const UserPanel = () => {
       {/* <UserOrders />
       <br></br>
       <UserResources /> */}
+      <ChangeEmail />
+      <PasswordReset />
     </div>
   );
 };
