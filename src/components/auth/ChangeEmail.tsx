@@ -6,7 +6,7 @@ import type { RootState, AppDispatch } from "../../store";
 export const ChangeEmail: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error, success } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.email
   );
 
   const [newEmail, setNewEmail] = useState("");
