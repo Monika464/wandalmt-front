@@ -44,10 +44,7 @@ const ProductList: React.FC = () => {
       <SearchContainer>
         {Array.isArray(products) &&
           products
-            .filter(
-              (product): product is { _id: string } =>
-                !!product && !!product._id
-            )
+            .filter((product) => !!product?._id)
             .map((product) => (
               <div key={product._id} className="relative">
                 <ProductItem

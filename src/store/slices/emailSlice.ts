@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../utils/api";
-import { useEffect } from "react";
 
 interface EmailState {
   loading: boolean;

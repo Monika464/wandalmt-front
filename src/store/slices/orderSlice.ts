@@ -36,6 +36,7 @@ export interface Order {
   user: { email: string; userId: string };
   createdAt: string;
   userResources?: Resource[];
+  refundedAt?: string;
 }
 
 interface OrderState {
@@ -43,6 +44,7 @@ interface OrderState {
   allOrders: Order[];
   loading: boolean;
   error: string | null;
+  userProfile?: any;
 }
 
 const initialState: OrderState = {

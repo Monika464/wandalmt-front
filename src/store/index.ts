@@ -8,6 +8,7 @@ import resourcePublicReducer from "./slices/resourcePublicSlice";
 import cartReducer from "./slices/cartSlice";
 import ordersReducer from "./slices/orderSlice";
 import emailReducer from "./slices/emailSlice";
+import userprofileSlice from "./slices/userprofileSlice";
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +21,7 @@ export const store = configureStore({
     cart: cartReducer,
     orders: ordersReducer,
     email: emailReducer,
+    userprofile: userprofileSlice,
   },
   devTools: {
     trace: true,

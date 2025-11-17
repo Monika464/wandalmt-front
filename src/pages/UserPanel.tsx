@@ -6,6 +6,7 @@ import type { RootState } from "../store";
 import Navbar from "../components/elements/Navbar";
 import { Link } from "react-router-dom";
 import { ChangeEmail } from "../components/auth/ChangeEmail";
+import UserProfile from "../components/orders/UserProfile";
 //import PasswordResetRequest from "../components/auth/PasswordResetRequest";
 //import LogoutButton from "./auth/LogoutButton";
 
@@ -34,6 +35,7 @@ const UserPanel = () => {
       <UserResources /> */}
       <ChangeEmail />
       {/* <PasswordResetRequest /> */}
+      <UserProfile />
     </div>
   );
 };

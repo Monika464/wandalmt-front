@@ -12,7 +12,7 @@ interface User {
   email: string;
   role: Role;
 }
-// Typ błędu backendu
+
 interface BackendError {
   error?: string;
   message?: string;
@@ -100,7 +100,7 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-// REGISTER ADMIN — używa tokenu z getState i NIE ma efektu logowania
+// REGISTER ADMIN
 
 export const registerAdmin = createAsyncThunk(
   "auth/registerAdmin",
@@ -198,56 +198,25 @@ export const logoutAdmin = createAsyncThunk(
     }
   }
 );
-// export const logout = createAsyncThunk("auth/logout", async () => {
-//   // Optionally, you can perform API logout here
+export const checkAuth = createAsyncThunk(
+  "auth/checkAuth",
+  async (_, thunkAPI) => {
+    try {
+      const state = thunkAPI.getState() as { auth: AuthState };
+      const token = state.auth.token;
 
-//   return;
-// });
+      if (!token) return;
+
+      const res = await api.get("/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue("unauthorized");
+    }
+  }
+);
 /////////////////////////////////////////////////////////////////////
-// export const requestPasswordReset = createAsyncThunk(
-//   "auth/requestReset",
-//   async (email: string, { rejectWithValue }) => {
-//     try {
-//       const res = await api.post("/auth/request-reset", { email });
-//       return res.data.message;
-//     } catch (err: any) {
-//       return rejectWithValue(err.response?.data?.error || "Błąd resetu hasła");
-//     }
-//   }
-// );
-
-// export const resetPassword = createAsyncThunk(
-//   "auth/resetPassword",
-//   async (
-//     payload: { token: string; newPassword: string },
-//     { rejectWithValue }
-//   ) => {
-//     try {
-//       const res = await api.post("/auth/reset-password", payload);
-//       return res.data.message;
-//     } catch (err: any) {
-//       return rejectWithValue(err.response?.data?.error || "Błąd zmiany hasła");
-//     }
-//   }
-// );
-
-// export const changeEmail = createAsyncThunk(
-//   "auth/changeEmail",
-//   async (newEmail: string, { rejectWithValue }) => {
-//     try {
-//       const res = await api.patch(
-//         "auth/change-email",
-//         { newEmail },
-//         { withCredentials: true }
-//       );
-//       return res.data.message;
-//     } catch (err: any) {
-//       return rejectWithValue(
-//         err.response?.data?.error || "Błąd zmiany e-maila"
-//       );
-//     }
-//}
-//);
 
 const authSlice = createSlice({
   name: "auth",
@@ -339,69 +308,11 @@ const authSlice = createSlice({
         //state.status = "idle";
         localStorage.removeItem("user");
         localStorage.removeItem("token");
+      })
+      .addCase(checkAuth.rejected, (state) => {
+        state.user = null;
       });
-    // RESET PASSWORD
-    // .addCase(requestPasswordReset.pending, (state) => {
-    //   state.loading = true;
-    //   state.error = null;
-    //   state.success = null;
-    // })
-    // .addCase(requestPasswordReset.fulfilled, (state, action) => {
-    //   state.loading = false;
-    //   state.success = action.payload;
-    // })
-    // .addCase(requestPasswordReset.rejected, (state, action) => {
-    //   state.loading = false;
-    //   state.error = action.payload as string;
-    // })
-
-    // // SET NEW PASSWORD
-    // .addCase(resetPassword.pending, (state) => {
-    //   state.loading = true;
-    //   state.error = null;
-    //   state.success = null;
-    // })
-    // .addCase(resetPassword.fulfilled, (state, action) => {
-    //   state.loading = false;
-    //   state.success = action.payload;
-    // })
-    // .addCase(resetPassword.rejected, (state, action) => {
-    //   state.loading = false;
-    //   state.error = action.payload as string;
-    // })
-
-    // // CHANGE EMAIL
-    // .addCase(changeEmail.pending, (state) => {
-    //   state.loading = true;
-    //   state.error = null;
-    //   state.success = null;
-    // })
-    // .addCase(changeEmail.fulfilled, (state, action) => {
-    //   state.loading = false;
-    //   state.success = action.payload;
-    // })
-    // .addCase(changeEmail.rejected, (state, action) => {
-    //   state.loading = false;
-    //   state.error = action.payload as string;
-    // });
-    // .addCase(logout.fulfilled, (state) => {
-    //   console.log("Logout reducer triggered");
-    //   state.user = null;
-    //   state.token = null;
-    //   state.status = "idle";
-    //   localStorage.removeItem("user");
-    //   localStorage.removeItem("token");
-    // });
   },
 });
 export const { clearMessages } = authSlice.actions;
 export default authSlice.reducer;
-
-// function dispatch(arg0: any) {
-//   throw new Error("Function not implemented.");
-// }
-
-// function setToken(savedToken: string): any {
-//   throw new Error("Function not implemented.");
-// }
-//export { registerUser, registerAdmin, login, logout };
