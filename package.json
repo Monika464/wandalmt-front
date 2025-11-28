@@ -32,6 +32,7 @@
     "@types/react-redux": "^7.1.34",
     "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^5.0.3",
+    "baseline-browser-mapping": "^2.8.31",
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",

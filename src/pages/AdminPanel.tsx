@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import AdminOrdersSummary from "../components/orders/AdminOrdersSummary";
 import AdminFinancials from "../components/orders/AdminFinancials";
 import Navbar from "../components/elements/Navbar";
+import VideoUploader from "../components/video/VideoUploader";
 
 const AdminPanel = () => {
   //const { user } = useSelector((state: RootState) => state.auth);
@@ -39,6 +40,9 @@ const AdminPanel = () => {
 
       <AdminOrdersSummary />
       <AdminFinancials />
+      <br></br>
+      <br></br>
+      <VideoUploader />
     </div>
   );
 };
