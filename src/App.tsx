@@ -29,6 +29,8 @@ import CreateProductForm from "./components/products/CreateProductForm";
 
 import SetNewPassword from "./components/auth/SetNewPassword";
 import PasswordResetRequest from "./components/auth/PasswordResetRequest";
+//import VideoPlayer from "./components/video/VideoPlayer";
+import WatchVideo from "./pages/WatchVideoPage";
 
 const App = () => {
   return (
@@ -148,6 +150,7 @@ const App = () => {
 
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/watch/:videoId" element={<WatchVideo />} />
             <Route path="*" element={<Navigate to="/homepage" />} />
           </Routes>
         </BrowserRouter>

@@ -3,6 +3,8 @@ import AdminOrdersSummary from "../components/orders/AdminOrdersSummary";
 import AdminFinancials from "../components/orders/AdminFinancials";
 import Navbar from "../components/elements/Navbar";
 import VideoUploader from "../components/video/VideoUploader";
+import WatchVideoPage from "./WatchVideoPage";
+import VideoList from "../components/video/VideoList";
 
 const AdminPanel = () => {
   //const { user } = useSelector((state: RootState) => state.auth);
@@ -43,6 +45,10 @@ const AdminPanel = () => {
       <br></br>
       <br></br>
       <VideoUploader />
+      <br></br>
+      <WatchVideoPage />
+      <br></br>
+      <VideoList />
     </div>
   );
 };

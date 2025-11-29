@@ -9,6 +9,7 @@ import cartReducer from "./slices/cartSlice";
 import ordersReducer from "./slices/orderSlice";
 import emailReducer from "./slices/emailSlice";
 import userprofileSlice from "./slices/userprofileSlice";
+import videoReducer from "./slices/videoSlice";
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +23,7 @@ export const store = configureStore({
     orders: ordersReducer,
     email: emailReducer,
     userprofile: userprofileSlice,
+    video: videoReducer,
   },
   devTools: {
     trace: true,
