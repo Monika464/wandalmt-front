@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 
-export default function VideoUploader() {
+interface Props {
+  onUploaded?: (videoId: string) => void;
+}
+
+export default function VideoUploader({ onUploaded }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [videoId, setVideoId] = useState<string | null>(null);
@@ -66,7 +70,9 @@ export default function VideoUploader() {
       // const id =
       //   created.videoId || created.guid || created.id || created.videoId;
       if (!id) throw new Error("no videoId returned from create-video");
+      console.log("Created video with id:", id);
       setVideoId(id);
+      onUploaded?.(id);
       await uploadToBackend(id, file);
       setStatus("Upload complete — video is processing on Bunny");
     } catch (err: any) {
@@ -76,7 +82,7 @@ export default function VideoUploader() {
 
   return (
     <div>
-      <h3>Video uploader (Bunny Stream, backend proxy)</h3>
+      <h3>Video uploader</h3>
       <form onSubmit={handleSubmit}>
         <input
           type="file"

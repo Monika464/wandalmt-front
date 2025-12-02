@@ -25,10 +25,11 @@ export const store = configureStore({
     userprofile: userprofileSlice,
     video: videoReducer,
   },
-  devTools: {
-    trace: true,
-    traceLimit: 25,
-  },
+  devTools: true,
+  // devTools: {
+  //   trace: true,
+  //   traceLimit: 25,
+  // },
 });
 
 export type RootState = ReturnType<typeof store.getState>;

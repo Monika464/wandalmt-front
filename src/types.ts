@@ -21,10 +21,11 @@ export interface Product {
 }
 
 export interface IChapter {
-  _id?: string; // MongoDB ObjectId jako string
+  _id?: string;
   title: string;
   description?: string;
-  videoUrl?: string;
+  videoId?: string;
+  order?: number;
 }
 
 export interface IResource {
@@ -32,7 +33,7 @@ export interface IResource {
   title: string;
   description: string;
   content: string;
-  videoUrl?: string;
+  //videoUrl?: string;
   productId: string;
   chapters: IChapter[];
   createdAt?: string;

@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 import AdminOrdersSummary from "../components/orders/AdminOrdersSummary";
 import AdminFinancials from "../components/orders/AdminFinancials";
 import Navbar from "../components/elements/Navbar";
@@ -8,6 +9,21 @@ import VideoList from "../components/video/VideoList";
 
 const AdminPanel = () => {
   //const { user } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div>Ładowanie...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Navigate to={`/login?redirect=${encodeURIComponent("/adminpanel")}`} />
+    );
+  }
+
+  if (user?.role !== "admin") {
+    return <Navigate to="/" />;
+  }
 
   return (
     <div className="p-6">

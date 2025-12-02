@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import api from "../../utils/api";
-
 import axios, { AxiosError } from "axios";
+import api from "../../utils/api";
+//import api from "../../utils/api";
 
 type Role = "user" | "admin";
 
@@ -25,6 +25,7 @@ interface AuthState {
   success: string | null;
   error: string | null;
   status: "idle" | "loading" | "succeeded" | "failed";
+  expiresAt?: number;
 }
 
 const storedUser = localStorage.getItem("user");
@@ -212,7 +213,34 @@ export const checkAuth = createAsyncThunk(
       });
       return res.data;
     } catch (err) {
+      thunkAPI.dispatch(logoutUser());
       return thunkAPI.rejectWithValue("unauthorized");
+    }
+  }
+);
+
+export const refreshToken = createAsyncThunk(
+  "auth/refreshToken",
+  async (_, thunkAPI) => {
+    try {
+      const state = thunkAPI.getState() as { auth: AuthState };
+      const token = state.auth.token;
+
+      if (!token) {
+        return thunkAPI.rejectWithValue("Brak tokena");
+      }
+
+      const response = await api.post(
+        "/auth/refresh-token",
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      return response.data; // { token, expiresAt }
+    } catch (err) {
+      return thunkAPI.rejectWithValue("Nie udało się odświeżyć tokena");
     }
   }
 );
@@ -309,8 +337,33 @@ const authSlice = createSlice({
         localStorage.removeItem("user");
         localStorage.removeItem("token");
       })
-      .addCase(checkAuth.rejected, (state) => {
+      .addCase(checkAuth.rejected, (state, action) => {
         state.user = null;
+        state.token = null;
+        state.status = "idle";
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+
+        // Ustaw komunikat o wygaśnięciu sesji
+        state.error =
+          action.payload === "unauthorized"
+            ? "Sesja wygasła. Zaloguj się ponownie."
+            : "Błąd autoryzacji";
+        state.status = "failed";
+      })
+      .addCase(refreshToken.fulfilled, (state, action) => {
+        state.token = action.payload.token;
+        state.expiresAt = action.payload.expiresAt;
+
+        localStorage.setItem("token", action.payload.token);
+        localStorage.setItem("expiresAt", action.payload.expiresAt.toString());
+
+        console.log("Token odświeżony");
+      })
+      .addCase(refreshToken.rejected, (state) => {
+        // Jeśli nie udało się odświeżyć, użytkownik zostanie wylogowany
+        // przy następnym requeście (interceptor 401)
+        console.log("Nie udało się odświeżyć tokena");
       });
   },
 });

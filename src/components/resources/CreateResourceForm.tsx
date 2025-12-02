@@ -19,7 +19,7 @@ const CreateResourceForm: React.FC<Props> = ({
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   //const [imageUrl, setImageUrl] = useState("");
-  const [videoUrl, setVideoUrl] = useState("");
+  //const [videoId, setVideoId] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,15 +30,13 @@ const CreateResourceForm: React.FC<Props> = ({
     }
 
     try {
-      await dispatch(
-        createResource({ productId, title, content, videoUrl })
-      ).unwrap();
+      await dispatch(createResource({ productId, title, content })).unwrap();
 
       alert("Resource został utworzony!");
       setTitle("");
       setContent("");
       // setImageUrl("");
-      setVideoUrl("");
+      //setVideoUrl("");
       onClose();
       onSuccess();
     } catch (err) {
@@ -73,13 +71,13 @@ const CreateResourceForm: React.FC<Props> = ({
         onChange={(e) => setImageUrl(e.target.value)}
         className="border p-2 rounded w-full"
       /> */}
-      <input
+      {/* <input
         type="text"
         placeholder="Video URL (opcjonalnie)"
         value={videoUrl}
         onChange={(e) => setVideoUrl(e.target.value)}
         className="border p-2 rounded w-full"
-      />
+      /> */}
       <div className="flex gap-2">
         <button
           type="submit"
