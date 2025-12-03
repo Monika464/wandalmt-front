@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios, { AxiosError } from "axios";
 import api from "../../utils/api";
+import { act } from "react";
 //import api from "../../utils/api";
 
 type Role = "user" | "admin";
@@ -25,11 +26,12 @@ interface AuthState {
   success: string | null;
   error: string | null;
   status: "idle" | "loading" | "succeeded" | "failed";
-  expiresAt?: number;
+  expiresAt?: number | null;
 }
 
 const storedUser = localStorage.getItem("user");
 const storedToken = localStorage.getItem("token");
+const storedExpiresAt = localStorage.getItem("expiresAt");
 
 const initialState: AuthState = {
   user: storedUser ? JSON.parse(storedUser) : null,
@@ -38,19 +40,15 @@ const initialState: AuthState = {
   success: null,
   error: null,
   status: "idle",
+  expiresAt: storedExpiresAt ? parseInt(storedExpiresAt) : null,
 };
-
-interface BackendError {
-  error?: string;
-  message?: string;
-}
 
 export const login = createAsyncThunk(
   "auth/login",
   async (credentials: { email: string; password: string }, thunkAPI) => {
     try {
       const res = await api.post("/auth/login", credentials);
-      return res.data; // { user, token }
+      return res.data; // { user, token, expiresAt }
     } catch (err) {
       let errorMessage = "Wystąpił błąd podczas logowania";
 
@@ -71,21 +69,6 @@ export const login = createAsyncThunk(
   }
 );
 
-// // Logowanie
-// export const login = createAsyncThunk(
-//   "auth/login",
-//   async (credentials: { email: string; password: string }) => {
-//     try {
-//        const res = await api.post("/auth/login", credentials);
-//     //console.log("Login response data:", res.data);
-//     return res.data; // { user, token }
-//     } catch (error) {
-//       let errorMessage: string = "Wystąpił błąd podczas logowania";
-//     }
-
-//   }
-// );
-
 // Rejestracja usera
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
@@ -97,7 +80,7 @@ export const registerUser = createAsyncThunk(
     captchaToken: string | null;
   }) => {
     const res = await api.post("/auth/register", newUser);
-    return res.data; // { user, token }
+    return res.data;
   }
 );
 
@@ -110,30 +93,25 @@ export const registerAdmin = createAsyncThunk(
     thunkAPI
   ) => {
     try {
-      console.log("RegisterAdmin payload:", data);
+      //console.log("RegisterAdmin payload:", data);
       const state = thunkAPI.getState() as { auth: AuthState };
       const token = state.auth.token;
 
       if (!token) {
-        console.error("Brak tokena w stanie Redux");
+        //console.error("Brak tokena w stanie Redux");
         return thunkAPI.rejectWithValue("Brak tokena autoryzacyjnego");
       }
 
-      // Wyślij żądanie z tokenem w nagłówku
       const response = await api.post("auth/register-admin", data, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      console.log("RegisterAdmin success:", response.data);
+      //console.log("RegisterAdmin success:", response.data);
 
       return response.data;
-      //const response = await api.post("/register-admin", data);
-
-      // ważne: NIE zapisuj tu nowego admina do localStorage
     } catch (err) {
-      // Typowanie błędu jako AxiosError<BackendError>
       let errorMessage: string = "Wystąpił błąd";
       if (axios.isAxiosError(err)) {
         const axiosError = err as AxiosError<BackendError>;
@@ -145,7 +123,6 @@ export const registerAdmin = createAsyncThunk(
         errorMessage = err.message;
       }
 
-      console.error("RegisterAdmin error:", errorMessage);
       return thunkAPI.rejectWithValue(errorMessage);
     }
   }
@@ -266,7 +243,16 @@ const authSlice = createSlice({
         state.status = "succeeded";
         state.user = action.payload.user;
         state.token = action.payload.token;
-        //state.error = null;
+
+        if (action.payload.expiresAt) {
+          state.expiresAt = action.payload.expiresAt;
+          localStorage.setItem(
+            "expiresAt",
+            action.payload.expiresAt.toString()
+          );
+        } else {
+          state.expiresAt = null;
+        }
 
         // Zapis do localStorage
         localStorage.setItem("user", JSON.stringify(action.payload.user));
@@ -275,7 +261,6 @@ const authSlice = createSlice({
       .addCase(login.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload as string;
-        //state.error = action.error.message || "Błąd logowania";
       })
 
       // REGISTER USER
@@ -289,8 +274,17 @@ const authSlice = createSlice({
           // automatyczne logowanie po rejestracji
           state.user = action.payload.user;
           state.token = action.payload.token;
-          //state.error = null;
-          // Zapis do localStorage
+
+          if (action.payload.expiresAt) {
+            state.expiresAt = action.payload.expiresAt;
+            localStorage.setItem(
+              "expiresAt",
+              action.payload.expiresAt.toString()
+            );
+          } else {
+            state.expiresAt = null;
+          }
+
           localStorage.setItem("user", JSON.stringify(action.payload.user));
           localStorage.setItem("token", action.payload.token);
         } else {
@@ -309,11 +303,10 @@ const authSlice = createSlice({
       .addCase(registerAdmin.fulfilled, (state) => {
         state.status = "succeeded";
         state.error = null;
-        // nie zmieniamy state.user ani token
       })
       .addCase(registerAdmin.rejected, (state, action) => {
         state.status = "failed";
-        // action.payload może zawierać string dzięki rejectWithValue
+
         state.error =
           (action.payload as string) ||
           action.error.message ||
@@ -321,30 +314,76 @@ const authSlice = createSlice({
       })
 
       // LOGOUT
+      .addCase(logoutUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(logoutUser.fulfilled, (state) => {
-        Object.assign(state, initialState);
-        //state.user = null;
-        //state.token = null;
-        //state.status = "idle";
+        state.user = null;
+        state.token = null;
+        state.expiresAt = null;
+        state.loading = false;
+        state.status = "idle";
+        state.error = null;
+        state.success = null;
+
         localStorage.removeItem("user");
         localStorage.removeItem("token");
+        localStorage.removeItem("expiresAt");
+      })
+      .addCase(logoutUser.rejected, (state, action) => {
+        state.user = null;
+        state.token = null;
+        state.expiresAt = null;
+        state.loading = false;
+        state.status = "idle";
+        state.success = null;
+        state.error = (action.payload as string) || "Błąd przy wylogowaniu";
+
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+        localStorage.removeItem("expiresAt");
+      })
+      .addCase(logoutAdmin.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
       .addCase(logoutAdmin.fulfilled, (state) => {
-        Object.assign(state, initialState);
-        //state.user = null;
-        //state.token = null;
-        //state.status = "idle";
+        state.user = null;
+        state.token = null;
+        state.expiresAt = null;
+        state.loading = false;
+        state.success = null;
+        state.error = null;
+        state.status = "idle";
+
         localStorage.removeItem("user");
         localStorage.removeItem("token");
+        localStorage.removeItem("expiresAt");
+      })
+      .addCase(logoutAdmin.rejected, (state, action) => {
+        state.user = null;
+        state.token = null;
+        state.expiresAt = null;
+        state.loading = false;
+        state.success = null;
+        state.error =
+          (action.payload as string) || "Błąd przy wylogowaniu admina";
+        state.status = "idle";
+
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+        localStorage.removeItem("expiresAt");
       })
       .addCase(checkAuth.rejected, (state, action) => {
         state.user = null;
         state.token = null;
+        state.expiresAt = null;
         state.status = "idle";
         localStorage.removeItem("user");
         localStorage.removeItem("token");
+        localStorage.removeItem("expiresAt");
 
-        // Ustaw komunikat o wygaśnięciu sesji
         state.error =
           action.payload === "unauthorized"
             ? "Sesja wygasła. Zaloguj się ponownie."
@@ -360,10 +399,24 @@ const authSlice = createSlice({
 
         console.log("Token odświeżony");
       })
-      .addCase(refreshToken.rejected, (state) => {
-        // Jeśli nie udało się odświeżyć, użytkownik zostanie wylogowany
-        // przy następnym requeście (interceptor 401)
-        console.log("Nie udało się odświeżyć tokena");
+      .addCase(refreshToken.rejected, (state, action) => {
+        const errorMessage = action.payload as string;
+
+        // Zapisujemy błąd aby wyświetlić użytkownikowi
+        state.error = `Nie udało się odświeżyć sesji: ${errorMessage}`;
+        state.status = "failed";
+
+        // Log dla developera
+        console.error("Refresh token error:", {
+          message: errorMessage,
+          user: state.user?.email,
+          expiresAt: state.expiresAt
+            ? new Date(state.expiresAt).toISOString()
+            : null,
+          timeLeft: state.expiresAt
+            ? Math.max(0, state.expiresAt - Date.now()) / 1000
+            : 0,
+        });
       });
   },
 });

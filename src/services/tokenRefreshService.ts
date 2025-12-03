@@ -1,11 +1,13 @@
 // services/tokenRefreshService.ts
+
 class TokenRefreshService {
   private refreshTimeout: number | null = null;
 
-  setupTokenRefresh(expiresAt: number, onRefreshCallback?: () => void) {
+  setupTokenRefresh(expiresAt: number, onRefreshCallback?: () => void): void {
     this.clearRefreshTimer();
 
-    const refreshTime = expiresAt - 15 * 60 * 1000;
+    const refreshBuffer = 15 * 60 * 1000; // 15 minut
+    const refreshTime = expiresAt - refreshBuffer;
     const timeUntilRefresh = refreshTime - Date.now();
 
     if (timeUntilRefresh > 0) {
@@ -17,15 +19,12 @@ class TokenRefreshService {
 
       this.refreshTimeout = window.setTimeout(() => {
         console.log("Czas na odświeżenie tokena!");
-        if (onRefreshCallback) {
-          onRefreshCallback();
-        }
+        onRefreshCallback?.();
+        this.refreshTimeout = null;
       }, timeUntilRefresh);
     } else if (Date.now() < expiresAt) {
       console.log("Token wygaśnie wkrótce - odświeżanie natychmiast");
-      if (onRefreshCallback) {
-        onRefreshCallback();
-      }
+      onRefreshCallback?.();
     }
   }
 
@@ -34,6 +33,9 @@ class TokenRefreshService {
       window.clearTimeout(this.refreshTimeout);
       this.refreshTimeout = null;
     }
+  }
+  isTimerActive(): boolean {
+    return this.refreshTimeout !== null;
   }
 }
 
