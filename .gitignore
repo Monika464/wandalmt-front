@@ -26,3 +26,53 @@ dist-ssr
 
 # Environment variables
 .env*
+!.env.example
+
+# ============================================
+# TEST FILES - KEEPING THEM IN GIT
+# ============================================
+# We keep test files in git to allow easier collaboration and code reviews.
+# __tests__/
+# *.test.ts
+# *.test.tsx
+# *.spec.ts
+# *.spec.tsx
+# jest.config.js
+# jest.setup.js
+
+# ============================================
+# Test output - we DO ignore these
+# ============================================
+coverage/
+.nyc_output/
+*.lcov
+
+# Test reports and artifacts
+test-results/
+test-reports/
+junit.xml
+*.trx
+
+# Playwright/Selenium test artifacts
+playwright-report/
+test-results/
+
+# Cypress test artifacts
+cypress/videos/
+cypress/screenshots/
+
+# ============================================
+# Build and compilation artifacts
+# ============================================
+*.tsbuildinfo
+*.build
+.cache/
+
+# Operating system files
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+
+# Visual Studio Code (optional)
+!.vscode/launch.json
+!.vscode/tasks.json
