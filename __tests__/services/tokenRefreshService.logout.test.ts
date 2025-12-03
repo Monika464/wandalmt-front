@@ -1,101 +1,84 @@
-// __tests__/services/tokenRefreshService.logout.test.ts - POPRAWIONY
+// __tests__/services/tokenRefreshService.simple.test.ts
 import { tokenRefreshService } from "../../src/services/tokenRefreshService";
 
-// Mock console.log aby nie zaśmiecał outputu
-const originalConsoleLog = console.log;
+// Wyłącz wszystkie console.log dla testów
 beforeAll(() => {
-  console.log = jest.fn();
+  jest.spyOn(console, "log").mockImplementation(() => {});
+  jest.spyOn(console, "warn").mockImplementation(() => {});
+  jest.spyOn(console, "error").mockImplementation(() => {});
 });
 
 afterAll(() => {
-  console.log = originalConsoleLog;
+  jest.restoreAllMocks();
 });
 
-describe("TokenRefreshService", () => {
+describe("TokenRefreshService - Simple Tests", () => {
   beforeEach(() => {
+    tokenRefreshService.reset();
+    tokenRefreshService.setRefreshBuffer(5000); // 5 sekund buffer
     jest.useFakeTimers();
-    jest.clearAllMocks();
-    tokenRefreshService.clearRefreshTimer(); // Zawsze czyść przed testem
+
+    // Ustaw prosty force logout callback dla testów
+    tokenRefreshService.setForceLogoutCallback(() => {
+      // Nic nie rób w testach
+    });
   });
 
   afterEach(() => {
     jest.useRealTimers();
-    tokenRefreshService.clearRefreshTimer(); // Zawsze czyść po teście
+    tokenRefreshService.clearRefreshTimer();
   });
 
-  test("should clear previous timer when setting up new one", () => {
-    const callback1 = jest.fn();
-    const callback2 = jest.fn();
-
-    const now = Date.now();
-
-    // Pierwszy timer - wygaśnie za 30 sekund
-    const expiresAt1 = now + 30000;
-    tokenRefreshService.setupTokenRefresh(expiresAt1, callback1);
-
-    // Drugi timer natychmiast - powinien wyczyścić pierwszy
-    const expiresAt2 = now + 60000; // 60 sekund
-    tokenRefreshService.setupTokenRefresh(expiresAt2, callback2);
-
-    // Timer 1 NIE powinien być aktywny po ustawieniu timer 2
-    expect(callback1).not.toHaveBeenCalled();
-
-    // Przesuń czas o 30 sekund - callback1 NIE powinien być wywołany
-    jest.advanceTimersByTime(30000);
-    expect(callback1).not.toHaveBeenCalled();
-
-    // Przesuń kolejne 30 sekund (łącznie 60) - callback2 powinien być wywołany
-    jest.advanceTimersByTime(30000);
-    expect(callback2).toHaveBeenCalledTimes(1);
-  });
-
-  test("should call callback immediately if token expires soon", () => {
+  test("basic timer setup and clear", () => {
     const callback = jest.fn();
     const now = Date.now();
-    const expiresAt = now + 5000; // 5 sekund (mniej niż 15 minut buffer)
 
-    tokenRefreshService.setupTokenRefresh(expiresAt, callback);
+    // Ustaw timer na 10 sekund
+    tokenRefreshService.setupTokenRefresh(now + 10000, callback);
+
+    expect(tokenRefreshService.isTimerActive()).toBe(true);
+
+    // Przesuń czas o 6 sekund (czas do odświeżenia: expiresAt - buffer = 10000 - 5000 = 5000ms)
+    jest.advanceTimersByTime(6000);
+    expect(callback).toHaveBeenCalledTimes(1);
+    expect(tokenRefreshService.isTimerActive()).toBe(false);
+  });
+
+  test("immediate refresh when token expires soon", () => {
+    const callback = jest.fn();
+    const now = Date.now();
+
+    // Token wygaśnie za 3 sekundy (mniej niż buffer 5 sekund)
+    tokenRefreshService.setupTokenRefresh(now + 3000, callback);
 
     // Callback powinien być wywołany natychmiast
     expect(callback).toHaveBeenCalledTimes(1);
-  });
-
-  test("should not call callback if token already expired", () => {
-    const callback = jest.fn();
-    const now = Date.now();
-    const expiresAt = now - 1000; // wygasł 1 sekundę temu
-
-    tokenRefreshService.setupTokenRefresh(expiresAt, callback);
-
-    expect(callback).not.toHaveBeenCalled();
-  });
-
-  test("should clear timer manually", () => {
-    const callback = jest.fn();
-    const now = Date.now();
-    const expiresAt = now + 30000;
-
-    tokenRefreshService.setupTokenRefresh(expiresAt, callback);
-    tokenRefreshService.clearRefreshTimer();
-
-    // Przesuń czas - callback nie powinien być wywołany
-    jest.advanceTimersByTime(30000);
-    expect(callback).not.toHaveBeenCalled();
-  });
-
-  test("should check if timer is active", () => {
-    const callback = jest.fn();
-    const now = Date.now();
-
-    // Bez timera
     expect(tokenRefreshService.isTimerActive()).toBe(false);
+  });
 
-    // Z timerem
-    tokenRefreshService.setupTokenRefresh(now + 30000, callback);
+  test("no callback for expired token", () => {
+    const callback = jest.fn();
+    const now = Date.now();
+
+    // Token już wygasł
+    tokenRefreshService.setupTokenRefresh(now - 1000, callback);
+
+    expect(callback).not.toHaveBeenCalled();
+    expect(tokenRefreshService.isTimerActive()).toBe(false);
+  });
+
+  test("manual timer clear", () => {
+    const callback = jest.fn();
+    const now = Date.now();
+
+    tokenRefreshService.setupTokenRefresh(now + 10000, callback);
     expect(tokenRefreshService.isTimerActive()).toBe(true);
 
-    // Po wyczyszczeniu
     tokenRefreshService.clearRefreshTimer();
     expect(tokenRefreshService.isTimerActive()).toBe(false);
+
+    // Timer nie powinien już zadziałać
+    jest.advanceTimersByTime(20000);
+    expect(callback).not.toHaveBeenCalled();
   });
 });

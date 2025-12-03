@@ -1,8 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios, { AxiosError } from "axios";
 import api from "../../utils/api";
-import { act } from "react";
-//import api from "../../utils/api";
+import { tokenRefreshService } from "../../services/tokenRefreshService";
 
 type Role = "user" | "admin";
 
@@ -42,6 +41,61 @@ const initialState: AuthState = {
   status: "idle",
   expiresAt: storedExpiresAt ? parseInt(storedExpiresAt) : null,
 };
+
+// Helper: Uruchamia odświeżanie tokena
+const setupTokenRefresh = (expiresAt: number) => {
+  if (!expiresAt || expiresAt <= Date.now()) {
+    console.warn("Nieprawidłowy lub wygasły expiresAt:", expiresAt);
+    return;
+  }
+
+  // Ustaw buffer na 5 minut przed wygaśnięciem
+  tokenRefreshService.setRefreshBuffer(5 * 60 * 1000);
+
+  tokenRefreshService.setupTokenRefresh(expiresAt, async () => {
+    try {
+      console.log("Automatyczne odświeżanie tokena...");
+      const result = await refreshToken();
+      if (refreshToken.fulfilled.match(result)) {
+        console.log("Token automatycznie odświeżony");
+      } else {
+        console.error("Błąd automatycznego odświeżania:", result.payload);
+        // W przypadku błędu, czyścimy timer
+        tokenRefreshService.clearRefreshTimer();
+      }
+    } catch (error) {
+      console.error("Wyjątek podczas automatycznego odświeżania:", error);
+    }
+  });
+};
+
+// Helper: Czyści timer odświeżania
+const clearTokenRefresh = () => {
+  tokenRefreshService.clearRefreshTimer();
+};
+
+// Helper: Inicjalizuje odświeżanie na podstawie istniejącego tokena
+const initializeTokenRefresh = () => {
+  const storedExpiresAt = localStorage.getItem("expiresAt");
+  if (storedExpiresAt) {
+    const expiresAt = parseInt(storedExpiresAt);
+    if (expiresAt > Date.now()) {
+      console.log("Inicjalizacja odświeżania tokena z localStorage");
+      setupTokenRefresh(expiresAt);
+    } else {
+      console.log("Token w localStorage już wygasł");
+      clearTokenRefresh();
+    }
+  }
+};
+
+// Wywołaj inicjalizację przy załadowaniu modułu
+if (typeof window !== "undefined") {
+  // Opóźnij inicjalizację, aby uniknąć problemów z cyklicznymi zależnościami
+  setTimeout(() => {
+    initializeTokenRefresh();
+  }, 1000);
+}
 
 export const login = createAsyncThunk(
   "auth/login",
@@ -217,7 +271,18 @@ export const refreshToken = createAsyncThunk(
 
       return response.data; // { token, expiresAt }
     } catch (err) {
-      return thunkAPI.rejectWithValue("Nie udało się odświeżyć tokena");
+      clearTokenRefresh();
+
+      let errorMessage = "Nie udało się odświeżyć tokena";
+      if (axios.isAxiosError(err)) {
+        const axiosError = err as AxiosError<BackendError>;
+        errorMessage =
+          axiosError.response?.data?.message ||
+          axiosError.message ||
+          errorMessage;
+      }
+
+      return thunkAPI.rejectWithValue(errorMessage);
     }
   }
 );
@@ -231,7 +296,23 @@ const authSlice = createSlice({
       state.error = null;
       state.success = null;
     },
+    // Nowy reducer do ręcznego ustawienia odświeżania
+    setupAutoRefresh(state) {
+      if (state.expiresAt && state.expiresAt > Date.now()) {
+        setupTokenRefresh(state.expiresAt);
+      }
+    },
+    // Nowy reducer do wyczyszczenia odświeżania
+    clearAutoRefresh() {
+      clearTokenRefresh();
+    },
   },
+  // reducers: {
+  //   clearMessages(state) {
+  //     state.error = null;
+  //     state.success = null;
+  //   },
+  // },
   extraReducers: (builder) => {
     builder
       // LOGIN
@@ -250,8 +331,11 @@ const authSlice = createSlice({
             "expiresAt",
             action.payload.expiresAt.toString()
           );
+          // Uruchom automatyczne odświeżanie
+          setupTokenRefresh(action.payload.expiresAt);
         } else {
           state.expiresAt = null;
+          clearTokenRefresh();
         }
 
         // Zapis do localStorage
@@ -261,6 +345,7 @@ const authSlice = createSlice({
       .addCase(login.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload as string;
+        clearTokenRefresh();
       })
 
       // REGISTER USER
@@ -281,8 +366,11 @@ const authSlice = createSlice({
               "expiresAt",
               action.payload.expiresAt.toString()
             );
+            // Uruchom automatyczne odświeżanie
+            setupTokenRefresh(action.payload.expiresAt);
           } else {
             state.expiresAt = null;
+            clearTokenRefresh();
           }
 
           localStorage.setItem("user", JSON.stringify(action.payload.user));
@@ -294,6 +382,7 @@ const authSlice = createSlice({
       .addCase(registerUser.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message || "Błąd rejestracji";
+        clearTokenRefresh();
       })
 
       // REGISTER ADMIN — nie nadpisujemy auth (tylko status/error)
@@ -306,7 +395,6 @@ const authSlice = createSlice({
       })
       .addCase(registerAdmin.rejected, (state, action) => {
         state.status = "failed";
-
         state.error =
           (action.payload as string) ||
           action.error.message ||
@@ -330,6 +418,8 @@ const authSlice = createSlice({
         localStorage.removeItem("user");
         localStorage.removeItem("token");
         localStorage.removeItem("expiresAt");
+
+        clearTokenRefresh();
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.user = null;
@@ -343,6 +433,9 @@ const authSlice = createSlice({
         localStorage.removeItem("user");
         localStorage.removeItem("token");
         localStorage.removeItem("expiresAt");
+
+        // Wyczyść timer odświeżania
+        clearTokenRefresh();
       })
       .addCase(logoutAdmin.pending, (state) => {
         state.loading = true;
@@ -360,6 +453,8 @@ const authSlice = createSlice({
         localStorage.removeItem("user");
         localStorage.removeItem("token");
         localStorage.removeItem("expiresAt");
+
+        clearTokenRefresh();
       })
       .addCase(logoutAdmin.rejected, (state, action) => {
         state.user = null;
@@ -389,6 +484,8 @@ const authSlice = createSlice({
             ? "Sesja wygasła. Zaloguj się ponownie."
             : "Błąd autoryzacji";
         state.status = "failed";
+
+        clearTokenRefresh();
       })
       .addCase(refreshToken.fulfilled, (state, action) => {
         state.token = action.payload.token;
@@ -398,6 +495,11 @@ const authSlice = createSlice({
         localStorage.setItem("expiresAt", action.payload.expiresAt.toString());
 
         console.log("Token odświeżony");
+
+        // Ponownie ustaw timer odświeżania z nowym expiresAt
+        if (action.payload.expiresAt) {
+          setupTokenRefresh(action.payload.expiresAt);
+        }
       })
       .addCase(refreshToken.rejected, (state, action) => {
         const errorMessage = action.payload as string;
@@ -417,8 +519,19 @@ const authSlice = createSlice({
             ? Math.max(0, state.expiresAt - Date.now()) / 1000
             : 0,
         });
+
+        if (
+          errorMessage.includes("Brak tokena") ||
+          errorMessage.includes("unauthorized")
+        ) {
+          setTimeout(() => {
+            // Możesz dodać automatyczne wylogowanie po błędzie
+            //thunkAPI.dispatch(logoutUser());
+          }, 5000);
+        }
       });
   },
 });
-export const { clearMessages } = authSlice.actions;
+export const { clearMessages, setupAutoRefresh, clearAutoRefresh } =
+  authSlice.actions;
 export default authSlice.reducer;

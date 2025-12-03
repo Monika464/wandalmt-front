@@ -31,8 +31,10 @@ import SetNewPassword from "./components/auth/SetNewPassword";
 import PasswordResetRequest from "./components/auth/PasswordResetRequest";
 //import VideoPlayer from "./components/video/VideoPlayer";
 import WatchVideo from "./pages/WatchVideoPage";
+import { useAutoRefresh } from "./hooks/useAutoRefresh";
 
 const App = () => {
+  useAutoRefresh();
   return (
     <>
       <div>
