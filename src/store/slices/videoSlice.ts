@@ -34,6 +34,18 @@ export const fetchVideosUrls = createAsyncThunk(
   }
 );
 
+export const deleteVideo = createAsyncThunk(
+  "video/delete",
+  async (videoId: string, { rejectWithValue }) => {
+    try {
+      await api.delete(`/api/stream/videos/${videoId}`);
+      return videoId; // zwracamy id usuniętego filmu
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data ?? "delete-video-failed");
+    }
+  }
+);
+
 const videoSlice = createSlice({
   name: "video",
   initialState,
@@ -59,6 +71,26 @@ const videoSlice = createSlice({
         state.videos = action.payload;
       })
       .addCase(fetchVideosUrls.rejected, (state) => {
+        state.loading = false;
+      })
+      .addCase(deleteVideo.pending, (state) => {
+        state.loading = true;
+      })
+
+      .addCase(deleteVideo.fulfilled, (state, action) => {
+        state.loading = false;
+
+        // usuń z listy
+        state.videos = state.videos.filter((v) => v._id !== action.payload);
+
+        // jeśli aktualnie oglądany film = usunięty
+        if (state.video?._id === action.payload) {
+          state.video = null;
+          state.url = null;
+        }
+      })
+
+      .addCase(deleteVideo.rejected, (state) => {
         state.loading = false;
       });
   },

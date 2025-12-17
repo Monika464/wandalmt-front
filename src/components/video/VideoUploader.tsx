@@ -21,7 +21,7 @@ export default function VideoUploader({ onUploaded }: Props) {
   };
 
   const uploadToBackend = async (videoId: string, f: File) => {
-    setStatus("Uploading file to backend -> Bunny...");
+    setStatus("Uploading file to backend");
     const fd = new FormData();
     fd.append("file", f);
 
@@ -70,7 +70,7 @@ export default function VideoUploader({ onUploaded }: Props) {
       // const id =
       //   created.videoId || created.guid || created.id || created.videoId;
       if (!id) throw new Error("no videoId returned from create-video");
-      console.log("Created video with id:", id);
+      //console.log("Created video with id:", id);
       setVideoId(id);
       onUploaded?.(id);
       await uploadToBackend(id, file);
