@@ -22,10 +22,10 @@ export interface Product {
 
 export interface IChapter {
   _id?: string;
+  number: number;
   title: string;
   description?: string;
   videoId?: string;
-  order?: number;
 }
 
 export interface IResource {

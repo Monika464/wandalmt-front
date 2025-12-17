@@ -16,11 +16,6 @@ export default function VideoList() {
     dispatch(fetchVideosUrls());
   }, [dispatch]);
 
-  console.log("Videos from state:", videos);
-  videos.map((v: any) => console.log("Video in map:", v._id));
-
-  // const [videos, setVideos] = useState([]);
-
   if (loading) return <p>Loading...</p>;
 
   return (

@@ -46,6 +46,7 @@ const initialState: ResourceState = {
 interface AddChapterPayload {
   resourceId: string;
   chapterData: {
+    number: number;
     title: string;
     description?: string;
     videoUrl?: string;
@@ -64,7 +65,6 @@ export const fetchResources = createAsyncThunk<
     if (params.sortField) searchParams.set("sortField", params.sortField);
     if (params.sortOrder) searchParams.set("sortOrder", params.sortOrder);
 
-    // 🔥 użycie helpera authorizedRequest
     const data = await authorizedRequest<IResourceListResponse>(thunkApi, {
       url: `/admin/resources?${searchParams.toString()}`,
       method: "GET",

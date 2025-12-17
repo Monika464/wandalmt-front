@@ -30,9 +30,16 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
   //const [videoUrl, setVideoUrl] = useState(resource.videoUrl || "");
   const [videoId, setVideoId] = useState("");
 
-  const [chapters, setChapters] = useState<IChapter[]>(resource.chapters || []);
+  const [chapters, setChapters] = useState<IChapter[]>(
+    (resource.chapters || []).map((ch, index) => ({
+      ...ch,
+      number: ch.number ?? index + 1, // jeśli brak number, ustaw na indeks + 1
+    }))
+  );
+
   const [newChapter, setNewChapter] = useState<IChapter>({
     _id: "",
+    number: 1,
     title: "",
     description: "",
     videoId: "",
@@ -66,16 +73,24 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
       alert("Chapter title is required");
       return;
     }
-    const chapterWithOrder = {
+    const chapterWithNumber = {
       ...newChapter,
-      order: chapters.length, // ← nadajemy numer
+      number: newChapter.number ?? chapters.length + 1,
     };
     try {
       const added = await dispatch(
-        addChapter({ resourceId: resource._id!, chapterData: chapterWithOrder })
+        addChapter({
+          resourceId: resource._id!,
+          chapterData: chapterWithNumber,
+        })
       ).unwrap();
       setChapters([...chapters, added.chapters[added.chapters.length - 1]]);
-      setNewChapter({ title: "", description: "", videoId: "" });
+      setNewChapter({
+        number: chapters.length + 2,
+        title: "",
+        description: "",
+        videoId: "",
+      });
     } catch (err) {
       console.error(err);
       alert("Error adding chapter");
@@ -107,35 +122,6 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
       await dispatch(
         deleteChapter({ resourceId: resource._id!, chapterId })
       ).unwrap();
-
-      // upewniamy się, że chapters to tablica
-      //setChapters(updatedResource.chapters || []);
-      // setChapters((prev) => prev.filter((ch) => ch._id !== chapterId));
-      // setChapters((prev) => {
-      //   const filtered = prev.filter((ch) => ch._id !== chapterId);
-
-      //   // przebuduj numery: 0,1,2,3...
-      //   return filtered.map((ch, i) => ({ ...ch, order: i }));
-      // });
-      setChapters((prev) => {
-        const filtered = prev.filter((ch) => ch._id !== chapterId);
-
-        // 1. aktualizacja numerów w stanie
-        const renumbered = filtered.map((ch, i) => ({ ...ch, order: i }));
-
-        // 2. aktualizacja numerów w backendzie
-        renumbered.forEach((ch, i) => {
-          dispatch(
-            editChapter({
-              resourceId: resource._id!,
-              chapterId: ch._id!,
-              chapterData: { order: i },
-            })
-          );
-        });
-
-        return renumbered;
-      });
     } catch (err) {
       console.error(err);
       alert("Error deleting chapter");
@@ -162,13 +148,6 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
             onChange={(e) => setContent(e.target.value)}
             className="border p-2 rounded mb-2 w-full"
           />
-          {/* <input
-            type="text"
-            placeholder="Video URL"
-            value={videoUrl}
-            onChange={(e) => setVideoUrl(e.target.value)}
-            className="border p-2 rounded mb-2 w-full"
-          /> */}
 
           <button
             onClick={handleSaveResource}
@@ -185,9 +164,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
           <p>
             <strong>Content:</strong> {content}
           </p>
-          {/* <p>
-            <strong>Video URL:</strong> {videoUrl}
-          </p> */}
+
           <button
             onClick={() => setIsEditingResource(true)}
             className="bg-yellow-500 text-white px-4 py-2 rounded mb-4"
@@ -197,187 +174,160 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
         </>
       )}
 
-      {/* <input
-        type="text"
-        placeholder="Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        className="border p-2 rounded mb-2 w-full"
-      />
-      <textarea
-        placeholder="Content"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        className="border p-2 rounded mb-2 w-full"
-      />
-      <input
-        type="text"
-        placeholder="Video URL"
-        value={videoUrl}
-        onChange={(e) => setVideoUrl(e.target.value)}
-        className="border p-2 rounded mb-2 w-full"
-      />
-      <button
-        onClick={handleSaveResource}
-        className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
-      >
-        Save Resource
-      </button> */}
-
       <hr className="my-4" />
 
       {/* Chapter list */}
       <h3 className="text-lg font-semibold mb-2">Chapters</h3>
       {chapters && chapters.length > 0 ? (
-        chapters
-          .slice()
-          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-          .map((ch) => (
-            <div key={ch._id} className="border p-2 rounded mb-2 relative">
-              {`${console.log("Rendering chapter:", ch)}`}
-              <p className="font-semibold">{ch.title}</p>
-              <p>{ch.description}</p>
-              <VideoUploader
-                onUploaded={(id) =>
-                  setChapters((prev) =>
-                    prev.map((c) =>
-                      c._id === ch._id ? { ...c, videoId: id } : c
+        chapters.slice().map((ch) => (
+          <div key={ch._id} className="border p-2 rounded mb-2 relative">
+            {/* {`${console.log("Rendering chapter:", ch)}`} */}
+            <p>{ch.number} </p>
+            <p className="font-semibold">{ch.title}</p>
+            <p>{ch.description}</p>
+            <VideoUploader
+              onUploaded={(id) =>
+                setChapters((prev) =>
+                  prev.map((c) =>
+                    c._id === ch._id ? { ...c, videoId: id } : c
+                  )
+                )
+              }
+            />
+            <button
+              onClick={() =>
+                setEditingChapterId(
+                  editingChapterId === ch._id ? null : ch._id!
+                )
+              }
+              className="absolute top-2 right-2 bg-gray-400 text-white px-2 py-1 rounded"
+            >
+              {editingChapterId === ch._id ? "Close" : "Edit Chapter"}
+            </button>
+            <button
+              onClick={() => handleDeleteChapter(ch._id!)}
+              className="absolute top-2 right-20 bg-red-500 text-white px-2 py-1 rounded"
+            >
+              Delete Chapter
+            </button>
+
+            {/* Formularz edycji chaptera */}
+            {editingChapterId === ch._id && (
+              <div className="mt-4 p-2 border-t">
+                {/* pola edycji */}
+                <input
+                  type="number"
+                  placeholder="Number"
+                  value={ch.number ?? ""}
+                  onChange={(e) =>
+                    setChapters((prev) =>
+                      prev.map((c2) =>
+                        c2._id === ch._id
+                          ? { ...c2, number: Number(e.target.value) }
+                          : c2
+                      )
                     )
-                  )
-                }
-              />
-              <button
-                onClick={() =>
-                  setEditingChapterId(
-                    editingChapterId === ch._id ? null : ch._id!
-                  )
-                }
-                className="absolute top-2 right-2 bg-gray-400 text-white px-2 py-1 rounded"
-              >
-                {editingChapterId === ch._id ? "Close" : "Edit Chapter"}
-              </button>
-              <button
-                onClick={() => handleDeleteChapter(ch._id!)}
-                className="absolute top-2 right-20 bg-red-500 text-white px-2 py-1 rounded"
-              >
-                Delete Chapter
-              </button>
-
-              {/* Formularz edycji chaptera */}
-              {editingChapterId === ch._id && (
-                <div className="mt-4 p-2 border-t">
-                  {/* pola edycji */}
-                  <input
-                    type="text"
-                    value={ch.title}
-                    onChange={(e) =>
-                      setChapters((prev) =>
-                        prev.map((c2) =>
-                          c2._id === ch._id
-                            ? { ...c2, title: e.target.value }
-                            : c2
-                        )
+                  }
+                  className="border p-2 rounded mb-2 w-full"
+                />
+                <input
+                  type="text"
+                  value={ch.title}
+                  onChange={(e) =>
+                    setChapters((prev) =>
+                      prev.map((c2) =>
+                        c2._id === ch._id
+                          ? { ...c2, title: e.target.value }
+                          : c2
                       )
-                    }
-                    className="border p-1 rounded mb-1 w-full"
-                  />
-                  <textarea
-                    value={ch.description || ""}
-                    onChange={(e) =>
-                      setChapters((prev) =>
-                        prev.map((c2) =>
-                          c2._id === ch._id
-                            ? { ...c2, description: e.target.value }
-                            : c2
-                        )
+                    )
+                  }
+                  className="border p-1 rounded mb-1 w-full"
+                />
+                <textarea
+                  value={ch.description || ""}
+                  onChange={(e) =>
+                    setChapters((prev) =>
+                      prev.map((c2) =>
+                        c2._id === ch._id
+                          ? { ...c2, description: e.target.value }
+                          : c2
                       )
-                    }
-                    className="border p-1 rounded mb-1 w-full"
-                  />
-                  {/* MINIATURKA WIDEO */}
-                  <div className="mb-2">
-                    {ch.videoId ? (
-                      <img
-                        src={`https://video.bunnycdn.com/library/${
-                          import.meta.env.VITE_BUNNY_LIBRARY_ID
-                        }/videos/${ch.videoId}/thumbnail`}
-                        alt="video thumbnail"
-                        className="w-40 h-24 object-cover rounded border mb-2"
-                      />
-                    ) : (
-                      <p className="text-sm text-gray-500">Brak filmu</p>
-                    )}
-                  </div>
-
-                  {/* INPUT NA VIDEO ID – opcjonalna edycja ręczna */}
-                  <input
-                    type="text"
-                    placeholder="Video ID"
-                    value={ch.videoId || ""}
-                    onChange={(e) =>
-                      setChapters((prev) =>
-                        prev.map((c2) =>
-                          c2._id === ch._id
-                            ? { ...c2, videoId: e.target.value }
-                            : c2
-                        )
-                      )
-                    }
-                    className="border p-1 rounded mb-2 w-full"
-                  />
-                  {/* <input
-                    type="text"
-                    value={
-                      ch.videoId ? (
-                        <img
-                          src={`https://video.bunnycdn.com/library/${
-                            import.meta.env.VITE_BUNNY_LIBRARY_ID
-                          }/videos/${ch.videoId}/thumbnail`}
-                          alt="video thumbnail"
-                          className="w-40 h-24 object-cover rounded border mb-2"
-                        />
-                      ) : (
-                        <p className="text-sm text-gray-500">Brak filmu</p>
-                      )
-                    }
-                    onChange={(e) =>
-                      setChapters((prev) =>
-                        prev.map((c2) =>
-                          c2._id === ch._id
-                            ? { ...c2, videoId: e.target.value }
-                            : c2
-                        )
-                      )
-                    }
-                    className="border p-1 rounded mb-2 w-full"
-                  /> */}
-                  <div className="flex justify-between">
-                    <button
-                      onClick={() => {
-                        handleEditChapter(ch._id!, ch);
-                        setEditingChapterId(null);
-                      }}
-                      className="bg-blue-500 text-white px-4 py-2 rounded"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={() => setEditingChapterId(null)}
-                      className="bg-gray-500 text-white px-4 py-2 rounded"
-                    >
-                      Cancel
-                    </button>
-                  </div>
+                    )
+                  }
+                  className="border p-1 rounded mb-1 w-full"
+                />
+                {/* MINIATURKA WIDEO */}
+                <div className="mb-2">
+                  {ch.videoId ? (
+                    <img
+                      src={`https://video.bunnycdn.com/library/${
+                        import.meta.env.VITE_BUNNY_LIBRARY_ID
+                      }/videos/${ch.videoId}/thumbnail`}
+                      alt="video thumbnail"
+                      className="w-40 h-24 object-cover rounded border mb-2"
+                    />
+                  ) : (
+                    <p className="text-sm text-gray-500">Brak filmu</p>
+                  )}
                 </div>
-              )}
-            </div>
-          ))
+
+                {/* INPUT NA VIDEO ID – opcjonalna edycja ręczna */}
+                <input
+                  type="text"
+                  placeholder="Video ID"
+                  value={ch.videoId || ""}
+                  onChange={(e) =>
+                    setChapters((prev) =>
+                      prev.map((c2) =>
+                        c2._id === ch._id
+                          ? { ...c2, videoId: e.target.value }
+                          : c2
+                      )
+                    )
+                  }
+                  className="border p-1 rounded mb-2 w-full"
+                />
+
+                <div className="flex justify-between">
+                  <button
+                    onClick={() => {
+                      handleEditChapter(
+                        ch._id!,
+                        chapters.find((c) => c._id === ch._id)!
+                      );
+                      setEditingChapterId(null);
+                    }}
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setEditingChapterId(null)}
+                    className="bg-gray-500 text-white px-4 py-2 rounded"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))
       ) : (
         <p>No chapters yet.</p>
       )}
 
       {/* Add new chapter – TYLKO raz, poniżej listy */}
       <h4 className="text-md font-semibold mt-4">Add New Chapter</h4>
+      <input
+        type="number"
+        placeholder="Number"
+        value={newChapter.number}
+        onChange={(e) =>
+          setNewChapter({ ...newChapter, number: Number(e.target.value) })
+        }
+        className="border p-1 rounded mb-1 w-full"
+      />
       <input
         type="text"
         placeholder="Title"

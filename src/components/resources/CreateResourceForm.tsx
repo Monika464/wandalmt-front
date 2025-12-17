@@ -64,20 +64,7 @@ const CreateResourceForm: React.FC<Props> = ({
         onChange={(e) => setContent(e.target.value)}
         className="border p-2 rounded w-full"
       />
-      {/* <input
-        type="text"
-        placeholder="Image URL"
-        value={imageUrl}
-        onChange={(e) => setImageUrl(e.target.value)}
-        className="border p-2 rounded w-full"
-      /> */}
-      {/* <input
-        type="text"
-        placeholder="Video URL (opcjonalnie)"
-        value={videoUrl}
-        onChange={(e) => setVideoUrl(e.target.value)}
-        className="border p-2 rounded w-full"
-      /> */}
+
       <div className="flex gap-2">
         <button
           type="submit"

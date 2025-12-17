@@ -32,6 +32,7 @@ const ViewResource: React.FC<Props> = ({ resource, onClose }) => {
         <ul className="space-y-2">
           {resource.chapters.map((ch) => (
             <li key={ch._id} className="border p-2 rounded bg-white shadow-sm">
+              <p>{ch.number}</p>
               <h4 className="font-semibold">{ch.title}</h4>
               <p className="text-sm text-gray-600">{ch.description}</p>
               {ch.videoUrl && (

@@ -160,7 +160,8 @@ export default function ResourceListComponent() {
                               className="border rounded p-2 bg-white shadow-sm"
                             >
                               <div className="font-semibold text-gray-800">
-                                {ch.title}
+                                <p>{ch.number}</p>
+                                <p>{ch.title}</p>
                               </div>
                               {ch.description && (
                                 <div className="text-sm text-gray-600">
