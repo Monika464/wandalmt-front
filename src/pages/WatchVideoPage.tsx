@@ -9,7 +9,9 @@ export default function WatchPage() {
   const { videoId } = useParams();
 
   const dispatch = useDispatch<AppDispatch>();
-  const { video, loading } = useSelector((s: any) => s.video);
+  const { video, loading, loaded } = useSelector((s: any) => s.video);
+
+  if (!videoId) return;
 
   useEffect(() => {
     if (videoId) dispatch(fetchVideoUrl(videoId));
@@ -17,7 +19,7 @@ export default function WatchPage() {
   }, [dispatch, videoId]);
 
   if (loading) return <p>Ładowanie wideo...</p>;
-  // if (!video) return <p>Brak wideo</p>;
+  // if (!video && loaded) return <p>Brak wideo</p>;
 
   return (
     <BunnyPlayer

@@ -91,8 +91,13 @@ export default function VideoUploader({ onUploaded }: Props) {
         />
         <button type="submit">Upload</button>
       </form>
-      <div>{status}</div>
-      {videoId && <div>videoId: {videoId}</div>}
+      {/* <div>{status}</div> */}
+      {/* {videoId && <div>videoId: {videoId}</div>} */}
+      {videoId && (
+        <div>
+          {file?.name} - {status}
+        </div>
+      )}
     </div>
   );
 }

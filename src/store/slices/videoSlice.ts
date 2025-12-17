@@ -4,6 +4,7 @@ import api from "../../utils/api";
 interface VideoState {
   url: string | null;
   loading: boolean;
+  loaded: boolean;
   video: any;
   videos: any[];
 }
@@ -11,6 +12,7 @@ interface VideoState {
 const initialState: VideoState = {
   url: null,
   loading: false,
+  loaded: false,
   video: null,
   videos: [],
 };
@@ -54,14 +56,17 @@ const videoSlice = createSlice({
     builder
       .addCase(fetchVideoUrl.pending, (state) => {
         state.loading = true;
+        state.loaded = true;
       })
       .addCase(fetchVideoUrl.fulfilled, (state, action) => {
         state.loading = false;
+        state.loaded = true;
         //state.url = action.payload.playbackUrl;
         state.video = action.payload.video;
       })
       .addCase(fetchVideoUrl.rejected, (state) => {
         state.loading = false;
+        state.loaded = true;
       })
       .addCase(fetchVideosUrls.pending, (state) => {
         state.loading = true;

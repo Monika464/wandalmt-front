@@ -5,6 +5,7 @@ import { fetchVideosUrls } from "../../store/slices/videoSlice";
 import { useNavigate } from "react-router-dom";
 
 export default function VideoList() {
+  console.log("Rendering VideoList component");
   const dispatch = useDispatch<AppDispatch>();
 
   const navigate = useNavigate();
@@ -15,14 +16,17 @@ export default function VideoList() {
     dispatch(fetchVideosUrls());
   }, [dispatch]);
 
+  console.log("Videos from state:", videos);
+  videos.map((v: any) => console.log("Video in map:", v._id));
+
   // const [videos, setVideos] = useState([]);
 
   if (loading) return <p>Loading...</p>;
 
   return (
     <div>
-      <div>
-        {videos.map((v: any) => (
+      {videos &&
+        videos.map((v: any) => (
           <div key={v._id}>
             <button
               onClick={() => navigate(`/watch/${v._id}`)}
@@ -32,7 +36,6 @@ export default function VideoList() {
             </button>
           </div>
         ))}
-      </div>
     </div>
   );
 }
