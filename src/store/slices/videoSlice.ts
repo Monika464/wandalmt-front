@@ -20,9 +20,9 @@ const initialState: VideoState = {
 export const fetchVideoUrl = createAsyncThunk(
   "video/fetchUrl",
   async (videoId: string) => {
-    console.log("Fetching video URL for ID hello:", videoId);
+    //console.log("Fetching video URL for ID hello:", videoId);
     const res = await api.get(`/api/stream/${videoId}`);
-    console.log("Fetched video URL:", res.data);
+    //console.log("Fetched video URL:", res.data);
     return res.data;
   }
 );

@@ -17,9 +17,9 @@ export default function WatchPage() {
   }, [dispatch, videoId]);
 
   if (loading) return <p>Ładowanie wideo...</p>;
-  // if (!video && loaded) return <p>Brak wideo</p>;
+  if (!video && !loading) return <p>Brak wideo</p>;
 
-  if (!videoId) return;
+  // if (!videoId) return;
 
   return (
     <BunnyPlayer

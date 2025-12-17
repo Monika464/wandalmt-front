@@ -62,7 +62,7 @@ const AdminPanel = () => {
       <br></br>
       <VideoUploader />
       <br></br>
-      <WatchVideoPage />
+      {/* <WatchVideoPage /> */}
       <br></br>
       <VideoList />
     </div>

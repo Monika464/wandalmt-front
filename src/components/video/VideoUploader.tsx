@@ -7,7 +7,7 @@ interface Props {
 export default function VideoUploader({ onUploaded }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<string | null>(null);
-  const [videoId, setVideoId] = useState<string | null>(null);
+  //const [videoId, setVideoId] = useState<string | null>(null);
 
   const createVideo = async (title?: string) => {
     setStatus("Creating video object...");
@@ -71,7 +71,7 @@ export default function VideoUploader({ onUploaded }: Props) {
       //   created.videoId || created.guid || created.id || created.videoId;
       if (!id) throw new Error("no videoId returned from create-video");
       //console.log("Created video with id:", id);
-      setVideoId(id);
+      //setVideoId(id);
       onUploaded?.(id);
       await uploadToBackend(id, file);
       setStatus("Upload complete — video is processing on Bunny");
@@ -91,9 +91,9 @@ export default function VideoUploader({ onUploaded }: Props) {
         />
         <button type="submit">Upload</button>
       </form>
-      {/* <div>{status}</div> */}
-      {/* {videoId && <div>videoId: {videoId}</div>} */}
-      {videoId && (
+
+      {/* {videoId && ( */}
+      {file && status && (
         <div>
           {file?.name} - {status}
         </div>
