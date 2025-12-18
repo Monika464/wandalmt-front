@@ -76,36 +76,6 @@ export const fetchResources = createAsyncThunk<
   }
 });
 
-// 📌 wszystkie resorce
-// export const fetchResource = createAsyncThunk(
-//   "resources/fetchOne",
-//   async (productId: string, { getState, rejectWithValue, signal }) => {
-//     //console.log("🚀 fetchResource START for product:", productId);
-
-//     try {
-//       const state = getState() as { auth?: { token?: string } };
-//       const token = state.auth?.token;
-
-//       const res = await api.get(`/admin/resources/${productId}`, {
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//         },
-//         signal,
-//       });
-
-//       console.log("Fetched resource for products:", productId, res.data);
-//       return res.data;
-//     } catch (error: any) {
-//       if (axios.isCancel(error) || error.name === "CanceledError") {
-//         console.warn("Request was cancelled");
-//         return rejectWithValue("Request cancelled");
-//       }
-
-//       return rejectWithValue(error.response?.data || error.message);
-//     }
-//   }
-// );
-
 // 📌 pojedynczy resorce
 
 export const fetchResourceById = createAsyncThunk<IResource, string>(
@@ -126,32 +96,6 @@ export const fetchResourceById = createAsyncThunk<IResource, string>(
   }
 );
 
-// export const fetchResourceById = createAsyncThunk(
-//   "resources/fetchById",
-//   async (resourceId: string, { getState, rejectWithValue, signal }) => {
-//     //console.log(`🔄 Fetching resource ${resourceId}`);
-//     try {
-//       const state = getState() as { auth?: { token?: string } };
-//       const token = state.auth?.token;
-
-//       const res = await api.get(`/admin/resources/id/${resourceId}`, {
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//         },
-//         signal,
-//       });
-//       console.log("Fetched resource by ID:", res.data);
-//       return res.data as IResource;
-//     } catch (error: any) {
-//       if (axios.isCancel(error) || error.name === "CanceledError") {
-//         console.warn("Request cancelled");
-//         return;
-//       }
-//       return rejectWithValue(error.message);
-//     }
-//   }
-// );
-
 export const fetchResourceByProductId = createAsyncThunk<IResource, string>(
   "resources/fetchByProductId",
   async (productId, thunkApi) => {
@@ -169,32 +113,6 @@ export const fetchResourceByProductId = createAsyncThunk<IResource, string>(
     }
   }
 );
-
-// export const fetchResourceByProductId = createAsyncThunk(
-//   "resources/fetchByProductId",
-//   async (productId: string, { getState, rejectWithValue, signal }) => {
-//     //console.log(`🔄 Fetching resource ${resourceId}`);
-//     try {
-//       const state = getState() as { auth?: { token?: string } };
-//       const token = state.auth?.token;
-
-//       const res = await api.get(`/admin/resources/product/${productId}`, {
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//         },
-//         signal,
-//       });
-//       // console.log("Fetched resource by ID:", res.data);
-//       return res.data as IResource;
-//     } catch (error: any) {
-//       if (axios.isCancel(error) || error.name === "CanceledError") {
-//         console.warn("Request cancelled");
-//         return;
-//       }
-//       return rejectWithValue(error.message);
-//     }
-//   }
-// );
 
 // 📌 Utwórz resource (powiązany z produktem)
 export const createResource = createAsyncThunk<IResource, any>(
@@ -215,13 +133,6 @@ export const createResource = createAsyncThunk<IResource, any>(
     }
   }
 );
-// export const createResource = createAsyncThunk(
-//   "resources/create",
-//   async (resourceData: any) => {
-//     const res = await api.post("/admin/resources", resourceData);
-//     return res.data;
-//   }
-// );
 
 // 📌 Edytuj resource (np. tytuł, opis, videoUrl itd.)
 export const editResource = createAsyncThunk<
@@ -242,13 +153,6 @@ export const editResource = createAsyncThunk<
     return thunkApi.rejectWithValue(error);
   }
 });
-// export const editResource = createAsyncThunk(
-//   "resources/edit",
-//   async ({ id, resourceData }: { id: string; resourceData: any }) => {
-//     const res = await api.put(`/admin/resources/${id}`, resourceData);
-//     return res.data;
-//   }
-// );
 
 export const deleteResource = createAsyncThunk<string, string>(
   "resources/delete",
@@ -267,27 +171,6 @@ export const deleteResource = createAsyncThunk<string, string>(
     }
   }
 );
-
-// export const deleteResource = createAsyncThunk(
-//   "resources/delete",
-//   async (id: string, { getState }) => {
-//     const state = getState() as RootState;
-//     const token = state.auth?.token;
-//     await api.delete(`/admin/resources/${id}`, {
-//       headers: { Authorization: `Bearer ${token}` },
-//     });
-//     return id;
-//   }
-// );
-
-// 📌 Usuń resource
-// export const deleteResource = createAsyncThunk(
-//   "resources/delete",
-//   async (id: string) => {
-//     await api.delete(`/admin/resources/${id}`);
-//     return id;
-//   }
-// );
 
 // 📌 Dodaj chapter do resource
 export const addChapter = createAsyncThunk<IResource, AddChapterPayload>(
@@ -308,34 +191,6 @@ export const addChapter = createAsyncThunk<IResource, AddChapterPayload>(
     }
   }
 );
-// export const addChapter = createAsyncThunk(
-//   "resources/addChapter",
-//   async (
-//     { resourceId, chapterData }: AddChapterPayload,
-//     { getState, rejectWithValue }
-//   ) => {
-//     try {
-//       const state = getState() as { auth?: { token?: string } };
-//       const token = state.auth?.token;
-
-//       const res = await api.post(
-//         `/admin/resources/${resourceId}/chapters`,
-//         chapterData,
-//         {
-//           headers: { Authorization: `Bearer ${token}` },
-//         }
-//       );
-
-//       return res.data;
-//     } catch (err: any) {
-//       console.error(
-//         "❌ Error in addChapter thunk:",
-//         err.response?.data || err.message
-//       );
-//       return rejectWithValue(err.response?.data || "Unknown error");
-//     }
-//   }
-// );
 
 // 📌 Usuń chapter z resource
 export const deleteChapter = createAsyncThunk<
@@ -355,19 +210,6 @@ export const deleteChapter = createAsyncThunk<
     return thunkApi.rejectWithValue(error);
   }
 });
-// export const deleteChapter = createAsyncThunk(
-//   "resources/deleteChapter",
-//   async ({
-//     resourceId,
-//     chapterId,
-//   }: {
-//     resourceId: string;
-//     chapterId: string;
-//   }) => {
-//     await api.delete(`/admin/resources/${resourceId}/chapters/${chapterId}`);
-//     return { resourceId, chapterId };
-//   }
-// );
 
 // 📌 Edytuj chapter w resource
 export const editChapter = createAsyncThunk<
@@ -395,24 +237,63 @@ export const editChapter = createAsyncThunk<
     }
   }
 );
-// export const editChapter = createAsyncThunk(
-//   "resources/editChapter",
-//   async ({
-//     resourceId,
-//     chapterId,
-//     chapterData,
-//   }: {
-//     resourceId: string;
-//     chapterId: string;
-//     chapterData: any;
-//   }) => {
-//     const res = await api.put(
-//       `/admin/resources/${resourceId}/chapters/${chapterId}`,
-//       chapterData
-//     );
-//     return res.data; // powinien zwracać cały resource po edycji chapter
-//   }
-// );
+
+// 📌 Delete Chapter Video
+export const deleteChapterVideo = createAsyncThunk<
+  { resourceId: string; chapterId: string; removedVideoId: string },
+  { resourceId: string; chapterId: string }
+>(
+  "resources/deleteChapterVideo",
+  async ({ resourceId, chapterId }, thunkApi) => {
+    try {
+      const result = await authorizedRequest<{
+        success: boolean;
+        removedVideoId: string;
+      }>(thunkApi, {
+        url: `/admin/resources/${resourceId}/chapters/${chapterId}/video`,
+        method: "DELETE",
+      });
+
+      console.log("🗑️ Chapter video deleted:", chapterId);
+      return {
+        resourceId,
+        chapterId,
+        removedVideoId: result.removedVideoId,
+      };
+    } catch (error: any) {
+      console.error("❌ Error deleting chapter video:", error);
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
+
+// 📌 Get Chapter with Video Details
+export const fetchChapterWithVideo = createAsyncThunk<
+  { resourceId: string; chapterId: string; chapter: IChapter },
+  { resourceId: string; chapterId: string }
+>(
+  "resources/fetchChapterWithVideo",
+  async ({ resourceId, chapterId }, thunkApi) => {
+    try {
+      const result = await authorizedRequest<{
+        success: boolean;
+        chapter: IChapter;
+      }>(thunkApi, {
+        url: `/admin/resources/${resourceId}/chapters/${chapterId}`,
+        method: "GET",
+      });
+
+      return {
+        resourceId,
+        chapterId,
+        chapter: result.chapter,
+      };
+    } catch (error: any) {
+      console.error("❌ Error fetching chapter with video:", error);
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
 
 const resourceSlice = createSlice({
   name: "resources",
@@ -570,6 +451,35 @@ const resourceSlice = createSlice({
         ) {
           state.selected.chapters = state.selected.chapters.filter(
             (ch: IChapter) => ch._id !== action.payload.chapterId
+          );
+        }
+      })
+
+      .addCase(deleteChapterVideo.fulfilled, (state, action) => {
+        if (
+          state.selected &&
+          state.selected._id === action.payload.resourceId
+        ) {
+          const chapter = state.selected.chapters.find(
+            (ch: IChapter) => ch._id === action.payload.chapterId
+          );
+          if (chapter) {
+            chapter.videoId = undefined;
+          }
+        }
+      })
+
+      // 📌 fetchChapterWithVideo
+      .addCase(fetchChapterWithVideo.fulfilled, (state, action) => {
+        if (
+          state.selected &&
+          state.selected._id === action.payload.resourceId
+        ) {
+          state.selected.chapters = state.selected.chapters.map(
+            (ch: IChapter) =>
+              ch._id === action.payload.chapterId
+                ? { ...ch, ...action.payload.chapter }
+                : ch
           );
         }
       });
