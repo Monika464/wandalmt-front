@@ -26,6 +26,7 @@ export interface IChapter {
   title: string;
   description?: string;
   videoId?: string;
+  bunnyGuid?: string;
 }
 
 export interface IResource {

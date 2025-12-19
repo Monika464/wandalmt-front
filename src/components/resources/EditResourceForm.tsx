@@ -12,6 +12,7 @@ import {
   fetchResourceById,
 } from "../../store/slices/resourceSlice";
 import VideoUploader from "../video/VideoUploader";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   resource: IResource;
@@ -45,25 +46,27 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
     Record<string, boolean>
   >({});
 
+  const navigate = useNavigate();
+
   // Załaduj szczegóły video dla chaptera
-  const loadChapterVideoDetails = async (chapterId: string) => {
-    const chapter = chapters.find((ch) => ch._id === chapterId);
-    if (chapter?.videoId && !chapter.video) {
-      setLoadingChapters((prev) => ({ ...prev, [chapterId]: true }));
-      try {
-        await dispatch(
-          fetchChapterWithVideo({
-            resourceId: resource._id!,
-            chapterId,
-          })
-        ).unwrap();
-      } catch (err) {
-        console.error("Error loading video details:", err);
-      } finally {
-        setLoadingChapters((prev) => ({ ...prev, [chapterId]: false }));
-      }
-    }
-  };
+  // const loadChapterVideoDetails = async (chapterId: string) => {
+  //   const chapter = chapters.find((ch) => ch._id === chapterId);
+  //   if (chapter?.videoId && !chapter.video) {
+  //     setLoadingChapters((prev) => ({ ...prev, [chapterId]: true }));
+  //     try {
+  //       await dispatch(
+  //         fetchChapterWithVideo({
+  //           resourceId: resource._id!,
+  //           chapterId,
+  //         })
+  //       ).unwrap();
+  //     } catch (err) {
+  //       console.error("Error loading video details:", err);
+  //     } finally {
+  //       setLoadingChapters((prev) => ({ ...prev, [chapterId]: false }));
+  //     }
+  //   }
+  // };
 
   const handleSaveResource = async () => {
     try {
@@ -192,6 +195,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
 
   // Handle video uploaded
   const handleVideoUploaded = (chapterId: string, videoId: string) => {
+    console.log("Video uploaded for chapter:", chapterId, videoId);
     if (chapterId === "new") {
       // For new chapter
       setNewChapter((prev) => ({ ...prev, videoId }));
@@ -292,13 +296,13 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
               {ch.videoId ? (
                 <div className="flex flex-col md:flex-row gap-4 items-start">
                   <div className="flex-shrink-0">
-                    <img
+                    {/* <img
                       src={`https://video.bunnycdn.com/library/${
                         import.meta.env.VITE_BUNNY_LIBRARY_ID
                       }/videos/${ch.videoId}/thumbnail`}
                       alt="video thumbnail"
                       className="w-48 h-32 object-cover rounded border"
-                    />
+                    /> */}
                   </div>
 
                   <div className="flex-1">
@@ -316,7 +320,13 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
                       >
                         🗑️ Delete Video
                       </button>
-                      <a
+                      <button
+                        onClick={() => navigate(`/watch/${ch.videoId}`)}
+                        className="px-3 py-1 bg-blue-500 text-white rounded"
+                      >
+                        {ch.title} video
+                      </button>
+                      {/* <a
                         href={`https://video.bunnycdn.com/library/${
                           import.meta.env.VITE_BUNNY_LIBRARY_ID
                         }/videos/${ch.videoId}`}
@@ -325,7 +335,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
                         className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
                       >
                         Open in Bunny
-                      </a>
+                      </a> */}
                     </div>
                   </div>
                 </div>
