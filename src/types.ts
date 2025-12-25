@@ -25,8 +25,16 @@ export interface IChapter {
   number: number;
   title: string;
   description?: string;
+  bunnyVideoId?: string;
   videoId?: string;
-  bunnyGuid?: string;
+  video?: {
+    // Opcjonalne szczegóły video (jeśli backend populuje)
+    _id: string;
+    bunnyGuid: string;
+    title: string;
+    thumbnailUrl?: string;
+    createdAt: string;
+  };
 }
 
 export interface IResource {
@@ -61,3 +69,20 @@ export interface ProductPublicItemProps extends Product {
 
 // typ do tworzenia (bez id)
 export type NewProduct = Omit<Product, "_id">;
+
+export interface VideoInfo {
+  _id: string;
+  bunnyGuid: string;
+  title: string;
+  status: "uploading" | "processing" | "ready" | "error";
+  processingProgress?: number;
+  thumbnailUrl?: string;
+  duration?: number;
+  errorMessage?: string;
+}
+
+// declare global {
+//   // Dla kompatybilności z NodeJS.Timeout w przeglądarce
+//   interface Timeout {}
+//   interface Interval {}
+// }

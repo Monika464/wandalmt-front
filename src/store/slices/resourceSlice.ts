@@ -4,11 +4,8 @@ import {
   type PayloadAction,
   type WritableDraft,
 } from "@reduxjs/toolkit";
-//import api from "../../utils/api"; // axios instance
 import type { IChapter, IResourceListResponse } from "../../types";
 import type { IResource } from "../../types";
-//import type { RootState } from "../../store";
-//import axios from "axios";
 import { authorizedRequest } from "../../utils/authorizedRequest";
 
 interface FetchParams {
@@ -43,19 +40,57 @@ const initialState: ResourceState = {
   error: null,
 };
 
+// ZAKTUALIZOWANE: Teraz chapterData używa bunnyVideoId zamiast videoId
 interface AddChapterPayload {
   resourceId: string;
   chapterData: {
     number: number;
     title: string;
     description?: string;
-    videoUrl?: string;
+    bunnyVideoId?: string;
+    videoId?: string;
   };
 }
 
+// 📌 Helper function do transformacji danych (backward compatibility)
+const transformChapterDataForApi = (chapterData: any): IChapter => {
+  // Jeśli frontend wysyła stare pole videoId, przekonwertuj na bunnyVideoId
+  if (chapterData.videoId && !chapterData.bunnyVideoId) {
+    return {
+      ...chapterData,
+      bunnyVideoId: chapterData.videoId,
+      videoId: chapterData.videoId,
+    };
+  }
+
+  // Jeśli frontend wysyła bunnyGuid, przekonwertuj na bunnyVideoId
+  if (chapterData.bunnyGuid && !chapterData.bunnyVideoId) {
+    return {
+      ...chapterData,
+      bunnyVideoId: chapterData.bunnyGuid,
+      bunnyGuid: undefined, // Nie wysyłaj starego pola
+    };
+  }
+
+  return chapterData;
+};
+
+// 📌 Helper function do transformacji danych z API
+const transformChapterFromApi = (chapter: any): IChapter => {
+  // API zwraca bunnyVideoId, ale frontend może oczekiwać videoId dla kompatybilności
+  return {
+    _id: chapter._id,
+    number: chapter.number,
+    title: chapter.title,
+    description: chapter.description,
+    bunnyVideoId: chapter.bunnyVideoId,
+    videoId: chapter.videoId,
+  };
+};
+
 export const fetchResources = createAsyncThunk<
-  IResourceListResponse, // typ danych zwracanych przy sukcesie
-  FetchParams // typ argumentu przekazywanego do thunka
+  IResourceListResponse,
+  FetchParams
 >("resources/fetchAll", async (params: FetchParams = {}, thunkApi) => {
   try {
     const searchParams = new URLSearchParams();
@@ -70,13 +105,19 @@ export const fetchResources = createAsyncThunk<
       method: "GET",
     });
 
+    // Transformuj chapters jeśli potrzeba
+    if (data.items) {
+      data.items = data.items.map((resource) => ({
+        ...resource,
+        chapters: resource.chapters?.map(transformChapterFromApi) || [],
+      }));
+    }
+
     return data;
   } catch (error: any) {
     return thunkApi.rejectWithValue(error);
   }
 });
-
-// 📌 pojedynczy resorce
 
 export const fetchResourceById = createAsyncThunk<IResource, string>(
   "resources/fetchById",
@@ -87,7 +128,12 @@ export const fetchResourceById = createAsyncThunk<IResource, string>(
         method: "GET",
       });
 
-      // console.log("✅ Fetched resource by ID:", resource);
+      // Transformuj chapters
+      if (resource.chapters) {
+        resource.chapters = resource.chapters.map(transformChapterFromApi);
+      }
+
+      console.log("✅ Fetched resource by ID:", resource._id);
       return resource;
     } catch (error: any) {
       console.error("❌ Error in fetchResourceById:", error);
@@ -105,7 +151,12 @@ export const fetchResourceByProductId = createAsyncThunk<IResource, string>(
         method: "GET",
       });
 
-      //console.log("✅ Fetched resource by product ID:", resource);
+      // Transformuj chapters
+      if (resource.chapters) {
+        resource.chapters = resource.chapters.map(transformChapterFromApi);
+      }
+
+      console.log("✅ Fetched resource by product ID:", productId);
       return resource;
     } catch (error: any) {
       console.error("❌ Error in fetchResourceByProductId:", error);
@@ -114,7 +165,6 @@ export const fetchResourceByProductId = createAsyncThunk<IResource, string>(
   }
 );
 
-// 📌 Utwórz resource (powiązany z produktem)
 export const createResource = createAsyncThunk<IResource, any>(
   "resources/create",
   async (resourceData, thunkApi) => {
@@ -125,7 +175,12 @@ export const createResource = createAsyncThunk<IResource, any>(
         data: resourceData,
       });
 
-      console.log("✅ Resource created:", resource);
+      // Transformuj chapters
+      if (resource.chapters) {
+        resource.chapters = resource.chapters.map(transformChapterFromApi);
+      }
+
+      console.log("✅ Resource created:", resource._id);
       return resource;
     } catch (error: any) {
       console.error("❌ Error creating resource:", error);
@@ -134,7 +189,6 @@ export const createResource = createAsyncThunk<IResource, any>(
   }
 );
 
-// 📌 Edytuj resource (np. tytuł, opis, videoUrl itd.)
 export const editResource = createAsyncThunk<
   IResource,
   { id: string; resourceData: any }
@@ -146,7 +200,12 @@ export const editResource = createAsyncThunk<
       data: resourceData,
     });
 
-    console.log("✅ Resource updated:", resource);
+    // Transformuj chapters
+    if (resource.chapters) {
+      resource.chapters = resource.chapters.map(transformChapterFromApi);
+    }
+
+    console.log("✅ Resource updated:", resource._id);
     return resource;
   } catch (error: any) {
     console.error("❌ Error editing resource:", error);
@@ -172,18 +231,26 @@ export const deleteResource = createAsyncThunk<string, string>(
   }
 );
 
-// 📌 Dodaj chapter do resource
+// 📌 Dodaj chapter do resource - ZAKTUALIZOWANE
 export const addChapter = createAsyncThunk<IResource, AddChapterPayload>(
   "resources/addChapter",
   async ({ resourceId, chapterData }, thunkApi) => {
     try {
+      // Transformuj dane przed wysłaniem
+      const transformedData = transformChapterDataForApi(chapterData);
+
       const resource = await authorizedRequest<IResource>(thunkApi, {
         url: `/admin/resources/${resourceId}/chapters`,
         method: "POST",
-        data: chapterData,
+        data: transformedData,
       });
 
-      console.log("✅ Chapter added:", resource);
+      // Transformuj chapters z odpowiedzi
+      if (resource.chapters) {
+        resource.chapters = resource.chapters.map(transformChapterFromApi);
+      }
+
+      console.log("✅ Chapter added to resource:", resourceId);
       return resource;
     } catch (error: any) {
       console.error("❌ Error adding chapter:", error);
@@ -211,7 +278,7 @@ export const deleteChapter = createAsyncThunk<
   }
 });
 
-// 📌 Edytuj chapter w resource
+// 📌 Edytuj chapter w resource - ZAKTUALIZOWANE
 export const editChapter = createAsyncThunk<
   IResource,
   {
@@ -223,14 +290,22 @@ export const editChapter = createAsyncThunk<
   "resources/editChapter",
   async ({ resourceId, chapterId, chapterData }, thunkApi) => {
     try {
+      // Transformuj dane przed wysłaniem
+      const transformedData = transformChapterDataForApi(chapterData);
+
       const resource = await authorizedRequest<IResource>(thunkApi, {
         url: `/admin/resources/${resourceId}/chapters/${chapterId}`,
         method: "PUT",
-        data: chapterData,
+        data: transformedData,
       });
 
-      console.log("✅ Chapter edited:", resource);
-      return resource; // zwraca zaktualizowany resource
+      // Transformuj chapters z odpowiedzi
+      if (resource.chapters) {
+        resource.chapters = resource.chapters.map(transformChapterFromApi);
+      }
+
+      console.log("✅ Chapter edited:", chapterId);
+      return resource;
     } catch (error: any) {
       console.error("❌ Error editing chapter:", error);
       return thunkApi.rejectWithValue(error);
@@ -238,9 +313,9 @@ export const editChapter = createAsyncThunk<
   }
 );
 
-// 📌 Delete Chapter Video
+// 📌 Delete Chapter Video - ZAKTUALIZOWANE
 export const deleteChapterVideo = createAsyncThunk<
-  { resourceId: string; chapterId: string; removedVideoId: string },
+  { resourceId: string; chapterId: string; removedBunnyVideoId: string },
   { resourceId: string; chapterId: string }
 >(
   "resources/deleteChapterVideo",
@@ -248,7 +323,7 @@ export const deleteChapterVideo = createAsyncThunk<
     try {
       const result = await authorizedRequest<{
         success: boolean;
-        removedVideoId: string;
+        removedBunnyVideoId: string; // ZMIANA: z removedVideoId
       }>(thunkApi, {
         url: `/admin/resources/${resourceId}/chapters/${chapterId}/video`,
         method: "DELETE",
@@ -258,7 +333,7 @@ export const deleteChapterVideo = createAsyncThunk<
       return {
         resourceId,
         chapterId,
-        removedVideoId: result.removedVideoId,
+        removedBunnyVideoId: result.removedBunnyVideoId,
       };
     } catch (error: any) {
       console.error("❌ Error deleting chapter video:", error);
@@ -267,7 +342,7 @@ export const deleteChapterVideo = createAsyncThunk<
   }
 );
 
-// 📌 Get Chapter with Video Details
+// 📌 Get Chapter with Video Details - ZAKTUALIZOWANE
 export const fetchChapterWithVideo = createAsyncThunk<
   { resourceId: string; chapterId: string; chapter: IChapter },
   { resourceId: string; chapterId: string }
@@ -277,19 +352,54 @@ export const fetchChapterWithVideo = createAsyncThunk<
     try {
       const result = await authorizedRequest<{
         success: boolean;
-        chapter: IChapter;
+        chapter: any; // Otrzymamy raw chapter z API
       }>(thunkApi, {
         url: `/admin/resources/${resourceId}/chapters/${chapterId}`,
         method: "GET",
       });
 
+      // Transformuj chapter z API na format frontendu
+      const transformedChapter = transformChapterFromApi(result.chapter);
+
       return {
         resourceId,
         chapterId,
-        chapter: result.chapter,
+        chapter: transformedChapter,
       };
     } catch (error: any) {
       console.error("❌ Error fetching chapter with video:", error);
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
+
+// 📌 Dodatkowy thunk dla backward compatibility
+export const setChapterVideo = createAsyncThunk<
+  IResource,
+  {
+    resourceId: string;
+    chapterId: string;
+    bunnyVideoId: string;
+  }
+>(
+  "resources/setChapterVideo",
+  async ({ resourceId, chapterId, bunnyVideoId }, thunkApi) => {
+    try {
+      const resource = await authorizedRequest<IResource>(thunkApi, {
+        url: `/admin/resources/${resourceId}/chapters/${chapterId}`,
+        method: "PUT",
+        data: { bunnyVideoId },
+      });
+
+      // Transformuj chapters
+      if (resource.chapters) {
+        resource.chapters = resource.chapters.map(transformChapterFromApi);
+      }
+
+      console.log("✅ Chapter video set:", chapterId);
+      return resource;
+    } catch (error: any) {
+      console.error("❌ Error setting chapter video:", error);
       return thunkApi.rejectWithValue(error);
     }
   }
@@ -306,12 +416,79 @@ const resourceSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
+    // Dodatkowe reducery do manualnej aktualizacji
+    updateChapterVideo: (
+      state,
+      action: PayloadAction<{
+        resourceId: string;
+        chapterId: string;
+        bunnyVideoId: string;
+      }>
+    ) => {
+      const { resourceId, chapterId, bunnyVideoId } = action.payload;
+
+      // Aktualizuj w selected resource
+      if (state.selected && state.selected._id === resourceId) {
+        const chapter = state.selected.chapters.find(
+          (ch: IChapter) => ch._id === chapterId
+        );
+        if (chapter) {
+          chapter.bunnyVideoId = bunnyVideoId;
+        }
+      }
+
+      // Aktualizuj w items
+      state.items = state.items.map((resource) => {
+        if (resource._id === resourceId) {
+          return {
+            ...resource,
+            chapters: resource.chapters.map((chapter) =>
+              chapter._id === chapterId ? { ...chapter, bunnyVideoId } : chapter
+            ),
+          };
+        }
+        return resource;
+      });
+    },
+    clearChapterVideo: (
+      state,
+      action: PayloadAction<{
+        resourceId: string;
+        chapterId: string;
+      }>
+    ) => {
+      const { resourceId, chapterId } = action.payload;
+
+      // Wyczyść w selected resource
+      if (state.selected && state.selected._id === resourceId) {
+        const chapter = state.selected.chapters.find(
+          (ch: IChapter) => ch._id === chapterId
+        );
+        if (chapter) {
+          chapter.bunnyVideoId = undefined;
+        }
+      }
+
+      // Wyczyść w items
+      state.items = state.items.map((resource) => {
+        if (resource._id === resourceId) {
+          return {
+            ...resource,
+            chapters: resource.chapters.map((chapter) =>
+              chapter._id === chapterId
+                ? { ...chapter, bunnyVideoId: undefined }
+                : chapter
+            ),
+          };
+        }
+        return resource;
+      });
+    },
   },
   extraReducers: (builder) => {
     builder
-      // 📌 fetchResource
+      // 📌 fetchResources
       .addCase(fetchResources.pending, (state) => {
-        //console.log("🔄 fetchResource pending");
         state.loading = true;
         state.error = null;
       })
@@ -323,16 +500,9 @@ const resourceSlice = createSlice({
           state.total = action.payload.total;
           state.page = action.payload.page;
           state.pageSize = action.payload.pageSize;
-          // const resource = action.payload;
-          // console.log("✅ fetchResource fulfilled:", action.payload._id);
-          //state.loading.fetch = false;
-          //state.error = null;
-          //state.selected = resource;
-          //state.resourcesByProductId[action.payload.productId] = action.payload;
         }
       )
       .addCase(fetchResources.rejected, (state, action) => {
-        // console.log("❌ fetchResource rejected:", action.error);
         state.loading = false;
         state.error = action.error.message || "Error fetching resource";
       })
@@ -351,8 +521,6 @@ const resourceSlice = createSlice({
           state.loading = false;
           state.error = null;
           state.selected = action.payload;
-          // state.resourcesByProductId[action.payload.productId] = action.payload;
-          //state.id[action.payload.id] = action.payload;
           if (action.payload._id) {
             state.resourcesById[action.payload._id] = action.payload;
           }
@@ -362,8 +530,8 @@ const resourceSlice = createSlice({
         state.loading = false;
         state.error = (action.payload as string) || "Failed to fetch resource";
       })
-      // 📌 fetchResourceByProductId
 
+      // 📌 fetchResourceByProductId
       .addCase(fetchResourceByProductId.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -402,7 +570,7 @@ const resourceSlice = createSlice({
 
       // 📌 editResource
       .addCase(editResource.pending, (state) => {
-        state.loading = true; // lub dodaj nowy flag dla edit
+        state.loading = true;
       })
       .addCase(editResource.fulfilled, (state, action) => {
         state.loading = false;
@@ -424,6 +592,8 @@ const resourceSlice = createSlice({
         if (state.selected && state.selected._id === action.payload) {
           state.selected = null;
         }
+        // Usuń z cache
+        delete state.resourcesById[action.payload];
       })
 
       // 📌 addChapter
@@ -431,6 +601,10 @@ const resourceSlice = createSlice({
         if (state.selected && state.selected._id === action.payload._id) {
           state.selected = action.payload;
         }
+        // Aktualizuj również w items
+        state.items = state.items.map((res) =>
+          res._id === action.payload._id ? action.payload : res
+        );
       })
 
       // 📌 editChapter
@@ -453,38 +627,92 @@ const resourceSlice = createSlice({
             (ch: IChapter) => ch._id !== action.payload.chapterId
           );
         }
+        // Aktualizuj również w items
+        state.items = state.items.map((resource) => {
+          if (resource._id === action.payload.resourceId) {
+            return {
+              ...resource,
+              chapters: resource.chapters.filter(
+                (ch: IChapter) => ch._id !== action.payload.chapterId
+              ),
+            };
+          }
+          return resource;
+        });
       })
 
+      // 📌 deleteChapterVideo - ZAKTUALIZOWANE
       .addCase(deleteChapterVideo.fulfilled, (state, action) => {
-        if (
-          state.selected &&
-          state.selected._id === action.payload.resourceId
-        ) {
+        const { resourceId, chapterId } = action.payload;
+
+        // Aktualizuj selected resource
+        if (state.selected && state.selected._id === resourceId) {
           const chapter = state.selected.chapters.find(
-            (ch: IChapter) => ch._id === action.payload.chapterId
+            (ch: IChapter) => ch._id === chapterId
           );
           if (chapter) {
-            chapter.videoId = undefined;
+            chapter.bunnyVideoId = undefined; // ZMIANA: bunnyVideoId zamiast videoId
           }
         }
+
+        // Aktualizuj items
+        state.items = state.items.map((resource) => {
+          if (resource._id === resourceId) {
+            return {
+              ...resource,
+              chapters: resource.chapters.map((chapter) =>
+                chapter._id === chapterId
+                  ? { ...chapter, bunnyVideoId: undefined }
+                  : chapter
+              ),
+            };
+          }
+          return resource;
+        });
       })
 
-      // 📌 fetchChapterWithVideo
+      // 📌 fetchChapterWithVideo - ZAKTUALIZOWANE
       .addCase(fetchChapterWithVideo.fulfilled, (state, action) => {
-        if (
-          state.selected &&
-          state.selected._id === action.payload.resourceId
-        ) {
+        const { resourceId, chapterId, chapter } = action.payload;
+
+        if (state.selected && state.selected._id === resourceId) {
           state.selected.chapters = state.selected.chapters.map(
             (ch: IChapter) =>
-              ch._id === action.payload.chapterId
-                ? { ...ch, ...action.payload.chapter }
-                : ch
+              ch._id === chapterId ? { ...ch, ...chapter } : ch
           );
         }
+
+        // Aktualizuj również w items
+        state.items = state.items.map((resource) => {
+          if (resource._id === resourceId) {
+            return {
+              ...resource,
+              chapters: resource.chapters.map((ch) =>
+                ch._id === chapterId ? { ...ch, ...chapter } : ch
+              ),
+            };
+          }
+          return resource;
+        });
+      })
+
+      // 📌 setChapterVideo (backward compatibility)
+      .addCase(setChapterVideo.fulfilled, (state, action) => {
+        if (state.selected && state.selected._id === action.payload._id) {
+          state.selected = action.payload;
+        }
+        state.items = state.items.map((res) =>
+          res._id === action.payload._id ? action.payload : res
+        );
       });
   },
 });
 
-export const { clearSelectedResource, setLoading } = resourceSlice.actions;
+export const {
+  clearSelectedResource,
+  setLoading,
+  updateChapterVideo,
+  clearChapterVideo,
+} = resourceSlice.actions;
+
 export default resourceSlice.reducer;
