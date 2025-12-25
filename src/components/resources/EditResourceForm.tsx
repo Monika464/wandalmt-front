@@ -14,6 +14,7 @@ import {
 import VideoUploader from "../video/VideoUploader";
 import { useNavigate } from "react-router-dom";
 import { fetchVideoUrl } from "../../store/slices/videoSlice";
+import Thumbnail from "../video/Thumbnail";
 
 interface Props {
   resource: IResource;
@@ -349,17 +350,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
               {ch.bunnyVideoId || ch.videoId ? (
                 <div className="flex flex-col md:flex-row gap-4 items-start">
                   <div className="flex-shrink-0">
-                    <img
-                      src={`https://video.bunnycdn.com/library/${
-                        import.meta.env.VITE_BUNNY_LIBRARY_ID
-                      }/videos/${ch.bunnyVideoId}/thumbnail`} // ZMIANA
-                      alt="video thumbnail"
-                      className="w-48 h-32 object-cover rounded border"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          "https://placehold.co/192x128?text=No+Thumbnail";
-                      }}
-                    />
+                    <Thumbnail bunnyVideoId={ch.bunnyVideoId || ""} />
                   </div>
 
                   <div className="flex-1">
