@@ -1,5 +1,5 @@
 // components/video/VideoUploader.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 interface Props {
   onUploaded?: (videoId: string, bunnyGuid: string) => void;
@@ -14,6 +14,9 @@ interface VideoStatus {
   processingProgress: number;
   thumbnailUrl?: string;
   errorMessage?: string;
+  duration?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
@@ -25,9 +28,7 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
   );
   const [createdBunnyGuid, setCreatedBunnyGuid] = useState<string | null>(null);
   const [videoStatus, setVideoStatus] = useState<VideoStatus | null>(null);
-  const [pollingInterval, setPollingInterval] = useState<ReturnType<
-    typeof setTimeout
-  > | null>(null);
+  const pollingIntervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Funkcja do sprawdzania statusu
   const checkStatus = async (videoId: string) => {
@@ -38,23 +39,37 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
       const data = await response.json();
 
       if (data.success && data.video) {
-        setVideoStatus(data.video);
+        const newStatus = data.video;
+        setVideoStatus(newStatus);
+        console.log("Polled video status:", newStatus);
+
+        // FIX: Jeśli progress 100%, ustaw status "ready"
+        const displayStatus =
+          newStatus.status === "processing" &&
+          newStatus.processingProgress >= 100
+            ? "ready"
+            : newStatus.status;
 
         // Aktualizuj status w UI
-        if (data.video.status === "processing") {
-          setStatus(`Przetwarzanie: ${data.video.processingProgress}%`);
-        } else if (data.video.status === "ready") {
-          setStatus("✅ Video gotowe do odtwarzania");
-          if (pollingInterval) {
-            clearInterval(pollingInterval);
-            setPollingInterval(null);
-          }
-        } else if (data.video.status === "error") {
-          setStatus(`❌ Błąd: ${data.video.errorMessage}`);
-          if (pollingInterval) {
-            clearInterval(pollingInterval);
-            setPollingInterval(null);
-          }
+        switch (displayStatus) {
+          case "uploading":
+            setStatus(`📤 Wysyłanie: ${newStatus.processingProgress}%`);
+            break;
+          case "processing":
+            setStatus(`🔄 Przetwarzanie: ${newStatus.processingProgress}%`);
+            break;
+          case "ready":
+            setStatus("✅ Video gotowe do odtwarzania");
+            stopPolling();
+            // Wywołaj callback jeśli istnieje
+            if (onUploaded && newStatus.bunnyGuid && createdVideoId) {
+              onUploaded(createdVideoId, newStatus.bunnyGuid);
+            }
+            break;
+          case "error":
+            setStatus(`❌ Błąd: ${newStatus.errorMessage || "Nieznany błąd"}`);
+            stopPolling();
+            break;
         }
       }
     } catch (error) {
@@ -64,22 +79,40 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
 
   // Rozpocznij polling statusu
   const startStatusPolling = (videoId: string) => {
-    // Sprawdzaj co 5 sekund
-    const interval = setInterval(() => checkStatus(videoId), 5000);
-    setPollingInterval(interval);
+    // Najpierw zatrzymaj istniejący
+    stopPolling();
 
     // Sprawdź od razu
     checkStatus(videoId);
+
+    // Sprawdzaj co 3 sekundy
+    pollingIntervalRef.current = setInterval(() => {
+      checkStatus(videoId);
+    }, 3000);
+  };
+
+  // Zatrzymaj polling
+  const stopPolling = () => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
   };
 
   // Cleanup przy unmount
   useEffect(() => {
     return () => {
-      if (pollingInterval) {
-        clearInterval(pollingInterval);
-      }
+      stopPolling();
     };
-  }, [pollingInterval]);
+  }, []);
+
+  // Jeśli mamy existingVideoId, rozpocznij polling
+  useEffect(() => {
+    if (existingVideoId && !createdVideoId) {
+      setCreatedVideoId(existingVideoId);
+      startStatusPolling(existingVideoId);
+    }
+  }, [createdVideoId]);
 
   const createVideo = async (title?: string) => {
     setStatus("Tworzenie obiektu wideo...");
@@ -155,11 +188,9 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
 
       setStatus("📤 Plik wysłany - trwa przetwarzanie przez Bunny...");
     } catch (err: any) {
+      console.error("Upload error:", err);
       setStatus("❌ Błąd: " + err.message);
-      if (pollingInterval) {
-        clearInterval(pollingInterval);
-        setPollingInterval(null);
-      }
+      stopPolling();
     } finally {
       setUploading(false);
     }
@@ -170,364 +201,251 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
     <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
       <div
         className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
-        style={{ width: `${progress}%` }}
+        style={{ width: `${Math.min(progress, 100)}%` }}
       ></div>
     </div>
   );
 
-  return (
-    <div className="border p-4 rounded bg-gray-50">
-      <h4 className="font-semibold mb-2">Upload Wideo</h4>
+  // Wyświetlanie miniaturki
+  const Thumbnail = ({
+    url,
+    bunnyGuid,
+  }: {
+    url?: string;
+    bunnyGuid: string;
+  }) => {
+    const [imgError, setImgError] = useState(false);
 
+    if (imgError || !url) {
+      return (
+        <div className="w-32 h-20 bg-gray-200 rounded border flex items-center justify-center">
+          <span className="text-xs text-gray-500">No thumbnail</span>
+        </div>
+      );
+    }
+
+    return (
+      <img
+        src={url}
+        alt="Thumbnail"
+        className="w-32 h-20 object-cover rounded border"
+        onError={() => setImgError(true)}
+      />
+    );
+  };
+
+  // Oblicz wyświetlany status (fix dla progress 100%)
+  const getDisplayStatus = () => {
+    if (!videoStatus) return "checking";
+
+    // Jeśli processing ale progress 100%, pokaż jako ready
+    if (
+      videoStatus.status === "processing" &&
+      videoStatus.processingProgress >= 100
+    ) {
+      return "ready";
+    }
+
+    return videoStatus.status;
+  };
+
+  const displayStatus = getDisplayStatus();
+
+  return (
+    <div className="border p-4 rounded bg-gray-50 max-w-md">
+      <h4 className="font-semibold mb-3 text-lg">Upload Wideo</h4>
+
+      {/* KLUCZOWA ZMIANA: Używamy createdVideoId zamiast videoStatus */}
+      {/* {createdVideoId ? ( */}
       {createdVideoId && videoStatus ? (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div
-            className={`p-3 rounded ${
-              videoStatus.status === "ready"
+            className={`p-4 rounded-lg ${
+              displayStatus === "ready"
                 ? "bg-green-50 border border-green-200"
-                : videoStatus.status === "error"
+                : displayStatus === "error"
                 ? "bg-red-50 border border-red-200"
-                : "bg-blue-50 border border-blue-200"
+                : displayStatus === "processing"
+                ? "bg-blue-50 border border-blue-200"
+                : "bg-yellow-50 border border-yellow-200"
             }`}
           >
-            <div className="flex justify-between items-center mb-2">
-              <span className="font-medium">
-                {videoStatus.status === "uploading"
-                  ? "📤 Wysyłanie"
-                  : videoStatus.status === "processing"
-                  ? "🔄 Przetwarzanie"
-                  : videoStatus.status === "ready"
-                  ? "✅ Gotowe"
-                  : "❌ Błąd"}
-              </span>
-              {videoStatus.status === "processing" && (
-                <span className="text-sm font-bold">
-                  {videoStatus.processingProgress}%
+            <div className="flex justify-between items-center mb-3">
+              <div className="flex items-center space-x-2">
+                <span className="font-medium">
+                  {displayStatus === "uploading"
+                    ? "📤 Wysyłanie"
+                    : displayStatus === "processing"
+                    ? "🔄 Przetwarzanie"
+                    : displayStatus === "ready"
+                    ? "✅ Gotowe"
+                    : "❌ Błąd"}
                 </span>
+                {(displayStatus === "uploading" ||
+                  displayStatus === "processing") && (
+                  <span className="text-sm font-bold bg-white px-2 py-1 rounded">
+                    {videoStatus?.processingProgress || 0}%
+                  </span>
+                )}
+              </div>
+
+              {(displayStatus === "uploading" ||
+                displayStatus === "processing") && (
+                <div className="text-xs text-gray-500 animate-pulse">Live</div>
               )}
             </div>
 
-            {(videoStatus.status === "uploading" ||
-              videoStatus.status === "processing") && (
-              <ProgressBar progress={videoStatus.processingProgress} />
+            {(displayStatus === "uploading" ||
+              displayStatus === "processing") && (
+              <ProgressBar progress={videoStatus?.processingProgress || 0} />
             )}
 
-            {videoStatus.status === "ready" && videoStatus.thumbnailUrl && (
-              <div className="mt-2">
-                <img
-                  src={videoStatus.thumbnailUrl}
-                  alt="Thumbnail"
-                  className="w-32 h-20 object-cover rounded border"
-                />
+            {displayStatus === "ready" && (
+              <div className="mt-3">
+                {videoStatus?.thumbnailUrl && (
+                  <Thumbnail
+                    url={videoStatus.thumbnailUrl}
+                    bunnyGuid={videoStatus.bunnyGuid}
+                  />
+                )}
+                <p className="text-sm text-green-600 mt-2">
+                  Video jest gotowe do odtwarzania!
+                </p>
+                {videoStatus?.duration && (
+                  <p className="text-xs text-gray-500">
+                    Czas trwania: {videoStatus.duration}s
+                  </p>
+                )}
               </div>
             )}
 
-            {videoStatus.errorMessage && (
-              <p className="text-sm text-red-600 mt-2">
+            {videoStatus?.errorMessage && (
+              <p className="text-sm text-red-600 mt-2 p-2 bg-red-100 rounded">
                 {videoStatus.errorMessage}
               </p>
             )}
 
-            <div className="text-xs text-gray-500 mt-2 space-y-1">
-              <p>Video ID: {videoStatus._id}</p>
-              <p>Bunny GUID: {videoStatus.bunnyGuid}</p>
+            <div className="text-xs text-gray-500 mt-3 space-y-1">
+              <p>
+                <span className="font-medium">Video ID:</span>{" "}
+                {videoStatus?._id || createdVideoId}
+              </p>
+              <p>
+                <span className="font-medium">Bunny GUID:</span>{" "}
+                {videoStatus?.bunnyGuid || createdBunnyGuid}
+              </p>
+              <p>
+                <span className="font-medium">Status:</span> {displayStatus}
+              </p>
+              <p>
+                <span className="font-medium">Progress:</span>{" "}
+                {videoStatus?.processingProgress || 0}%
+              </p>
+              {videoStatus?.updatedAt && (
+                <p>
+                  <span className="font-medium">Ostatnia aktualizacja:</span>{" "}
+                  {new Date(videoStatus.updatedAt).toLocaleTimeString()}
+                </p>
+              )}
             </div>
           </div>
+
+          {/* Przycisk resetu */}
+          {(displayStatus === "ready" || displayStatus === "error") && (
+            <button
+              onClick={() => {
+                setCreatedVideoId(null);
+                setCreatedBunnyGuid(null);
+                setVideoStatus(null);
+                setFile(null);
+                setStatus("Wybierz plik wideo");
+                stopPolling();
+              }}
+              className="px-3 py-1 text-sm border rounded hover:bg-gray-100"
+            >
+              Wgraj kolejne video
+            </button>
+          )}
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <input
-              type="file"
-              accept="video/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  setFile(file);
-                  setStatus(
-                    `Wybrano: ${file.name} (${Math.round(
-                      file.size / 1024 / 1024
-                    )}MB)`
-                  );
-                }
-              }}
-              className="border p-2 rounded w-full"
-              disabled={uploading}
-            />
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+              <input
+                type="file"
+                id="video-upload"
+                accept="video/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setFile(file);
+                    setStatus(
+                      `Wybrano: ${file.name} (${Math.round(
+                        file.size / 1024 / 1024
+                      )}MB)`
+                    );
+                  }
+                }}
+                className="hidden"
+                disabled={uploading}
+              />
+              <label htmlFor="video-upload" className="cursor-pointer block">
+                <div className="text-4xl mb-2">📁</div>
+                <p className="text-gray-600">
+                  {file ? file.name : "Kliknij aby wybrać plik wideo"}
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  MP4, MOV, AVI, MKV (max 2GB)
+                </p>
+              </label>
+            </div>
+
+            {file && (
+              <div className="mt-2 text-sm text-gray-600">
+                <p>Rozmiar: {Math.round(file.size / 1024 / 1024)}MB</p>
+                <p>Typ: {file.type || "Nieznany"}</p>
+              </div>
+            )}
           </div>
 
           <button
             type="submit"
             disabled={!file || uploading}
-            className={`px-4 py-2 rounded w-full ${
+            className={`px-4 py-3 rounded-lg w-full font-medium ${
               !file || uploading
-                ? "bg-gray-300 cursor-not-allowed"
-                : "bg-blue-500 hover:bg-blue-600 text-white"
-            }`}
+                ? "bg-gray-300 cursor-not-allowed text-gray-500"
+                : "bg-blue-500 hover:bg-blue-600 text-white shadow-md"
+            } transition-all duration-200`}
           >
-            {uploading ? "Wysyłanie..." : "Wyślij Wideo"}
+            {uploading ? (
+              <span className="flex items-center justify-center">
+                <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
+                Wysyłanie...
+              </span>
+            ) : (
+              "Wyślij Wideo"
+            )}
           </button>
         </form>
       )}
 
+      {/* Status message */}
       <div
-        className={`mt-2 text-sm ${
+        className={`mt-3 text-sm p-2 rounded ${
           status.includes("✅")
-            ? "text-green-600"
+            ? "bg-green-100 text-green-700"
             : status.includes("❌")
-            ? "text-red-600"
-            : "text-blue-600"
+            ? "bg-red-100 text-red-700"
+            : "bg-blue-100 text-blue-700"
         }`}
       >
-        {status}
-      </div>
-
-      {file && !createdVideoId && (
-        <div className="text-xs text-gray-500 mt-2">
-          <p>Rozmiar: {Math.round(file.size / 1024 / 1024)}MB</p>
-          <p>Typ: {file.type}</p>
+        <div className="flex items-center">
+          {status.includes("🔄") && (
+            <span className="animate-spin mr-2">⟳</span>
+          )}
+          {status}
         </div>
-      )}
+      </div>
     </div>
   );
 }
-// import React, { useState } from "react";
-
-// interface Props {
-//   onUploaded?: (videoId: string) => void;
-//   existingVideoId?: string;
-// }
-
-// export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
-//   const [file, setFile] = useState<File | null>(null);
-//   const [status, setStatus] = useState<string | null>(null);
-//   const [uploading, setUploading] = useState(false);
-//   const [createdVideoId, setCreatedVideoId] = useState<string | null>(
-//     existingVideoId || null
-//   );
-
-//   const createVideo = async (title?: string) => {
-//     setStatus("Creating video object...");
-//     const resp = await fetch("http://localhost:3000/api/stream/create-video", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ title: title || file?.name || "untitled" }),
-//     });
-//     if (!resp.ok) throw new Error("create-video failed");
-//     return resp.json();
-//   };
-
-//   const uploadToBackend = async (videoId: string, f: File) => {
-//     setStatus("Uploading file...");
-//     const fd = new FormData();
-//     fd.append("file", f);
-
-//     const resp = await fetch(
-//       `http://localhost:3000/api/stream/upload/${videoId}`,
-//       {
-//         method: "POST",
-//         body: fd,
-//       }
-//     );
-
-//     if (!resp.ok) {
-//       const txt = await resp.text();
-//       throw new Error("upload failed: " + txt);
-//     }
-//     return resp.json();
-//   };
-
-//   const extractVideoId = (created: any) => {
-//     if (!created) return null;
-//     if (created.video?.bunnyGuid) return created.video.bunnyGuid;
-//     if (created.guid) return created.guid;
-//     if (created.id) return created.id;
-//     if (created.videoId) return created.videoId;
-//     if (created.video?.guid) return created.video.guid;
-//     return null;
-//   };
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     if (!file) return setStatus("Select file first");
-
-//     setUploading(true);
-//     try {
-//       const created = await createVideo();
-//       const id = extractVideoId(created);
-
-//       if (!id) throw new Error("no videoId returned from create-video");
-
-//       setCreatedVideoId(id);
-//       onUploaded?.(id);
-
-//       await uploadToBackend(id, file);
-//       setStatus("✅ Upload complete - video is processing");
-//     } catch (err: any) {
-//       setStatus("❌ Error: " + err.message);
-//     } finally {
-//       setUploading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="border p-4 rounded bg-gray-50">
-//       <h4 className="font-semibold mb-2">Upload Video</h4>
-
-//       {createdVideoId ? (
-//         <div className="text-green-600 mb-2">
-//           <p>✅ Video uploaded successfully!</p>
-//           <p className="text-sm">ID: {createdVideoId}</p>
-//         </div>
-//       ) : (
-//         <form onSubmit={handleSubmit} className="space-y-3">
-//           <div>
-//             <input
-//               type="file"
-//               accept="video/*"
-//               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-//               className="border p-2 rounded w-full"
-//               disabled={uploading}
-//             />
-//           </div>
-
-//           {file && (
-//             <div className="text-sm text-gray-600">
-//               Selected: {file.name} ({Math.round(file.size / 1024 / 1024)}MB)
-//             </div>
-//           )}
-
-//           <button
-//             type="submit"
-//             disabled={!file || uploading}
-//             className={`px-4 py-2 rounded ${
-//               !file || uploading
-//                 ? "bg-gray-300 cursor-not-allowed"
-//                 : "bg-blue-500 hover:bg-blue-600 text-white"
-//             }`}
-//           >
-//             {uploading ? "Uploading..." : "Upload Video"}
-//           </button>
-//         </form>
-//       )}
-
-//       {status && (
-//         <div
-//           className={`mt-2 text-sm ${
-//             status.includes("✅")
-//               ? "text-green-600"
-//               : status.includes("❌")
-//               ? "text-red-600"
-//               : "text-blue-600"
-//           }`}
-//         >
-//           {status}
-//         </div>
-//       )}
-//     </div>
-//   );
-//}
-//////////////////////////////////////////////////
-// import React, { useState } from "react";
-
-// interface Props {
-//   onUploaded?: (videoId: string) => void;
-// }
-
-// export default function VideoUploader({ onUploaded }: Props) {
-//   const [file, setFile] = useState<File | null>(null);
-//   const [status, setStatus] = useState<string | null>(null);
-//   //const [videoId, setVideoId] = useState<string | null>(null);
-
-//   const createVideo = async (title?: string) => {
-//     setStatus("Creating video object...");
-//     const resp = await fetch("http://localhost:3000/api/stream/create-video", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ title: title || file?.name || "untitled" }),
-//     });
-//     if (!resp.ok) throw new Error("create-video failed");
-//     return resp.json();
-//   };
-
-//   const uploadToBackend = async (videoId: string, f: File) => {
-//     setStatus("Uploading file to backend");
-//     const fd = new FormData();
-//     fd.append("file", f);
-
-//     const resp = await fetch(
-//       `http://localhost:3000/api/stream/upload/${videoId}`,
-//       {
-//         method: "POST",
-//         body: fd,
-//       }
-//     );
-
-//     if (!resp.ok) {
-//       const txt = await resp.text();
-//       throw new Error("upload failed: " + txt);
-//     }
-//     return resp.json();
-//   };
-
-//   const extractVideoId = (created: any) => {
-//     // sprawdzamy możliwe miejsca
-//     if (!created) return null;
-
-//     // 1) backend zwraca shape { success: true, video: { bunnyGuid, ... } }
-//     if (created.video?.bunnyGuid) return created.video.bunnyGuid;
-
-//     // 2) backend zwraca directly Bunny shape { guid: '...' }
-//     if (created.guid) return created.guid;
-
-//     // 3) legacy id fields
-//     if (created.id) return created.id;
-//     if (created.videoId) return created.videoId;
-
-//     // 4) czasem backend mógł zwrócić video: {..., guid: '...'}
-//     if (created.video?.guid) return created.video.guid;
-
-//     // nic nie znaleziono
-//     return null;
-//   };
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     if (!file) return setStatus("Select file first");
-//     try {
-//       const created = await createVideo();
-//       const id = extractVideoId(created);
-//       // const id =
-//       //   created.videoId || created.guid || created.id || created.videoId;
-//       if (!id) throw new Error("no videoId returned from create-video");
-//       //console.log("Created video with id:", id);
-//       //setVideoId(id);
-//       onUploaded?.(id);
-//       await uploadToBackend(id, file);
-//       setStatus("Upload complete — video is processing on Bunny");
-//     } catch (err: any) {
-//       setStatus("Error: " + err.message);
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <h3>Video uploader</h3>
-//       <form onSubmit={handleSubmit}>
-//         <input
-//           type="file"
-//           accept="video/*"
-//           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-//         />
-//         <button type="submit">Upload</button>
-//       </form>
-
-//       {/* {videoId && ( */}
-//       {file && status && (
-//         <div>
-//           {file?.name} - {status}
-//         </div>
-//       )}
-//     </div>
-//   );
-// }

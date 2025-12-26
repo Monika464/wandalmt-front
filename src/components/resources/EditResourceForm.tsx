@@ -34,6 +34,9 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
     }))
   );
 
+  const [activeUploads, setActiveUploads] = useState<
+    Record<string, { videoId: string | null; bunnyGuid: string | null }>
+  >({});
   // UWAGA: Teraz używamy bunnyVideoId zamiast videoId
   const [newChapter, setNewChapter] = useState<IChapter>({
     _id: "",
@@ -196,6 +199,11 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
       bunnyGuid,
     });
 
+    // Ustaw aktywny upload dla tego rozdziału
+    setActiveUploads((prev) => ({
+      ...prev,
+      [chapterId]: { videoId, bunnyGuid },
+    }));
     const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(videoId);
 
     if (!isValidObjectId) {
@@ -385,6 +393,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
                 <div>
                   <p className="text-gray-500 mb-2">No video assigned</p>
                   <VideoUploader
+                    key={`uploader-${ch._id}`}
                     onUploaded={(videoId, bunnyGuid) =>
                       handleVideoUploaded(ch._id!, videoId, bunnyGuid)
                     }
