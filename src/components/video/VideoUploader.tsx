@@ -61,10 +61,24 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
           case "ready":
             setStatus("✅ Video gotowe do odtwarzania");
             stopPolling();
-            // Wywołaj callback jeśli istnieje
-            if (onUploaded && newStatus.bunnyGuid && createdVideoId) {
-              onUploaded(createdVideoId, newStatus.bunnyGuid);
+
+            console.log("Video is ready:", newStatus);
+
+            // Powiadom parent component
+            if (onUploaded && newStatus.bunnyGuid && newStatus._id) {
+              onUploaded(newStatus._id, newStatus.bunnyGuid);
             }
+            console.log("Created Video ID:", newStatus._id);
+            console.log("Bunny GUID:", newStatus.bunnyGuid);
+
+            // if (onUploaded && newStatus.bunnyGuid && createdVideoId) {
+            //   // Użyj newStatus._id jako videoId jeśli jest prawidłowy
+            //   const finalVideoId = /^[0-9a-fA-F]{24}$/.test(newStatus._id || "")
+            //     ? newStatus._id
+            //     : createdVideoId;
+
+            //   onUploaded(finalVideoId, newStatus.bunnyGuid);
+            // }
             break;
           case "error":
             setStatus(`❌ Błąd: ${newStatus.errorMessage || "Nieznany błąd"}`);
@@ -122,6 +136,7 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
       body: JSON.stringify({ title: title || file?.name || "untitled" }),
     });
     if (!resp.ok) throw new Error("create-video failed");
+    console.log("createVideo response:", resp.json); // DODAJ TEN LOG!
     return resp.json();
   };
 
@@ -181,7 +196,11 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
       startStatusPolling(videoId);
 
       // 3. Powiadom parent component
-      onUploaded?.(videoId, bunnyGuid);
+      //onUploaded?.(videoId, bunnyGuid);
+      // if (onUploaded) {
+      //   console.log("📤 Sending to parent:", { videoId, bunnyGuid });
+      //   onUploaded(videoId || "pending", bunnyGuid || "pending");
+      // }
 
       // 4. Wyślij plik
       await uploadToBackend(videoId, bunnyGuid, file);
