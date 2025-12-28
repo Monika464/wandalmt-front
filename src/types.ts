@@ -81,6 +81,17 @@ export interface VideoInfo {
   errorMessage?: string;
 }
 
+export interface IVideo {
+  _id: string;
+  title: string;
+  bunnyGuid: string;
+  fileName?: string;
+  thumbnailUrl?: string;
+  duration?: number;
+  status?: string;
+  // dodaj inne pola które masz w bazie danych
+}
+
 // declare global {
 //   // Dla kompatybilności z NodeJS.Timeout w przeglądarce
 //   interface Timeout {}

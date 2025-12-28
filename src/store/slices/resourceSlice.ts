@@ -259,24 +259,32 @@ export const addChapter = createAsyncThunk<IResource, AddChapterPayload>(
   }
 );
 
-// 📌 Usuń chapter z resource
+// 📌 Usuń chapter z resource (razem z video)
 export const deleteChapter = createAsyncThunk<
   { resourceId: string; chapterId: string },
-  { resourceId: string; chapterId: string }
->("resources/deleteChapter", async ({ resourceId, chapterId }, thunkApi) => {
-  try {
-    await authorizedRequest(thunkApi, {
-      url: `/admin/resources/${resourceId}/chapters/${chapterId}`,
-      method: "DELETE",
-    });
+  { resourceId: string; chapterId: string; videoId: string }
+>(
+  "resources/deleteChapter",
+  async ({ resourceId, chapterId, videoId }, thunkApi) => {
+    try {
+      await authorizedRequest(thunkApi, {
+        url: `/api/stream/videos/${videoId}`,
+        method: "DELETE",
+      });
 
-    console.log("🗑️ Chapter deleted:", chapterId);
-    return { resourceId, chapterId };
-  } catch (error: any) {
-    console.error("❌ Error deleting chapter:", error);
-    return thunkApi.rejectWithValue(error);
+      await authorizedRequest(thunkApi, {
+        url: `/admin/resources/${resourceId}/chapters/${chapterId}`,
+        method: "DELETE",
+      });
+
+      console.log("🗑️ Chapter deleted:", chapterId);
+      return { resourceId, chapterId };
+    } catch (error: any) {
+      console.error("❌ Error deleting chapter:", error);
+      return thunkApi.rejectWithValue(error);
+    }
   }
-});
+);
 
 // 📌 Edytuj chapter w resource - ZAKTUALIZOWANE
 export const editChapter = createAsyncThunk<
@@ -313,34 +321,34 @@ export const editChapter = createAsyncThunk<
   }
 );
 
-// 📌 Delete Chapter Video - ZAKTUALIZOWANE
-export const deleteChapterVideo = createAsyncThunk<
-  { resourceId: string; chapterId: string; removedBunnyVideoId: string },
-  { resourceId: string; chapterId: string }
->(
-  "resources/deleteChapterVideo",
-  async ({ resourceId, chapterId }, thunkApi) => {
-    try {
-      const result = await authorizedRequest<{
-        success: boolean;
-        removedBunnyVideoId: string; // ZMIANA: z removedVideoId
-      }>(thunkApi, {
-        url: `/admin/resources/${resourceId}/chapters/${chapterId}/video`,
-        method: "DELETE",
-      });
+// // 📌 Delete Chapter Video - ZAKTUALIZOWANE
+// export const deleteChapterVideo = createAsyncThunk<
+//   { resourceId: string; chapterId: string; removedBunnyVideoId: string },
+//   { resourceId: string; chapterId: string }
+// >(
+//   "resources/deleteChapterVideo",
+//   async ({ resourceId, chapterId }, thunkApi) => {
+//     try {
+//       const result = await authorizedRequest<{
+//         success: boolean;
+//         removedBunnyVideoId: string;
+//       }>(thunkApi, {
+//         url: `/admin/resources/${resourceId}/chapters/${chapterId}/video`,
+//         method: "DELETE",
+//       });
 
-      console.log("🗑️ Chapter video deleted:", chapterId);
-      return {
-        resourceId,
-        chapterId,
-        removedBunnyVideoId: result.removedBunnyVideoId,
-      };
-    } catch (error: any) {
-      console.error("❌ Error deleting chapter video:", error);
-      return thunkApi.rejectWithValue(error);
-    }
-  }
-);
+//       console.log("🗑️ Chapter video deleted:", chapterId);
+//       return {
+//         resourceId,
+//         chapterId,
+//         removedBunnyVideoId: result.removedBunnyVideoId,
+//       };
+//     } catch (error: any) {
+//       console.error("❌ Error deleting chapter video:", error);
+//       return thunkApi.rejectWithValue(error);
+//     }
+//   }
+// );
 
 // 📌 Get Chapter with Video Details - ZAKTUALIZOWANE
 export const fetchChapterWithVideo = createAsyncThunk<
@@ -642,34 +650,34 @@ const resourceSlice = createSlice({
       })
 
       // 📌 deleteChapterVideo - ZAKTUALIZOWANE
-      .addCase(deleteChapterVideo.fulfilled, (state, action) => {
-        const { resourceId, chapterId } = action.payload;
+      // .addCase(deleteChapterVideo.fulfilled, (state, action) => {
+      //   const { resourceId, chapterId } = action.payload;
 
-        // Aktualizuj selected resource
-        if (state.selected && state.selected._id === resourceId) {
-          const chapter = state.selected.chapters.find(
-            (ch: IChapter) => ch._id === chapterId
-          );
-          if (chapter) {
-            chapter.bunnyVideoId = undefined; // ZMIANA: bunnyVideoId zamiast videoId
-          }
-        }
+      //   // Aktualizuj selected resource
+      //   if (state.selected && state.selected._id === resourceId) {
+      //     const chapter = state.selected.chapters.find(
+      //       (ch: IChapter) => ch._id === chapterId
+      //     );
+      //     if (chapter) {
+      //       chapter.bunnyVideoId = undefined; // ZMIANA: bunnyVideoId zamiast videoId
+      //     }
+      //   }
 
-        // Aktualizuj items
-        state.items = state.items.map((resource) => {
-          if (resource._id === resourceId) {
-            return {
-              ...resource,
-              chapters: resource.chapters.map((chapter) =>
-                chapter._id === chapterId
-                  ? { ...chapter, bunnyVideoId: undefined }
-                  : chapter
-              ),
-            };
-          }
-          return resource;
-        });
-      })
+      //   // Aktualizuj items
+      //   state.items = state.items.map((resource) => {
+      //     if (resource._id === resourceId) {
+      //       return {
+      //         ...resource,
+      //         chapters: resource.chapters.map((chapter) =>
+      //           chapter._id === chapterId
+      //             ? { ...chapter, bunnyVideoId: undefined }
+      //             : chapter
+      //         ),
+      //       };
+      //     }
+      //     return resource;
+      //   });
+      // })
 
       // 📌 fetchChapterWithVideo - ZAKTUALIZOWANE
       .addCase(fetchChapterWithVideo.fulfilled, (state, action) => {

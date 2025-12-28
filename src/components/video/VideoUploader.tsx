@@ -62,7 +62,7 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
             setStatus("✅ Video gotowe do odtwarzania");
             stopPolling();
 
-            console.log("Video is ready:", newStatus);
+            //console.log("Video is ready:", newStatus);
 
             // Powiadom parent component
             if (onUploaded && newStatus.bunnyGuid && newStatus._id) {
@@ -449,7 +449,7 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
       )}
 
       {/* Status message */}
-      <div
+      {/* <div
         className={`mt-3 text-sm p-2 rounded ${
           status.includes("✅")
             ? "bg-green-100 text-green-700"
@@ -464,7 +464,7 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
           )}
           {status}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

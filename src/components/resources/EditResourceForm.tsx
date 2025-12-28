@@ -1,5 +1,5 @@
 // components/resources/EditResourceForm.tsx
-import React, { use, useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../store";
 import type { IResource, IChapter } from "../../types"; // Zaktualizowany import
@@ -8,13 +8,15 @@ import {
   addChapter,
   editChapter,
   deleteChapter,
-  deleteChapterVideo,
+  //deleteChapterVideo,
   fetchResourceById,
 } from "../../store/slices/resourceSlice";
+
 import VideoUploader from "../video/VideoUploader";
 import { useNavigate } from "react-router-dom";
-import { fetchVideoUrl } from "../../store/slices/videoSlice";
+
 import Thumbnail from "../video/Thumbnail";
+import VideoTitle from "../video/VideoTitle";
 
 interface Props {
   resource: IResource;
@@ -37,6 +39,11 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
   const selectedResource = useSelector(
     (state: RootState) => state.resources.selected
   );
+  const selecteddVideo = useSelector((state: RootState) => state.video);
+  const videoIdforTitle = selecteddVideo.video
+    ? selecteddVideo.video._id
+    : null;
+
   const [chapters, setChapters] = useState<IChapter[]>([]);
   const [activeUploads, setActiveUploads] = useState<
     Record<string, { videoId: string | null; bunnyGuid: string | null }>
@@ -156,37 +163,37 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
   };
 
   // Delete chapter video - ZAKTUALIZOWANE
-  const handleDeleteChapterVideo = async (chapterId: string) => {
-    if (!window.confirm("Na pewno chcesz usunąć wideo z tego rozdziału?"))
-      return;
+  // const handleDeleteChapterVideo = async (chapterId: string) => {
+  //   if (!window.confirm("Na pewno chcesz usunąć wideo z tego rozdziału?"))
+  //     return;
 
-    try {
-      await dispatch(
-        deleteChapterVideo({
-          resourceId: resource._id!,
-          chapterId,
-        })
-      ).unwrap();
+  //   try {
+  //     await dispatch(
+  //       deleteChapterVideo({
+  //         resourceId: resource._id!,
+  //         chapterId,
+  //       })
+  //     ).unwrap();
 
-      // Refresh chapter data
-      const updatedResource = await dispatch(
-        fetchResourceById(resource._id!)
-      ).unwrap();
+  //     // Refresh chapter data
+  //     const updatedResource = await dispatch(
+  //       fetchResourceById(resource._id!)
+  //     ).unwrap();
 
-      setChapters(updatedResource.chapters || []);
-      alert("Wideo zostało usunięte");
-    } catch (err) {
-      console.error(err);
-      alert("Error deleting video");
-    }
-  };
+  //     setChapters(updatedResource.chapters || []);
+  //     alert("Wideo zostało usunięte");
+  //   } catch (err) {
+  //     console.error(err);
+  //     alert("Error deleting video");
+  //   }
+  // };
 
   // Delete chapter
   const handleDeleteChapter = async (chapterId: string) => {
     if (!window.confirm("Na pewno chcesz usunąć ten rozdział?")) return;
     try {
       await dispatch(
-        deleteChapter({ resourceId: resource._id!, chapterId })
+        deleteChapter({ resourceId: resource._id!, chapterId, videoId })
       ).unwrap();
 
       // Refresh chapters list
@@ -378,22 +385,21 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
                   <div className="flex-1">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">
-                          Bunny Video ID:
-                        </span>
+                        <span className="text-sm font-medium">Video:</span>
                         <code className="bg-gray-100 px-2 py-1 rounded text-sm">
-                          {ch.videoId}
+                          {/* {ch.videoId} */}{" "}
+                          <VideoTitle videoId={ch.videoId} />
                         </code>
                       </div>
                     </div>
 
                     <div className="flex gap-2 mt-3">
-                      <button
+                      {/* <button
                         onClick={() => handleDeleteChapterVideo(ch._id!)}
                         className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
                       >
                         🗑️ Delete Video
-                      </button>
+                      </button> */}
                       <button
                         onClick={() => handlePlayVideo(ch)}
                         className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
@@ -479,7 +485,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
                       rows={3}
                     />
                   </div>
-
+                  {/* 
                   {ch.bunnyVideoId && (
                     <div>
                       <label className="block text-sm font-medium mb-1">
@@ -492,7 +498,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
                         className="border p-2 rounded w-full bg-gray-50"
                       />
                     </div>
-                  )}
+                  )} */}
 
                   <div className="flex gap-2 pt-2">
                     <button
@@ -580,7 +586,6 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
                   <span className="text-sm">
                     Bunny Video ID gotowe: {newChapter.bunnyVideoId}
                   </span>{" "}
-                  {/* ZMIANA */}
                   <button
                     onClick={() =>
                       setNewChapter({

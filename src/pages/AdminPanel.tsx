@@ -6,6 +6,7 @@ import Navbar from "../components/elements/Navbar";
 import VideoUploader from "../components/video/VideoUploader";
 import WatchVideoPage from "./WatchVideoPage";
 import VideoList from "../components/video/VideoList";
+import VideoTitle from "../components/video/VideoTitle";
 
 const AdminPanel = () => {
   //const { user } = useSelector((state: RootState) => state.auth);
@@ -65,6 +66,8 @@ const AdminPanel = () => {
       {/* <WatchVideoPage /> */}
       <br></br>
       <VideoList />
+      <p>title</p>
+      <VideoTitle videoId={"695184f863d131abcd25a3e0"} />
     </div>
   );
 };
