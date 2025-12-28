@@ -1,7 +1,7 @@
 // components/resources/EditResourceForm.tsx
 import React, { use, useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import type { AppDispatch } from "../../store";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../store";
 import type { IResource, IChapter } from "../../types"; // Zaktualizowany import
 import {
   editResource,
@@ -27,13 +27,17 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
 
   const [title, setTitle] = useState(resource.title);
   const [content, setContent] = useState(resource.content || "");
-  const [chapters, setChapters] = useState<IChapter[]>(
-    (resource.chapters || []).map((ch, index) => ({
-      ...ch,
-      number: ch.number ?? index + 1,
-    }))
+  // const [chapters, setChapters] = useState<IChapter[]>(
+  //   (resource.chapters || []).map((ch, index) => ({
+  //     ...ch,
+  //     number: ch.number ?? index + 1,
+  //   }))
+  // );
+  // Pobierz aktualny resource z Redux
+  const selectedResource = useSelector(
+    (state: RootState) => state.resources.selected
   );
-
+  const [chapters, setChapters] = useState<IChapter[]>([]);
   const [activeUploads, setActiveUploads] = useState<
     Record<string, { videoId: string | null; bunnyGuid: string | null }>
   >({});
@@ -48,6 +52,17 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
 
   const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
   const [isEditingResource, setIsEditingResource] = useState(true);
+
+  useEffect(() => {
+    if (selectedResource?.chapters) {
+      setChapters(
+        selectedResource.chapters.map((ch, index) => ({
+          ...ch,
+          number: ch.number ?? index + 1,
+        }))
+      );
+    }
+  }, [selectedResource]);
 
   const handleSaveResource = async () => {
     try {
@@ -89,17 +104,6 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
       bunnyVideoId: newChapter.bunnyVideoId,
     };
 
-    console.log("Adding chapter with data:", chapterData);
-    // const chapterData = {
-    //   ...newChapter,
-    //   number: newChapter.number ?? chapters.length + 1,
-    //   bunnyVideoId: newChapter.bunnyVideoId || undefined,
-    // };
-    // TYLKO jeśli videoId jest prawidłowym ID, wyślij je
-    // if (newChapter.videoId && newChapter.videoId.trim() !== "") {
-    //   chapterData.videoId = newChapter.videoId;
-    // }
-    // TYLKO jeśli videoId jest prawidłowym ObjectId
     if (isValidObjectId) {
       chapterData.videoId = newChapter.videoId;
     }
@@ -143,7 +147,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
         })
       ).unwrap();
 
-      setChapters(updatedResource.chapters || []);
+      //setChapters(updatedResource.chapters || []);
       setEditingChapterId(null);
     } catch (err) {
       console.error(err);
