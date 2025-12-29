@@ -189,11 +189,15 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
   // };
 
   // Delete chapter
-  const handleDeleteChapter = async (chapterId: string) => {
+  const handleDeleteChapter = async (chapter: IChapter) => {
     if (!window.confirm("Na pewno chcesz usunąć ten rozdział?")) return;
     try {
       await dispatch(
-        deleteChapter({ resourceId: resource._id!, chapterId, videoId })
+        deleteChapter({
+          resourceId: resource._id!,
+          chapterId: chapter._id,
+          videoId: chapter.videoId,
+        })
       ).unwrap();
 
       // Refresh chapters list
@@ -364,7 +368,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
                   {editingChapterId === ch._id ? "Close" : "Edit Chapter"}
                 </button>
                 <button
-                  onClick={() => handleDeleteChapter(ch._id!)}
+                  onClick={() => handleDeleteChapter(ch)}
                   className="bg-red-500 text-white px-3 py-1 rounded text-sm"
                 >
                   Delete Chapter

@@ -22,7 +22,7 @@ const VideoTitle: React.FC<VideoTitleProps> = ({ videoId, short = false }) => {
       setLoading(true);
       try {
         const result = await dispatch(fetchVideoUrl(videoId)).unwrap();
-        console.log("Fetched video title data:", result.video.title);
+        //console.log("Fetched video title data:", result.video.title);
         setTitle(result.video.title);
       } catch (err) {
         console.error("Error fetching video title:", err);

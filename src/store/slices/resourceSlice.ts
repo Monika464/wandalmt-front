@@ -156,7 +156,7 @@ export const fetchResourceByProductId = createAsyncThunk<IResource, string>(
         resource.chapters = resource.chapters.map(transformChapterFromApi);
       }
 
-      console.log("✅ Fetched resource by product ID:", productId);
+      //console.log("✅ Fetched resource by product ID:", productId);
       return resource;
     } catch (error: any) {
       console.error("❌ Error in fetchResourceByProductId:", error);
@@ -267,6 +267,7 @@ export const deleteChapter = createAsyncThunk<
   "resources/deleteChapter",
   async ({ resourceId, chapterId, videoId }, thunkApi) => {
     try {
+      console.log("🗑️ Deleting chapter:", chapterId, "with videoId:", videoId);
       await authorizedRequest(thunkApi, {
         url: `/api/stream/videos/${videoId}`,
         method: "DELETE",
