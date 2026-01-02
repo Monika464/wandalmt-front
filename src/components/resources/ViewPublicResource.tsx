@@ -11,18 +11,10 @@ const ViewPublicResource: React.FC<Props> = ({ resource }) => {
   const { handlePlayVideo } = useVideoNavigation();
   return (
     <div className="p-4 border rounded-md bg-gray-50">
-      <h2 className="text-xl font-bold mb-2">{resource.title}</h2>
-      <p className="mb-2">{resource.content}</p>
-
-      {/* {resource.imageUrl && (
-        <img
-          src={resource.imageUrl}
-          alt={resource.title}
-          className="w-full h-48 object-cover rounded mb-2"
-        />
-      )} */}
-
-      <h3 className="text-lg font-semibold mb-2">Chapters</h3>
+      {/* <h2 className="text-xl font-bold mb-2">{resource.title}</h2>
+      <p className="mb-2">{resource.content}</p> */}
+      {/* 
+      <h3 className="text-lg font-semibold mb-2">Chapters</h3> */}
       {resource.chapters && resource.chapters.length > 0 ? (
         <ul className="space-y-2">
           {resource.chapters.map((ch, index) => (

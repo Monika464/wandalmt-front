@@ -61,7 +61,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
   });
 
   const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
-  const [isEditingResource, setIsEditingResource] = useState(true);
+  const [isEditingResource, setIsEditingResource] = useState(false);
 
   useEffect(() => {
     if (selectedResource?.chapters) {
@@ -165,32 +165,6 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
     }
   };
 
-  // Delete chapter video - ZAKTUALIZOWANE
-  // const handleDeleteChapterVideo = async (chapterId: string) => {
-  //   if (!window.confirm("Na pewno chcesz usunąć wideo z tego rozdziału?"))
-  //     return;
-
-  //   try {
-  //     await dispatch(
-  //       deleteChapterVideo({
-  //         resourceId: resource._id!,
-  //         chapterId,
-  //       })
-  //     ).unwrap();
-
-  //     // Refresh chapter data
-  //     const updatedResource = await dispatch(
-  //       fetchResourceById(resource._id!)
-  //     ).unwrap();
-
-  //     setChapters(updatedResource.chapters || []);
-  //     alert("Wideo zostało usunięte");
-  //   } catch (err) {
-  //     console.error(err);
-  //     alert("Error deleting video");
-  //   }
-  // };
-
   // Delete chapter
   const handleDeleteChapter = async (chapter: IChapter) => {
     if (!window.confirm("Na pewno chcesz usunąć ten rozdział?")) return;
@@ -276,31 +250,9 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
     }
   };
 
-  // const handlePlayVideo = useCallback(
-  //   (chapter: IChapter) => {
-  //     if (chapter.videoId) {
-  //       console.log("Navigating to video:", chapter.videoId);
-  //       navigate(`/watch/${chapter.videoId}`);
-  //     } else {
-  //       alert("No video available for this chapter");
-  //     }
-  //   },
-  //   [navigate]
-  // );
-
-  // const handlePlayVideo = (chapter: IChapter) => {
-  //   console.log("handlePlayVideo called with chapter:", chapter);
-  //   if (chapter.videoId) {
-  //     console.log("Navigating to video:", chapter.videoId);
-  //     navigate(`/watch/${chapter.videoId}`);
-  //   } else {
-  //     alert("No video available for this chapter");
-  //   }
-  // };
-
   return (
     <div className="p-4 border rounded-md bg-gray-50 relative">
-      <h2 className="text-xl font-bold mb-4">Edit Resource</h2>
+      <h2 className="text-xl font-bold mb-4">Editing Resource</h2>
 
       {/* Resource fields - bez zmian */}
       {isEditingResource ? (
@@ -492,20 +444,6 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
                       rows={3}
                     />
                   </div>
-                  {/* 
-                  {ch.bunnyVideoId && (
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Bunny Video ID
-                      </label>
-                      <input
-                        type="text"
-                        value={ch.bunnyVideoId || ""}
-                        readOnly
-                        className="border p-2 rounded w-full bg-gray-50"
-                      />
-                    </div>
-                  )} */}
 
                   <div className="flex gap-2 pt-2">
                     <button

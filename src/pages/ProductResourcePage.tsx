@@ -88,18 +88,29 @@ export default function ProductResourcePage() {
               <strong>Opis:</strong> {resource.description}
             </p>
             <div className="mt-2">
-              <button
-                onClick={() => setEditingResource(resource)}
-                className="px-3 py-1 bg-purple-500 text-white rounded mr-2"
-              >
-                Edytuj zasób
-              </button>
-              <button
-                onClick={() => setViewingResource(resource)}
-                className="px-3 py-1 bg-blue-500 text-white rounded"
-              >
-                Pokaż zasób
-              </button>
+              {!editingResource && !viewingResource && (
+                <>
+                  <button
+                    onClick={() => setEditingResource(resource)}
+                    className="px-3 py-1 bg-purple-500 text-white rounded mr-2"
+                  >
+                    Edytuj zasób
+                  </button>
+                  <button
+                    onClick={() => setViewingResource(resource)}
+                    className="px-3 py-1 bg-blue-500 text-white rounded"
+                  >
+                    Pokaż zasób
+                  </button>
+                </>
+              )}
+              {(editingResource || viewingResource) && (
+                <p className="text-gray-500 text-sm italic">
+                  {editingResource
+                    ? "Tryb edycji aktywny"
+                    : "Podgląd zasobu aktywny"}
+                </p>
+              )}
             </div>
           </div>
         ) : (

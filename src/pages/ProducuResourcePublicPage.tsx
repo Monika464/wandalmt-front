@@ -30,6 +30,8 @@ export default function ProductResourcePage() {
       : undefined
   );
 
+  console.log("resource:", resource);
+
   useEffect(() => {
     if (!productId) return;
 
@@ -72,14 +74,14 @@ export default function ProductResourcePage() {
         <p className="font-bold">{formatCurrency(product.price)}</p>
 
         <div className="mt-4">
-          <h2 className="text-lg">Zasób:</h2>
+          <h2 className="text-lg">Zawartośc kursu:</h2>
           {resource ? (
             <div>
               <p>
                 <strong>Tytuł:</strong> {resource.title}
               </p>
               <p>
-                <strong>Opis:</strong> {resource.description}
+                <strong>Opis:</strong> {resource.content}
               </p>
             </div>
           ) : (

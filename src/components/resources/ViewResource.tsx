@@ -15,22 +15,12 @@ const ViewResource: React.FC<Props> = ({ resource, onClose }) => {
 
   const { handlePlayVideo } = useVideoNavigation();
 
-  // const handlePlayVideo = (chapter: IChapter) => {
-  //   console.log("handlePlayVideo called with chapter:", chapter);
-  //   if (chapter.videoId) {
-  //     console.log("Navigating to video:", chapter.videoId);
-  //     navigate(`/watch/${chapter.videoId}`);
-  //   } else {
-  //     alert("No video available for this chapter");
-  //   }
-  // };
-
   return (
     <div className="p-4 border rounded-md bg-gray-50">
-      <h2 className="text-xl font-bold mb-2">{resource.title}</h2>
-      <p className="mb-2">{resource.content}</p>
-
-      <h3 className="text-lg font-semibold mb-2">Chapters</h3>
+      {/* <h2 className="text-xl font-bold mb-2">{resource.title}</h2>
+      <p className="mb-2">{resource.content}</p> */}
+      {/* 
+      <h3 className="text-lg font-semibold mb-2">Chapters</h3> */}
       {resource.chapters && resource.chapters.length > 0 ? (
         <ul className="space-y-2">
           {resource.chapters.map((ch) => (
