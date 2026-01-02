@@ -322,34 +322,7 @@ export const editChapter = createAsyncThunk<
   }
 );
 
-// // 📌 Delete Chapter Video - ZAKTUALIZOWANE
-// export const deleteChapterVideo = createAsyncThunk<
-//   { resourceId: string; chapterId: string; removedBunnyVideoId: string },
-//   { resourceId: string; chapterId: string }
-// >(
-//   "resources/deleteChapterVideo",
-//   async ({ resourceId, chapterId }, thunkApi) => {
-//     try {
-//       const result = await authorizedRequest<{
-//         success: boolean;
-//         removedBunnyVideoId: string;
-//       }>(thunkApi, {
-//         url: `/admin/resources/${resourceId}/chapters/${chapterId}/video`,
-//         method: "DELETE",
-//       });
 
-//       console.log("🗑️ Chapter video deleted:", chapterId);
-//       return {
-//         resourceId,
-//         chapterId,
-//         removedBunnyVideoId: result.removedBunnyVideoId,
-//       };
-//     } catch (error: any) {
-//       console.error("❌ Error deleting chapter video:", error);
-//       return thunkApi.rejectWithValue(error);
-//     }
-//   }
-// );
 
 // 📌 Get Chapter with Video Details - ZAKTUALIZOWANE
 export const fetchChapterWithVideo = createAsyncThunk<

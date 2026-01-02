@@ -3,6 +3,7 @@ import type { IChapter, IResource } from "../../types";
 import Thumbnail from "../video/Thumbnail";
 import VideoTitle from "../video/VideoTitle";
 import { useNavigate } from "react-router-dom";
+import { useVideoNavigation } from "../../hooks/useVideoNavigation";
 
 interface Props {
   resource: IResource;
@@ -12,35 +13,22 @@ interface Props {
 const ViewResource: React.FC<Props> = ({ resource, onClose }) => {
   const navigate = useNavigate();
 
-  const handlePlayVideo = (chapter: IChapter) => {
-    console.log("handlePlayVideo called with chapter:", chapter);
-    if (chapter.videoId) {
-      console.log("Navigating to video:", chapter.videoId);
-      navigate(`/watch/${chapter.videoId}`);
-    } else {
-      alert("No video available for this chapter");
-    }
-  };
+  const { handlePlayVideo } = useVideoNavigation();
+
+  // const handlePlayVideo = (chapter: IChapter) => {
+  //   console.log("handlePlayVideo called with chapter:", chapter);
+  //   if (chapter.videoId) {
+  //     console.log("Navigating to video:", chapter.videoId);
+  //     navigate(`/watch/${chapter.videoId}`);
+  //   } else {
+  //     alert("No video available for this chapter");
+  //   }
+  // };
 
   return (
     <div className="p-4 border rounded-md bg-gray-50">
       <h2 className="text-xl font-bold mb-2">{resource.title}</h2>
       <p className="mb-2">{resource.content}</p>
-
-      {/* {resource.imageUrl && (
-        <img
-          src={resource.imageUrl}
-          alt={resource.title}
-          className="w-full h-48 object-cover rounded mb-2"
-        />
-      )} */}
-
-      {/* {resource.videoUrl && (
-        <video controls className="w-full rounded mb-4">
-          <source src={resource.videoUrl} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-      )} */}
 
       <h3 className="text-lg font-semibold mb-2">Chapters</h3>
       {resource.chapters && resource.chapters.length > 0 ? (
@@ -60,7 +48,7 @@ const ViewResource: React.FC<Props> = ({ resource, onClose }) => {
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">Video:</span>
                       <code className="bg-gray-100 px-2 py-1 rounded text-sm">
-                        {/* {ch.videoId} */} <VideoTitle videoId={ch.videoId} />
+                        <VideoTitle videoId={ch.videoId} />
                       </code>
                     </div>
                   </div>

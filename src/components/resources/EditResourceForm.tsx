@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 
 import Thumbnail from "../video/Thumbnail";
 import VideoTitle from "../video/VideoTitle";
+import { useVideoNavigation } from "../../hooks/useVideoNavigation";
 
 interface Props {
   resource: IResource;
@@ -26,6 +27,8 @@ interface Props {
 const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+
+  const { handlePlayVideo } = useVideoNavigation();
 
   const [title, setTitle] = useState(resource.title);
   const [content, setContent] = useState(resource.content || "");
@@ -285,15 +288,15 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
   //   [navigate]
   // );
 
-  const handlePlayVideo = (chapter: IChapter) => {
-    console.log("handlePlayVideo called with chapter:", chapter);
-    if (chapter.videoId) {
-      console.log("Navigating to video:", chapter.videoId);
-      navigate(`/watch/${chapter.videoId}`);
-    } else {
-      alert("No video available for this chapter");
-    }
-  };
+  // const handlePlayVideo = (chapter: IChapter) => {
+  //   console.log("handlePlayVideo called with chapter:", chapter);
+  //   if (chapter.videoId) {
+  //     console.log("Navigating to video:", chapter.videoId);
+  //     navigate(`/watch/${chapter.videoId}`);
+  //   } else {
+  //     alert("No video available for this chapter");
+  //   }
+  // };
 
   return (
     <div className="p-4 border rounded-md bg-gray-50 relative">
