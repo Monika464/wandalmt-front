@@ -37,6 +37,7 @@ export interface Order {
   createdAt: string;
   userResources?: Resource[];
   refundedAt?: string;
+  refundId?: string | null;
 }
 
 interface OrderState {

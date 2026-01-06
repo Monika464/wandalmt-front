@@ -20,6 +20,8 @@ export interface Product {
   status?: string;
 }
 
+export type NewProduct = Omit<Product, "_id">;
+
 export interface IChapter {
   _id?: string;
   number: number;
@@ -66,9 +68,6 @@ export interface ProductItemProps extends Product {
 export interface ProductPublicItemProps extends Product {
   _id: string;
 }
-
-// typ do tworzenia (bez id)
-export type NewProduct = Omit<Product, "_id">;
 
 export interface VideoInfo {
   _id: string;
