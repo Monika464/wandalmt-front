@@ -29,7 +29,7 @@ const ReturnPage: React.FC = () => {
     const verifyPayment = async () => {
       try {
         const statusRes = await fetch(
-          `http://localhost:3000/session-status?session_id=${sessionId}`,
+          `http://localhost:3000/api/session-status?session_id=${sessionId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

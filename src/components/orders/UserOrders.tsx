@@ -23,7 +23,7 @@ const UserOrders: React.FC = () => {
   if (!userOrders || userOrders.length === 0)
     return <p>Nie masz jeszcze żadnych zamówień.</p>;
 
-  console.log("userOrders in UserOrders", userOrders);
+  //console.log("userOrders in UserOrders", userOrders);
 
   return (
     <div>

@@ -88,11 +88,12 @@ export interface IVideo {
   thumbnailUrl?: string;
   duration?: number;
   status?: string;
-  // dodaj inne pola które masz w bazie danych
 }
 
-// declare global {
-//   // Dla kompatybilności z NodeJS.Timeout w przeglądarce
-//   interface Timeout {}
-//   interface Interval {}
-// }
+export interface CartItem {
+  _id: string;
+  title: string;
+  price: number;
+  quantity: number;
+  imageUrl?: string;
+}

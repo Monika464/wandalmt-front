@@ -65,9 +65,9 @@ const AdminPanel = () => {
       <br></br>
       {/* <WatchVideoPage /> */}
       <br></br>
-      <VideoList />
+      {/* <VideoList />
       <p>title</p>
-      <VideoTitle videoId={"695184f863d131abcd25a3e0"} />
+      <VideoTitle videoId={"695184f863d131abcd25a3e0"} /> */}
     </div>
   );
 };

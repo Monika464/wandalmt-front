@@ -95,6 +95,7 @@ export const refundOrder = createAsyncThunk<
   string, // id zamówienia
   { state: RootState }
 >("orders/refundOrder", async (orderId, thunkAPI) => {
+  console.log("Initiating refund for orderId:", orderId);
   try {
     const token = thunkAPI.getState().auth.token;
     const res = await api.post(
@@ -104,6 +105,7 @@ export const refundOrder = createAsyncThunk<
         headers: { Authorization: `Bearer ${token}` },
       }
     );
+    console.log("Refund response data:", res.data);
     return res.data;
   } catch (err: any) {
     return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
