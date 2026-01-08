@@ -1,19 +1,22 @@
 // pages/CartReturnPage.tsx
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../store";
 import axios from "axios";
+import { clearCart } from "../store/slices/cartSlice";
 
 const CartReturnPage: React.FC = () => {
+  console.log("Rendering CartReturnPage");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const { token } = useSelector((state: RootState) => state.auth);
-
   const [status, setStatus] = useState<
     "loading" | "success" | "error" | "pending"
   >("loading");
   const [message, setMessage] = useState("");
+  const [orderDetails, setOrderDetails] = useState<any>(null);
   const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
   const [discountAmount, setDiscountAmount] = useState<number | null>(null);
 
@@ -22,6 +25,14 @@ const CartReturnPage: React.FC = () => {
       const sessionId = searchParams.get("session_id");
       const success = searchParams.get("success");
       const canceled = searchParams.get("canceled");
+      const orderId = searchParams.get("orderId");
+
+      console.log("CartReturnPage - params:", {
+        sessionId,
+        success,
+        orderId,
+        canceled,
+      });
 
       if (canceled === "true") {
         setStatus("error");
@@ -42,10 +53,12 @@ const CartReturnPage: React.FC = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+        console.log("Payment status response:", response.data);
 
         if (response.data.status === "complete") {
           setStatus("success");
-          setMessage(response.data.message);
+          setMessage(response.data.message || "Płatność zakończona sukcesem!");
+          setOrderDetails(response.data);
 
           if (response.data.invoiceUrl) {
             setInvoiceUrl(response.data.invoiceUrl);
@@ -59,10 +72,15 @@ const CartReturnPage: React.FC = () => {
           localStorage.removeItem("cartCheckoutData");
 
           // Możesz też wyczyścić koszyk tutaj
-          // dispatch(clearCart());
-        } else {
+          dispatch(clearCart());
+        } else if (response.data.status === "pending") {
           setStatus("pending");
-          setMessage(response.data.message);
+          setMessage(
+            response.data.message || "Płatność w trakcie przetwarzania..."
+          );
+        } else {
+          setStatus("error");
+          setMessage(response.data.message || "Płatność nie powiodła się.");
         }
       } catch (err: any) {
         console.error("Payment status error:", err);
@@ -70,11 +88,16 @@ const CartReturnPage: React.FC = () => {
         setMessage(
           err.response?.data?.error || "Błąd podczas sprawdzania płatności"
         );
+
+        if (orderId) {
+          dispatch(clearCart());
+          localStorage.removeItem("cart");
+        }
       }
     };
 
     checkPaymentStatus();
-  }, [searchParams, token]);
+  }, [searchParams, token, dispatch]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -92,16 +115,42 @@ const CartReturnPage: React.FC = () => {
         {status === "success" && (
           <>
             <div className="text-6xl mb-6">🎉</div>
-            <h2 className="text-2xl font-bold text-green-600 mb-4">
-              Płatność zakończona sukcesem!
-            </h2>
+            <h2 className="text-2xl font-bold text-green-600 mb-4">Sukces!</h2>
             <p className="text-gray-700 mb-6">{message}</p>
+
+            {/* Szczegóły zamówienia */}
+            {orderDetails && (
+              <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
+                <h3 className="font-semibold mb-2">Szczegóły zamówienia:</h3>
+                <p className="text-sm">
+                  <span className="font-medium">Numer zamówienia:</span>{" "}
+                  {orderDetails.orderId || "Brak"}
+                </p>
+                <p className="text-sm">
+                  <span className="font-medium">Kwota:</span>{" "}
+                  {orderDetails.totalAmount
+                    ? `${orderDetails.totalAmount.toFixed(2)} PLN`
+                    : "Brak"}
+                </p>
+                {discountAmount && (
+                  <p className="text-sm text-green-600">
+                    <span className="font-medium">Zniżka:</span>{" "}
+                    {discountAmount.toFixed(2)} PLN
+                  </p>
+                )}
+                <p className="text-sm mt-2">
+                  Potwierdzenie zostało wysłane na email.
+                </p>
+              </div>
+            )}
 
             {discountAmount && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
                 <p className="text-green-700">
                   Zniżka:{" "}
-                  <span className="font-bold">{discountAmount} PLN</span>
+                  <span className="font-bold">
+                    {discountAmount.toFixed(2)} PLN
+                  </span>
                 </p>
               </div>
             )}
@@ -134,6 +183,12 @@ const CartReturnPage: React.FC = () => {
                 className="w-full py-3 border border-blue-500 text-blue-500 rounded hover:bg-blue-50"
               >
                 Kontynuuj zakupy
+              </button>
+              <button
+                onClick={() => navigate("/")}
+                className="w-full py-3 border border-gray-300 text-gray-700 rounded hover:bg-gray-50"
+              >
+                Strona główna
               </button>
             </div>
           </>

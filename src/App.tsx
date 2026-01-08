@@ -18,10 +18,10 @@ import ResourceAdminListComponent from "./components/resources/ResourceList";
 import ProductListComponent from "./components/products/ProductList";
 import ProductListPublicComponent from "./components/products/ProductPublicList";
 import UserManagement from "./components/usermanagement/UserManagement";
+import Cart from "./components/products/Cart";
 import CartCheckout from "./components/products/CartCheckout";
 import CheckoutPage from "./pages/CheckoutPage";
 import ReturnPage from "./pages/ReturnPage";
-//import CartCheckoutPage from "./pages/CartCheckoutPage";
 import CartReturnPage from "./pages/CartReturnPage";
 import UserOrders from "./components/orders/UserOrders";
 import UserResources from "./components/orders/UserResources";
@@ -32,6 +32,9 @@ import PasswordResetRequest from "./components/auth/PasswordResetRequest";
 //import VideoPlayer from "./components/video/VideoPlayer";
 import WatchVideo from "./pages/WatchVideoPage";
 import { useAutoRefresh } from "./hooks/useAutoRefresh";
+import CartCancelPage from "./pages/CartCancelPage";
+import FAQPage from "./pages/FAQPage";
+import ContactPage from "./pages/ContactPage";
 
 const App = () => {
   useAutoRefresh();
@@ -50,13 +53,16 @@ const App = () => {
               path="products/:productId"
               element={<ProductResourcePublicPage />}
             />
-
-            <Route path="/cart" element={<CartCheckout />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/cart/checkout" element={<CartCheckout />} />
+            <Route path="/cart/return" element={<CartReturnPage />} />
+            <Route path="/cart/cancel" element={<CartCancelPage />} />
 
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/return" element={<ReturnPage />} />
-            {/* <Route path="/cart-checkout" element={<CartCheckoutPage />} /> */}
-            <Route path="/cart-return" element={<CartReturnPage />} />
+
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/faq" element={<FAQPage />} />
 
             <Route path="/reset-password/:token" element={<SetNewPassword />} />
             <Route
