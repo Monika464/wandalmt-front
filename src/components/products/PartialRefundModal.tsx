@@ -24,6 +24,16 @@ const PartialRefundModal: React.FC<PartialRefundModalProps> = ({
 
   if (!isOpen) return null;
 
+  // Funkcja do uzyskania productId z produktu
+  const getProductId = (item: any): string => {
+    if (item.productId) {
+      return item.productId.toString();
+    } else if (item.product && item.product._id) {
+      return item.product._id.toString();
+    }
+    return item._id?.toString() || `unknown-${Math.random()}`;
+  };
+
   // Funkcja pomocnicza do uzyskania informacji o produkcie
   const getProductInfo = (item: any) => {
     if (item.product && typeof item.product === "object") {
@@ -81,7 +91,6 @@ const PartialRefundModal: React.FC<PartialRefundModalProps> = ({
       0
     );
   };
-
   const handleSubmit = async () => {
     try {
       setLoading(true);
@@ -89,16 +98,28 @@ const PartialRefundModal: React.FC<PartialRefundModalProps> = ({
 
       const refundItems = Object.entries(selectedProducts)
         .filter(([_, quantity]) => quantity > 0)
-        .map(([productId, quantity]) => ({
-          productId,
-          quantity,
-          reason: "Zwrot na żądanie klienta",
-        }));
+        .map(([productId, quantity]) => {
+          // Znajdź produkt w zamówieniu
+          const product = order.products.find((p: any) => {
+            const pId = getProductId(p);
+            return pId === productId;
+          });
+
+          return {
+            productId: productId,
+            quantity,
+            reason: "Zwrot na żądanie klienta",
+          };
+        });
 
       if (refundItems.length === 0) {
         setError("Wybierz przynajmniej jeden produkt do zwrotu");
         return;
       }
+
+      console.log("Submitting refund items:", refundItems);
+      console.log("Order ID:", order._id);
+      console.log("Selected products:", selectedProducts);
 
       await dispatch(
         partialRefundOrder({
@@ -114,6 +135,7 @@ const PartialRefundModal: React.FC<PartialRefundModalProps> = ({
       );
       onClose();
     } catch (err: any) {
+      console.error("Refund submission error:", err);
       setError(err.message || "Błąd podczas składania wniosku o zwrot");
     } finally {
       setLoading(false);

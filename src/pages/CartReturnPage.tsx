@@ -7,7 +7,6 @@ import axios from "axios";
 import { clearCart } from "../store/slices/cartSlice";
 
 const CartReturnPage: React.FC = () => {
-  console.log("Rendering CartReturnPage");
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
@@ -27,12 +26,12 @@ const CartReturnPage: React.FC = () => {
       const canceled = searchParams.get("canceled");
       const orderId = searchParams.get("orderId");
 
-      console.log("CartReturnPage - params:", {
-        sessionId,
-        success,
-        orderId,
-        canceled,
-      });
+      // console.log("CartReturnPage - params:", {
+      //   sessionId,
+      //   success,
+      //   orderId,
+      //   canceled,
+      // });
 
       if (canceled === "true") {
         setStatus("error");
@@ -53,7 +52,6 @@ const CartReturnPage: React.FC = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        console.log("Payment status response:", response.data);
 
         if (response.data.status === "complete") {
           setStatus("success");

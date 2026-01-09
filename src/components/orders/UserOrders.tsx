@@ -22,6 +22,23 @@ const UserOrders: React.FC = () => {
     dispatch(fetchUserOrders());
   }, [dispatch]);
 
+  // Funkcja do otwierania modala dla częściowego zwrotu
+  const openPartialRefundModal = (orderId: string) => {
+    setOrderForPartialRefund(orderId);
+  };
+
+  // Funkcja do zamykania modala
+  const closePartialRefundModal = () => {
+    setOrderForPartialRefund(null);
+  };
+
+  // Funkcja po udanym złożeniu wniosku o zwrot
+  const handleRefundSubmitted = () => {
+    closePartialRefundModal();
+    // Odśwież listę zamówień
+    dispatch(fetchUserOrders());
+  };
+
   if (ordersLoading)
     return (
       <div className="flex justify-center items-center py-8">
@@ -80,10 +97,25 @@ const UserOrders: React.FC = () => {
     }
   };
 
-  // Sprawdź czy można zwrócić zamówienie (do 14 dni od zakupu)
   const canRefundOrder = (order: any) => {
-    if (order.status !== "paid") return false;
-    if (order.refundedAt) return false; // Już zwrócone
+    console.log("🔍 Checking if order can be refunded:", {
+      id: order._id,
+      status: order.status,
+      refundedAt: order.refundedAt,
+      hasProductsToRefund: hasRefundableProducts(order),
+    });
+
+    // Nie można zwrócić jeśli całe zamówienie już zwrócone
+    if (order.status === "refunded" || order.refundedAt) {
+      console.log("❌ Order fully refunded or refundedAt exists");
+      return false;
+    }
+
+    // Akceptuj tylko zamówienia które są opłacone lub częściowo zwrócone
+    if (order.status !== "paid" && order.status !== "partially_refunded") {
+      console.log("❌ Order status not suitable for refund");
+      return false;
+    }
 
     const purchaseDate = new Date(order.paidAt || order.createdAt);
     const now = new Date();
@@ -91,8 +123,31 @@ const UserOrders: React.FC = () => {
       (now.getTime() - purchaseDate.getTime()) / (1000 * 60 * 60 * 24)
     );
 
-    return daysSincePurchase <= 14;
+    const canRefund = daysSincePurchase <= 14;
+    console.log(
+      `📅 Days since purchase: ${daysSincePurchase}, Can refund: ${canRefund}`
+    );
+
+    return canRefund;
   };
+
+  // Sprawdź czy można zwrócić zamówienie (do 14 dni od zakupu)
+  // const canRefundOrder = (order: any) => {
+  //    console.log("🔍 Checking if order can be refunded:", {
+  //   id: order._id,
+  //   status: order.status,
+  //   refundedAt: order.refundedAt,
+  //   hasProductsToRefund: hasRefundableProducts(order)
+  // });
+  //  //   if (order.status !== "paid") return false;
+  //   if (order.refundedAt) return false;
+  //   const purchaseDate = new Date(order.paidAt || order.createdAt);
+  //   const now = new Date();
+  //   const daysSincePurchase = Math.floor(
+  //     (now.getTime() - purchaseDate.getTime()) / (1000 * 60 * 60 * 24)
+  //   );
+  //   return daysSincePurchase <= 14;
+  // };
 
   // Sprawdź czy zamówienie ma jakieś produkty do zwrotu
   const hasRefundableProducts = (order: any) => {
@@ -528,7 +583,8 @@ const UserOrders: React.FC = () => {
         <PartialRefundModal
           order={userOrders.find((o) => o._id === orderForPartialRefund)!}
           isOpen={!!orderForPartialRefund}
-          onClose={() => setOrderForPartialRefund(null)}
+          onClose={closePartialRefundModal}
+          onRefundSuccess={handleRefundSubmitted}
         />
       )}
     </div>
