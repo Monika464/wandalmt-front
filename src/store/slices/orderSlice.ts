@@ -61,7 +61,6 @@ export interface Order {
     | "canceled";
   totalAmount: number;
 
-  // Kupon rabatowy
   couponCode?: string;
   discount?: {
     amount: number;
@@ -132,7 +131,7 @@ const initialState: OrderState = {
 
 // 🔹 Zamówienia użytkownika
 export const fetchUserOrders = createAsyncThunk<
-  Order[],
+  any[],
   void,
   { state: RootState }
 >("orders/fetchUserOrders", async (_, thunkAPI) => {
@@ -141,6 +140,11 @@ export const fetchUserOrders = createAsyncThunk<
     const res = await api.get("/api/orders/user", {
       headers: { Authorization: `Bearer ${token}` },
     });
+
+    if (res.data.orders) {
+      return res.data.orders; // zwracamy tylko tablicę zamówień
+    }
+
     return res.data;
   } catch (err: any) {
     return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);

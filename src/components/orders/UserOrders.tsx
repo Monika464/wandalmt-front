@@ -519,34 +519,37 @@ const UserOrders: React.FC = () => {
                 </div>
 
                 {/* Faktura */}
-                {order.invoiceId && (
-                  <div className="mt-6 bg-blue-50 border border-blue-200 rounded p-4">
-                    <h4 className="font-semibold text-blue-800 mb-2">
-                      🧾 Faktura VAT
-                    </h4>
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <p className="text-sm text-blue-700">
-                          Numer faktury: {order.invoiceId}
-                        </p>
-                        {order.invoiceData?.companyName && (
-                          <p className="text-sm text-blue-700">
-                            Firma: {order.invoiceData.companyName}
-                          </p>
-                        )}
-                      </div>
-                      {order.invoiceUrl && (
-                        <a
-                          href={order.invoiceUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-2 sm:mt-0 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm inline-block"
-                        >
-                          Pobierz fakturę
-                        </a>
-                      )}
-                    </div>
-                  </div>
+                {order.invoiceDetails?.invoicePdf && (
+                  <a
+                    href={order.invoiceDetails.invoicePdf}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 text-sm ml-3"
+                  >
+                    <svg
+                      className="w-4 h-4 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    Pobierz PDF
+                  </a>
+                )}
+
+                {order.invoiceDetails?.invoiceNumber && (
+                  <p className="text-sm text-gray-600 mt-2">
+                    Numer faktury:{" "}
+                    <span className="font-medium">
+                      {order.invoiceDetails.invoiceNumber}
+                    </span>
+                  </p>
                 )}
 
                 {/* Zasoby użytkownika */}

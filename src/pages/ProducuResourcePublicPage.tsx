@@ -98,7 +98,7 @@ export default function ProductResourcePage() {
             )}
           </div>
           <AddToCartButton product={product} />
-          <CheckoutButton productId={productId!} />
+          {/* <CheckoutButton productId={productId!} /> */}
         </div>
       </div>
     </>
