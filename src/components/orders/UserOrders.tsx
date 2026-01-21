@@ -22,6 +22,15 @@ const UserOrders: React.FC = () => {
     dispatch(fetchUserOrders());
   }, [dispatch]);
 
+  console.log("📦 UserOrders state:", {
+    userOrders,
+    ordersLoading,
+    ordersError,
+  });
+
+  userOrders.forEach((element) => {
+    console.log("ELEMENT", element);
+  });
   // Funkcja do otwierania modala dla częściowego zwrotu
   const openPartialRefundModal = (orderId: string) => {
     setOrderForPartialRefund(orderId);
