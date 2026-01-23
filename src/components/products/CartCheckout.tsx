@@ -30,10 +30,56 @@ const CartCheckout: React.FC = () => {
   const calculateTotal = () => {
     return cartItems.reduce(
       (total, item) => total + item.price * (item.quantity || 1),
-      0
+      0,
     );
   };
+  // ========== 1. PUBLICZNA WALIDACJA (bez logowania) ==========
+  const validateCouponPublic = async (code: string) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/discounts/validate-public",
+        {
+          couponCode: code,
+          totalAmount: calculateTotal(),
+        },
+        // BEZ headers!
+      );
 
+      return response.data;
+    } catch (err: any) {
+      throw new Error(err.response?.data?.error || "Błąd walidacji kuponu");
+    }
+  };
+
+  // ========== 2. CHRONIONA WALIDACJA (z logowaniem) ==========
+  const validateCouponProtected = async (code: string) => {
+    if (!token) {
+      throw new Error("Wymagane zalogowanie");
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/discounts/validate", // INNY endpoint!
+        {
+          couponCode: code,
+          cartItems,
+          totalAmount: calculateTotal(),
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      return response.data;
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        throw new Error("Sesja wygasła. Zaloguj się ponownie.");
+      }
+      throw new Error(err.response?.data?.error || "Błąd walidacji kuponu");
+    }
+  };
+
+  // ========== 3. GŁÓWNA FUNKCJA WALIDACJI KUPONU ==========
   const handleCouponValidation = async () => {
     if (!couponCode.trim()) {
       setCouponError("Wprowadź kod kuponu");
@@ -44,48 +90,87 @@ const CartCheckout: React.FC = () => {
     setCouponError("");
 
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/discounts/validate",
-        {
-          couponCode,
-          cartItems,
-          totalAmount: calculateTotal(),
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      // SPRAWDŹ CZY UŻYTKOWNIK JEST ZALOGOWANY
+      if (user && token) {
+        // UŻYJ CHRONIONEGO ENDPOINTU
+        const result = await validateCouponProtected(couponCode);
 
-      if (response.data.valid) {
-        // BACKEND ZWRACA response.data.discount, NIE response.data.coupon
-        setAppliedCoupon({
-          id: response.data.discount.id,
-          name: response.data.discount.name,
-          ...(response.data.discount.type === "percentage"
-            ? { percent_off: response.data.discount.value }
-            : { amount_off: response.data.discount.value * 100 }),
-          duration: "once",
-        });
-        setCouponError("");
-        setShowCouponInput(false);
+        if (result.valid) {
+          applyCouponToState(result);
+        } else {
+          setCouponError(result.error || "Nieprawidłowy kupon");
+        }
+      } else {
+        // UŻYJ PUBLICZNEGO ENDPOINTU
+        const result = await validateCouponPublic(couponCode);
+
+        if (result.valid) {
+          if (result.requiresLogin) {
+            // Kupon wymaga logowania
+            setCouponError(result.message || "Ten kupon wymaga zalogowania");
+            // Zaproponuj logowanie
+            if (
+              window.confirm(
+                "Ten kupon wymaga zalogowania. Przejść do logowania?",
+              )
+            ) {
+              navigate(
+                `/login?redirect=${encodeURIComponent("/cart/checkout")}&coupon=${couponCode}`,
+              );
+            }
+            return;
+          } else {
+            // Kupon publiczny - zastosuj
+            applyCouponToState(result);
+          }
+        } else {
+          setCouponError(result.error || "Nieprawidłowy kupon");
+        }
       }
     } catch (err: any) {
-      setCouponError(err.response?.data?.error || "Nieprawidłowy kupon");
+      setCouponError(err.message || "Nieprawidłowy kupon");
       setAppliedCoupon(null);
     } finally {
       setCouponLoading(false);
     }
   };
 
-  const removeCoupon = () => {
-    setAppliedCoupon(null);
-    setCouponCode("");
+  // ========== 4. FUNKCJA APLIKUJĄCA KUPON DO STANU ==========
+  const applyCouponToState = (result: any) => {
+    setAppliedCoupon({
+      id: result.discount.id,
+      name: result.discount.name || result.discount.code,
+      ...(result.discount.type === "percentage"
+        ? { percent_off: result.discount.value }
+        : { amount_off: result.discount.value * 100 }),
+      duration: "once",
+    });
     setCouponError("");
+    setShowCouponInput(false);
   };
 
+  // ========== 5. FUNKCJA SPRAWDZAJĄCA KUPON PRZY PŁATNOŚCI ==========
+  const verifyCouponAtCheckout = async (code: string) => {
+    if (!token) {
+      throw new Error("Wymagane zalogowanie");
+    }
+
+    // Ostateczna weryfikacja przed płatnością
+    const result = await validateCouponProtected(code);
+
+    if (!result.valid) {
+      throw new Error(result.error || "Kupon nie może być zastosowany");
+    }
+
+    return result;
+  };
+
+  // ========== 6. HANDLER PŁATNOŚCI ==========
   const handleCheckout = async () => {
     if (!user || !token) {
-      navigate(`/login?redirect=${encodeURIComponent("/cart/checkout")}`);
+      navigate(
+        `/login?redirect=${encodeURIComponent("/cart/checkout")}&coupon=${couponCode}`,
+      );
       return;
     }
 
@@ -97,6 +182,22 @@ const CartCheckout: React.FC = () => {
     try {
       setLoading(true);
 
+      // OSTATECZNA WERYFIKACJA KUPONU (jeśli jest zastosowany)
+      let finalCouponCode = couponCode;
+      if (couponCode && appliedCoupon) {
+        try {
+          await verifyCouponAtCheckout(couponCode);
+          // Jeśli tu nie ma błędu, kupon jest poprawny
+        } catch (couponErr: any) {
+          // Kupon nie przeszedł finalnej walidacji
+          setAppliedCoupon(null);
+          setCouponError(couponErr.message);
+          setCouponCode("");
+          alert(`Kupon nie może być zastosowany: ${couponErr.message}`);
+          return;
+        }
+      }
+
       // Przygotuj dane do wysłania
       const checkoutData: any = {
         items: cartItems.map((item) => ({
@@ -105,9 +206,9 @@ const CartCheckout: React.FC = () => {
         })),
       };
 
-      // Dodaj kupon jeśli został zastosowany
-      if (couponCode && appliedCoupon) {
-        checkoutData.couponCode = couponCode; // ← ZMIENIONE: couponCode zamiast appliedCoupon.id
+      // Dodaj kupon jeśli został pomyślnie zweryfikowany
+      if (finalCouponCode && appliedCoupon) {
+        checkoutData.couponCode = finalCouponCode;
       }
 
       // Dodaj informację o wymaganej fakturze
@@ -125,10 +226,8 @@ const CartCheckout: React.FC = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
-
-      //console.log("✅ Response from backend:", response.data);
 
       if (response.data.url) {
         // Zapisz dane w localStorage
@@ -136,10 +235,10 @@ const CartCheckout: React.FC = () => {
           "cartCheckoutData",
           JSON.stringify({
             sessionId: response.data.sessionId,
-            couponCode: couponCode,
+            couponCode: finalCouponCode,
             requireInvoice: requireInvoice,
             orderId: response.data.orderId,
-          })
+          }),
         );
 
         // Przekieruj do Stripe
@@ -147,12 +246,17 @@ const CartCheckout: React.FC = () => {
       }
     } catch (err: any) {
       console.error("Checkout error:", err);
-      alert(err.response?.data?.error || "Wystąpił błąd podczas płatności");
+
       if (err.response?.status === 401) {
         alert("Sesja wygasła. Zaloguj się ponownie.");
         navigate("/login");
       } else if (err.response?.status === 400) {
         alert(err.response.data.error || "Błąd w danych zamówienia");
+      } else if (err.response?.status === 403) {
+        // Kupon nie dostępny dla tego użytkownika
+        setAppliedCoupon(null);
+        setCouponError(err.response.data.error);
+        alert(err.response.data.error);
       } else {
         alert(err.response?.data?.error || "Wystąpił błąd podczas płatności");
       }
@@ -160,6 +264,157 @@ const CartCheckout: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // ========== 7. USUWANIE KUPONU ==========
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    setCouponError("");
+  };
+
+  //   const validatePublic = async (code) => {
+  //   const response = await axios.post(
+  //     "/api/discounts/validate-public",
+  //     {
+  //       couponCode: code,
+  //       totalAmount: calculateTotal(),
+  //     }
+  //     // BEZ headers!
+  //   );
+
+  //   if (response.data.requiresLogin) {
+  //     // Pokaż komunikat: "Zaloguj się, aby użyć tego kuponu"
+  //   }
+
+  //   return response.data;
+  // };
+
+  //   const handleCouponValidation = async () => {
+  //     if (!couponCode.trim()) {
+  //       setCouponError("Wprowadź kod kuponu");
+  //       return;
+  //     }
+
+  //     setCouponLoading(true);
+  //     setCouponError("");
+
+  //     try {
+  //       const response = await axios.post(
+  //         "http://localhost:3000/api/discounts/validate-public",
+  //         {
+  //           couponCode,
+  //           cartItems,
+  //           totalAmount: calculateTotal(),
+  //         },
+  //         {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         },
+  //       );
+
+  //       if (response.data.valid) {
+  //         // BACKEND ZWRACA response.data.discount, NIE response.data.coupon
+  //         setAppliedCoupon({
+  //           id: response.data.discount.id,
+  //           name: response.data.discount.name,
+  //           ...(response.data.discount.type === "percentage"
+  //             ? { percent_off: response.data.discount.value }
+  //             : { amount_off: response.data.discount.value * 100 }),
+  //           duration: "once",
+  //         });
+  //         setCouponError("");
+  //         setShowCouponInput(false);
+  //       }
+  //     } catch (err: any) {
+  //       setCouponError(err.response?.data?.error || "Nieprawidłowy kupon");
+  //       setAppliedCoupon(null);
+  //     } finally {
+  //       setCouponLoading(false);
+  //     }
+  //   };
+
+  //   const removeCoupon = () => {
+  //     setAppliedCoupon(null);
+  //     setCouponCode("");
+  //     setCouponError("");
+  //   };
+
+  //   const handleCheckout = async () => {
+  //     if (!user || !token) {
+  //       navigate(`/login?redirect=${encodeURIComponent("/cart/checkout")}`);
+  //       return;
+  //     }
+
+  //     if (cartItems.length === 0) {
+  //       alert("Koszyk jest pusty");
+  //       return;
+  //     }
+
+  //     try {
+  //       setLoading(true);
+
+  //       // Przygotuj dane do wysłania
+  //       const checkoutData: any = {
+  //         items: cartItems.map((item) => ({
+  //           _id: item._id,
+  //           quantity: item.quantity || 1,
+  //         })),
+  //       };
+
+  //       // Dodaj kupon jeśli został zastosowany
+  //       if (couponCode && appliedCoupon) {
+  //         checkoutData.couponCode = couponCode; // ← ZMIENIONE: couponCode zamiast appliedCoupon.id
+  //       }
+
+  //       // Dodaj informację o wymaganej fakturze
+  //       if (requireInvoice) {
+  //         checkoutData.requireInvoice = true;
+  //       }
+
+  //       console.log("📦 Sending checkout data:", checkoutData);
+
+  //       const response = await axios.post(
+  //         "http://localhost:3000/api/cart-checkout-session",
+  //         checkoutData,
+  //         {
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         },
+  //       );
+
+  //       //console.log("✅ Response from backend:", response.data);
+
+  //       if (response.data.url) {
+  //         // Zapisz dane w localStorage
+  //         localStorage.setItem(
+  //           "cartCheckoutData",
+  //           JSON.stringify({
+  //             sessionId: response.data.sessionId,
+  //             couponCode: couponCode,
+  //             requireInvoice: requireInvoice,
+  //             orderId: response.data.orderId,
+  //           }),
+  //         );
+
+  //         // Przekieruj do Stripe
+  //         window.location.href = response.data.url;
+  //       }
+  //     } catch (err: any) {
+  //       console.error("Checkout error:", err);
+  //       alert(err.response?.data?.error || "Wystąpił błąd podczas płatności");
+  //       if (err.response?.status === 401) {
+  //         alert("Sesja wygasła. Zaloguj się ponownie.");
+  //         navigate("/login");
+  //       } else if (err.response?.status === 400) {
+  //         alert(err.response.data.error || "Błąd w danych zamówienia");
+  //       } else {
+  //         alert(err.response?.data?.error || "Wystąpił błąd podczas płatności");
+  //       }
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
   if (cartItems.length === 0) {
     return (
@@ -301,8 +556,37 @@ const CartCheckout: React.FC = () => {
                     Anuluj
                   </button>
                 </div>
+
+                {/* Informacja o statusie logowania */}
+                {!user && (
+                  <p className="text-sm text-gray-600">
+                    💡 Nie jesteś zalogowany. Publiczne kupony będą działać od
+                    razu.
+                  </p>
+                )}
+
                 {couponError && (
-                  <p className="text-red-500 text-sm">{couponError}</p>
+                  <div
+                    className={`p-3 rounded ${couponError.includes("wymaga zalogowania") ? "bg-yellow-50 border border-yellow-200" : "bg-red-50 border border-red-200"}`}
+                  >
+                    <p
+                      className={`text-sm ${couponError.includes("wymaga zalogowania") ? "text-yellow-700" : "text-red-500"}`}
+                    >
+                      {couponError}
+                    </p>
+                    {couponError.includes("wymaga zalogowania") && (
+                      <button
+                        onClick={() =>
+                          navigate(
+                            `/login?redirect=${encodeURIComponent("/cart/checkout")}&coupon=${couponCode}`,
+                          )
+                        }
+                        className="mt-2 text-sm text-blue-600 hover:text-blue-800 underline"
+                      >
+                        Przejdź do logowania
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             )}
@@ -321,6 +605,11 @@ const CartCheckout: React.FC = () => {
               {appliedCoupon.amount_off && (
                 <p className="text-sm text-green-600">
                   Zniżka: {appliedCoupon.amount_off / 100} PLN
+                </p>
+              )}
+              {!user && (
+                <p className="text-xs text-yellow-600 mt-1">
+                  ⚠️ Zaloguj się przed płatnością, aby potwierdzić kupon
                 </p>
               )}
             </div>
