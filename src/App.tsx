@@ -35,6 +35,8 @@ import { useAutoRefresh } from "./hooks/useAutoRefresh";
 import CartCancelPage from "./pages/CartCancelPage";
 import FAQPage from "./pages/FAQPage";
 import ContactPage from "./pages/ContactPage";
+import ProductResources from "./components/orders/ProductResources";
+import UserProductsDashboard from "./pages/UserProductDashboard";
 
 const App = () => {
   useAutoRefresh();
@@ -68,6 +70,12 @@ const App = () => {
             <Route
               path="/reset-password-request"
               element={<PasswordResetRequest />}
+            />
+
+            <Route path="/user/products" element={<UserProductsDashboard />} />
+            <Route
+              path="/user/products/:productId"
+              element={<ProductResources />}
             />
             {/* Routy admina */}
             <Route

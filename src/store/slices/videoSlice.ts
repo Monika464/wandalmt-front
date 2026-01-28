@@ -22,9 +22,9 @@ export const fetchVideoUrl = createAsyncThunk(
   async (videoId: string) => {
     //console.log("Fetching video URL for ID hello:", videoId);
     const res = await api.get(`/api/stream/${videoId}`);
-    //console.log("Fetched video URL:", res.data);
+    console.log("Fetched video URL:", res.data);
     return res.data;
-  }
+  },
 );
 
 export const fetchVideosUrls = createAsyncThunk(
@@ -33,7 +33,7 @@ export const fetchVideosUrls = createAsyncThunk(
     const res = await api.get(`/api/stream/videos`);
 
     return res.data;
-  }
+  },
 );
 
 export const deleteVideo = createAsyncThunk(
@@ -45,7 +45,7 @@ export const deleteVideo = createAsyncThunk(
     } catch (err: any) {
       return rejectWithValue(err?.response?.data ?? "delete-video-failed");
     }
-  }
+  },
 );
 
 const videoSlice = createSlice({

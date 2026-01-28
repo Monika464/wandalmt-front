@@ -9,7 +9,6 @@ import type { RootState, AppDispatch } from "../store";
 import { formatCurrency } from "../utils/formatcurremcy";
 import ViewPublicResource from "../components/resources/ViewPublicResource";
 import AddToCartButton from "../components/products/AddToCartButton";
-import CheckoutButton from "../components/products/CheckoutButton";
 import Navbar from "../components/elements/Navbar";
 
 export default function ProductResourcePage() {
@@ -19,7 +18,7 @@ export default function ProductResourcePage() {
   const dispatch = useDispatch<AppDispatch>();
 
   const product: Product | undefined = useSelector((state: RootState) =>
-    productId ? state.productsPublic.byId[productId] : undefined
+    productId ? state.productsPublic.byId[productId] : undefined,
   );
 
   //console.log("hello", productId);
@@ -27,7 +26,7 @@ export default function ProductResourcePage() {
   const resource: IResource | undefined = useSelector((state: RootState) =>
     productId
       ? state.resourcesPublic.resourcesByProductId[productId]
-      : undefined
+      : undefined,
   );
 
   console.log("resource:", resource);

@@ -21,7 +21,7 @@ const ProductList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   const { products, loading, error } = useSelector(
-    (state: RootState) => state.products
+    (state: RootState) => state.products,
   );
 
   const [editingProductId, setEditingProductId] = useState<string | null>(null);

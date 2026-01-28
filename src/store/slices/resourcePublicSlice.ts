@@ -34,7 +34,7 @@ export const fetchResourceByProductId = createAsyncThunk<
       const res = await api.get(`/resources/${productId}`, {
         signal,
       });
-      // console.log("Fetched resource by ID:", res.data);
+      //console.log("Fetched resource by ID:", res.data);
       return res.data as IResource;
     } catch (error: any) {
       if (axios.isCancel(error) || error.name === "CanceledError") {
@@ -43,7 +43,7 @@ export const fetchResourceByProductId = createAsyncThunk<
       }
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 const resourceSlice = createSlice({
@@ -71,13 +71,13 @@ const resourceSlice = createSlice({
         fetchResourceByProductId.fulfilled,
         (
           state: WritableDraft<ResourceState>,
-          action: PayloadAction<IResource>
+          action: PayloadAction<IResource>,
         ) => {
           state.loading = false;
           state.error = null;
           state.selected = action.payload;
           state.resourcesByProductId[action.payload.productId] = action.payload;
-        }
+        },
       )
       .addCase(fetchResourceByProductId.rejected, (state, action) => {
         state.loading = false;

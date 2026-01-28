@@ -97,3 +97,13 @@ export interface CartItem {
   quantity: number;
   imageUrl?: string;
 }
+
+export interface ImportMetaEnv {
+  readonly VITE_BUNNY_LIBRARY_ID: string;
+  readonly VITE_API_URL: string;
+  // dodaj inne zmienne środowiskowe
+}
+
+export interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}

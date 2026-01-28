@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUserOrders } from "../../store/slices/orderSlice";
 import type { AppDispatch, RootState } from "../../store";
+import { fetchResourceByProductId } from "../../store/slices/resourcePublicSlice";
 
 const UserResources: React.FC = () => {
   console.log("Rendering UserResources component");
@@ -14,7 +15,19 @@ const UserResources: React.FC = () => {
     dispatch(fetchUserOrders());
   }, [dispatch]);
 
-  console.log("User Orders:", userOrders);
+  useEffect(() => {
+    userOrders.forEach((order) => {
+      order.products.forEach((item) => {
+        const product = item.product || item;
+        if (product && product._id) {
+          console.log(
+            `Fetching resource for product ID: ${product._id} from order ID: ${order._id}`,
+          );
+          dispatch(fetchResourceByProductId(product._id));
+        }
+      });
+    });
+  }, [userOrders, dispatch]);
 
   if (loading) return <p>Ładowanie zasobów...</p>;
 
