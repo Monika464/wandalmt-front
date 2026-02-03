@@ -50,7 +50,7 @@ const CartReturnPage: React.FC = () => {
           `http://localhost:3000/api/cart-session-status?session_id=${sessionId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
 
         if (response.data.status === "complete") {
@@ -61,6 +61,8 @@ const CartReturnPage: React.FC = () => {
           if (response.data.invoiceUrl) {
             setInvoiceUrl(response.data.invoiceUrl);
           }
+
+          console.log("Discount applied:", response.data);
 
           if (response.data.discountApplied) {
             setDiscountAmount(response.data.discountAmount);
@@ -74,7 +76,7 @@ const CartReturnPage: React.FC = () => {
         } else if (response.data.status === "pending") {
           setStatus("pending");
           setMessage(
-            response.data.message || "Płatność w trakcie przetwarzania..."
+            response.data.message || "Płatność w trakcie przetwarzania...",
           );
         } else {
           setStatus("error");
@@ -84,7 +86,7 @@ const CartReturnPage: React.FC = () => {
         console.error("Payment status error:", err);
         setStatus("error");
         setMessage(
-          err.response?.data?.error || "Błąd podczas sprawdzania płatności"
+          err.response?.data?.error || "Błąd podczas sprawdzania płatności",
         );
 
         if (orderId) {
