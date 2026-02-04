@@ -1,7 +1,11 @@
 // src/components/Register.tsx
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { registerUser, registerAdmin } from "../../store/slices/authSlice";
+import {
+  registerUser,
+  registerAdmin,
+  clearError,
+} from "../../store/slices/authSlice";
 import type { AppDispatch, RootState } from "../../store";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../elements/Navbar";
@@ -43,21 +47,71 @@ const Register: React.FC = () => {
   //console.log("Current User:", currentUser);
 
   const [success, setSuccess] = useState<string>("");
+  const [localError, setLocalError] = useState<string>("");
+
+  // Czyszczenie błędów przy załadowaniu komponentu
+  useEffect(() => {
+    dispatch(clearError());
+    setLocalError("");
+  }, [dispatch]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Czyszczenie błędów przy zmianie pola
+    if (error || localError) {
+      dispatch(clearError());
+      setLocalError("");
+    }
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Reset błędów
+    dispatch(clearError());
+    setLocalError("");
+    setSuccess("");
+
+    // Walidacja
     if (!captchaToken) {
-      alert("Potwierdź, że nie jesteś robotem.");
+      setLocalError("Potwierdź, że nie jesteś robotem.");
       return;
     }
-    setSuccess("");
+
+    if (!formData.name.trim()) {
+      setLocalError("Imię jest wymagane");
+      return;
+    }
+
+    if (!formData.surname.trim()) {
+      setLocalError("Nazwisko jest wymagane");
+      return;
+    }
+
+    if (!formData.email.trim()) {
+      setLocalError("Email jest wymagany");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setLocalError("Nieprawidłowy format email");
+      return;
+    }
+
+    if (!formData.password) {
+      setLocalError("Hasło jest wymagane");
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setLocalError("Hasło musi mieć co najmniej 6 znaków");
+      return;
+    }
 
     try {
       if (formData.role === "admin" && currentUser?.role === "admin") {
@@ -67,7 +121,7 @@ const Register: React.FC = () => {
             surname: formData.surname,
             email: formData.email,
             password: formData.password,
-          })
+          }),
         ).unwrap();
         setSuccess("Admin został pomyślnie zarejestrowany!");
       } else {
@@ -80,9 +134,17 @@ const Register: React.FC = () => {
             email: formData.email,
             password: formData.password,
             captchaToken: captchaToken,
-          })
+          }),
         ).unwrap();
-        //navigate("/login");
+        // Reset formularza
+        setFormData({
+          name: "",
+          surname: "",
+          email: "",
+          password: "",
+          role: "user",
+        });
+        setCaptchaToken(null);
         navigate(`/login?redirect=${encodeURIComponent(redirectTo)}`);
       }
 
@@ -98,6 +160,21 @@ const Register: React.FC = () => {
       console.error("Błąd rejestracji:", err);
     }
   };
+
+  // Funkcja do wyświetlania błędów
+  const getErrorMessage = () => {
+    if (localError) return localError;
+    if (error) {
+      // Przekształć różne formaty błędów
+      if (typeof error === "string") return error;
+      if (error.error) return error.error;
+      if (error.message) return error.message;
+      return "Wystąpił błąd podczas rejestracji";
+    }
+    return null;
+  };
+
+  const errorMessage = getErrorMessage();
 
   return (
     <>

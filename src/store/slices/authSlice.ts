@@ -5,6 +5,19 @@ import { tokenRefreshService } from "../../services/tokenRefreshService";
 
 type Role = "user" | "admin";
 
+interface RegisterData {
+  name: string;
+  surname: string;
+  email: string;
+  password: string;
+  captchaToken?: string;
+}
+
+interface LoginData {
+  email: string;
+  password: string;
+}
+
 interface User {
   _id: string;
   name: string;
@@ -120,22 +133,47 @@ export const login = createAsyncThunk(
       // Przekaż wiadomość do Reducera
       return thunkAPI.rejectWithValue(errorMessage);
     }
-  }
+  },
 );
 
 // Rejestracja usera
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
-  async (newUser: {
-    name: string;
-    surname: string;
-    email: string;
-    password: string;
-    captchaToken: string | null;
-  }) => {
-    const res = await api.post("/auth/register", newUser);
-    return res.data;
-  }
+  async (
+    newUser: {
+      name: string;
+      surname: string;
+      email: string;
+      password: string;
+      captchaToken: string | null;
+    },
+    { rejectWithValue },
+  ) => {
+    try {
+      const res = await api.post("/auth/register", newUser);
+      return res.data;
+    } catch (error: any) {
+      console.error("Rejestracja - błąd szczegóły:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      // KLUCZOWA ZMIANA: Poprawna obsługa błędu
+      if (error.response?.data?.error) {
+        // Backend zwraca { error: "wiadomość" }
+        return rejectWithValue(error.response.data.error);
+      } else if (error.response?.data?.message) {
+        // Lub { message: "wiadomość" }
+        return rejectWithValue(error.response.data.message);
+      } else if (error.response?.data) {
+        // Lub zwykły string
+        return rejectWithValue(error.response.data);
+      } else {
+        return rejectWithValue(error.message || "Registration failed");
+      }
+    }
+  },
 );
 
 // REGISTER ADMIN
@@ -144,7 +182,7 @@ export const registerAdmin = createAsyncThunk(
   "auth/registerAdmin",
   async (
     data: { name: string; surname: string; email: string; password: string },
-    thunkAPI
+    thunkAPI,
   ) => {
     try {
       //console.log("RegisterAdmin payload:", data);
@@ -179,7 +217,7 @@ export const registerAdmin = createAsyncThunk(
 
       return thunkAPI.rejectWithValue(errorMessage);
     }
-  }
+  },
 );
 
 // Logout thunk
@@ -196,7 +234,7 @@ export const logoutUser = createAsyncThunk(
       await api.post(
         "/auth/logout",
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       return;
@@ -204,7 +242,7 @@ export const logoutUser = createAsyncThunk(
       console.error("Logout user error:", error);
       return thunkAPI.rejectWithValue("Błąd przy wylogowaniu użytkownika");
     }
-  }
+  },
 );
 
 // Logout admin
@@ -220,7 +258,7 @@ export const logoutAdmin = createAsyncThunk(
       await api.post(
         "/auth/logout-admin",
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       return;
@@ -228,7 +266,7 @@ export const logoutAdmin = createAsyncThunk(
       console.error("Logout admin error:", error);
       return thunkAPI.rejectWithValue("Błąd przy wylogowaniu admina");
     }
-  }
+  },
 );
 export const checkAuth = createAsyncThunk(
   "auth/checkAuth",
@@ -247,7 +285,7 @@ export const checkAuth = createAsyncThunk(
       thunkAPI.dispatch(logoutUser());
       return thunkAPI.rejectWithValue("unauthorized");
     }
-  }
+  },
 );
 
 export const refreshToken = createAsyncThunk(
@@ -266,7 +304,7 @@ export const refreshToken = createAsyncThunk(
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       return response.data; // { token, expiresAt }
@@ -284,7 +322,7 @@ export const refreshToken = createAsyncThunk(
 
       return thunkAPI.rejectWithValue(errorMessage);
     }
-  }
+  },
 );
 /////////////////////////////////////////////////////////////////////
 
@@ -295,6 +333,9 @@ const authSlice = createSlice({
     clearMessages(state) {
       state.error = null;
       state.success = null;
+    },
+    clearError: (state) => {
+      state.error = null;
     },
     // Nowy reducer do ręcznego ustawienia odświeżania
     setupAutoRefresh(state) {
@@ -329,7 +370,7 @@ const authSlice = createSlice({
           state.expiresAt = action.payload.expiresAt;
           localStorage.setItem(
             "expiresAt",
-            action.payload.expiresAt.toString()
+            action.payload.expiresAt.toString(),
           );
           // Uruchom automatyczne odświeżanie
           setupTokenRefresh(action.payload.expiresAt);
@@ -364,7 +405,7 @@ const authSlice = createSlice({
             state.expiresAt = action.payload.expiresAt;
             localStorage.setItem(
               "expiresAt",
-              action.payload.expiresAt.toString()
+              action.payload.expiresAt.toString(),
             );
             // Uruchom automatyczne odświeżanie
             setupTokenRefresh(action.payload.expiresAt);
@@ -381,7 +422,8 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.error.message || "Błąd rejestracji";
+        //state.error = action.error.message || "Błąd rejestracji";
+        state.error = (action.payload as string) || "Registration failed";
         clearTokenRefresh();
       })
 
@@ -532,6 +574,6 @@ const authSlice = createSlice({
       });
   },
 });
-export const { clearMessages, setupAutoRefresh, clearAutoRefresh } =
+export const { clearMessages, setupAutoRefresh, clearAutoRefresh, clearError } =
   authSlice.actions;
 export default authSlice.reducer;
