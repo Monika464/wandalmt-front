@@ -18,6 +18,46 @@ const CartReturnPage: React.FC = () => {
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
   const [discountAmount, setDiscountAmount] = useState<number | null>(null);
+  const [refreshTimer, setRefreshTimer] = useState<number | null>(null);
+  const [timeLeft, setTimeLeft] = useState<number>(4);
+
+  // Timer do automatycznego odświeżenia
+  useEffect(() => {
+    // Jeśli status to success i nie ma invoiceUrl, uruchamiamy timer
+    if (status === "success" && !invoiceUrl && refreshTimer === null) {
+      const timer = window.setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            window.location.reload(); // Odśwież stronę
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      setRefreshTimer(timer);
+
+      // Cleanup
+      return () => {
+        if (timer) clearInterval(timer);
+      };
+    }
+
+    // Jeśli pojawi się invoiceUrl, zatrzymujemy timer
+    if (invoiceUrl && refreshTimer) {
+      clearInterval(refreshTimer);
+      setRefreshTimer(null);
+    }
+  }, [status, invoiceUrl, refreshTimer]);
+
+  // Dodatkowo: zatrzymaj timer przy odmontowaniu komponentu
+  useEffect(() => {
+    return () => {
+      if (refreshTimer) {
+        clearInterval(refreshTimer);
+      }
+    };
+  }, [refreshTimer]);
 
   useEffect(() => {
     const checkPaymentStatus = async () => {
@@ -25,13 +65,6 @@ const CartReturnPage: React.FC = () => {
       const success = searchParams.get("success");
       const canceled = searchParams.get("canceled");
       const orderId = searchParams.get("orderId");
-
-      // console.log("CartReturnPage - params:", {
-      //   sessionId,
-      //   success,
-      //   orderId,
-      //   canceled,
-      // });
 
       if (canceled === "true") {
         setStatus("error");
@@ -62,7 +95,7 @@ const CartReturnPage: React.FC = () => {
             setInvoiceUrl(response.data.invoiceUrl);
           }
 
-          console.log("Discount applied:", response.data);
+          //console.log("Discount applied:", response.data);
 
           if (response.data.discountApplied) {
             setDiscountAmount(response.data.discountAmount);
@@ -71,7 +104,7 @@ const CartReturnPage: React.FC = () => {
           // Wyczyść localStorage
           localStorage.removeItem("cartCheckoutData");
 
-          // Możesz też wyczyścić koszyk tutaj
+          // Wyczyść koszyk
           dispatch(clearCart());
         } else if (response.data.status === "pending") {
           setStatus("pending");
@@ -99,6 +132,11 @@ const CartReturnPage: React.FC = () => {
     checkPaymentStatus();
   }, [searchParams, token, dispatch]);
 
+  // Funkcja do ręcznego odświeżenia
+  // const handleManualRefresh = () => {
+  //   window.location.reload();
+  // };
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
@@ -117,6 +155,25 @@ const CartReturnPage: React.FC = () => {
             <div className="text-6xl mb-6">🎉</div>
             <h2 className="text-2xl font-bold text-green-600 mb-4">Sukces!</h2>
             <p className="text-gray-700 mb-6">{message}</p>
+
+            {/* Timer informacyjny */}
+            {/* {!invoiceUrl && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                <p className="text-yellow-700 mb-2">
+                  <span className="font-bold">Trwa generowanie faktury...</span>
+                </p>
+                <p className="text-sm text-yellow-600 mb-3">
+                  Strona odświeży się automatycznie za:{" "}
+                  <span className="font-bold">{timeLeft} sekund</span>
+                </p>
+                <button
+                  onClick={handleManualRefresh}
+                  className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm"
+                >
+                  Odśwież teraz
+                </button>
+              </div>
+            )} */}
 
             {/* Szczegóły zamówienia */}
             {orderDetails && (
@@ -139,7 +196,7 @@ const CartReturnPage: React.FC = () => {
                   </p>
                 )}
                 <p className="text-sm mt-2">
-                  Potwierdzenie zostało wysłane na email.
+                  Potwierdzenie zostanie wysłane na email.
                 </p>
               </div>
             )}
