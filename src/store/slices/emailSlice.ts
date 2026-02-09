@@ -20,12 +20,13 @@ export const requestPasswordReset = createAsyncThunk(
   "email/requestPasswordReset",
   async (email: string, { rejectWithValue }) => {
     try {
-      const res = await api.post("/email/request-reset", { email });
+      //const res = await api.post("/email/request-reset", { email });
+      const res = await api.post("/auth/forgot-password", { email });
       return res.data.message;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.error || "Błąd resetu hasła");
     }
-  }
+  },
 );
 
 // -----------------------------------------------------
@@ -35,15 +36,17 @@ export const resetPassword = createAsyncThunk(
   "email/resetPassword",
   async (
     payload: { token: string; newPassword: string },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
-      const res = await api.post("/email/reset-password", payload);
+      //const res = await api.post("/email/reset-password", payload);
+      const res = await api.post("/auth/reset-password", payload);
+
       return res.data.message;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.error || "Błąd zmiany hasła");
     }
-  }
+  },
 );
 
 // -----------------------------------------------------
@@ -63,15 +66,15 @@ export const changeEmail = createAsyncThunk(
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       return res.data.message;
     } catch (err: any) {
       return rejectWithValue(
-        err.response?.data?.error || "Błąd zmiany e-maila"
+        err.response?.data?.error || "Błąd zmiany e-maila",
       );
     }
-  }
+  },
 );
 
 // -----------------------------------------------------
