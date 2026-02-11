@@ -230,7 +230,7 @@ const CartReturnPage: React.FC = () => {
 
             <div className="space-y-3">
               <button
-                onClick={() => navigate("/account?tab=purchases")}
+                onClick={() => navigate("/user/products")}
                 className="w-full py-3 bg-blue-500 text-white rounded hover:bg-blue-600"
               >
                 Przejdź do moich zakupów
