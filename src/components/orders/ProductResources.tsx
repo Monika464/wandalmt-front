@@ -317,7 +317,7 @@ const ProductResources: React.FC = () => {
                     ← Previous
                   </button>
 
-                  {user?._id && (
+                  {/* {user?._id && (
                     <button
                       onClick={handleToggleChapterCompletion}
                       className={`px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 ${
@@ -341,7 +341,7 @@ const ProductResources: React.FC = () => {
                         </>
                       )}
                     </button>
-                  )}
+                  )} */}
 
                   <button
                     onClick={handleNextChapter}
