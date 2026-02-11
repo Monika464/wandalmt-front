@@ -10,6 +10,7 @@ import ordersReducer from "./slices/orderSlice";
 import emailReducer from "./slices/emailSlice";
 import userprofileSlice from "./slices/userprofileSlice";
 import videoReducer from "./slices/videoSlice";
+import progressReducer from "./slices/progressSlice";
 
 export const store = configureStore({
   reducer: {
@@ -24,6 +25,7 @@ export const store = configureStore({
     email: emailReducer,
     userprofile: userprofileSlice,
     video: videoReducer,
+    progress: progressReducer,
   },
   devTools: true,
   // devTools: {

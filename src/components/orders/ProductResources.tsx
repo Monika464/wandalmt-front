@@ -1,21 +1,22 @@
 // components/products/ProductResources.tsx
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import type { AppDispatch, RootState } from "../../store";
 import type { IResource } from "../../types";
 import { fetchResourceByProductId } from "../../store/slices/resourcePublicSlice";
+import { useChapterProgress } from "../../hooks/useChapterProgress";
 import InlineVideoPlayer from "../video/InlineVideoPlayer";
 import {
-  Play,
   CheckCircle,
   Clock,
   Lock,
   ChevronRight,
   BarChart3,
-  Award,
   BookOpen,
+  Loader2,
 } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 interface Chapter {
   _id: string;
@@ -27,16 +28,6 @@ interface Chapter {
   order?: number;
   duration?: number;
   thumbnail?: string;
-  isLocked?: boolean;
-}
-
-interface VideoProgress {
-  productId: string;
-  chapterId: string;
-  progress: number;
-  timeWatched: number;
-  lastWatched: string;
-  completed: boolean;
 }
 
 const ProductResources: React.FC = () => {
@@ -47,8 +38,6 @@ const ProductResources: React.FC = () => {
   const [currentChapter, setCurrentChapter] = useState<Chapter | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [loading, setLoading] = useState(true);
-  const [videoProgress, setVideoProgress] = useState<VideoProgress[]>([]);
-  const [overallProgress, setOverallProgress] = useState(0);
 
   const resource: IResource | undefined = useSelector((state: RootState) =>
     productId
@@ -56,101 +45,32 @@ const ProductResources: React.FC = () => {
       : undefined,
   );
 
-  // Ładowanie postępu
-  const loadProgressFromStorage = useCallback(() => {
-    if (!productId) return [];
-    try {
-      const saved = localStorage.getItem(`videoProgress_${productId}`);
-      return saved ? JSON.parse(saved) : [];
-    } catch (error) {
-      console.error("Błąd ładowania postępu:", error);
-      return [];
+  const { user } = useSelector((state: RootState) => state.auth);
+  //console.log("Current user in ProductResources:", user);
+  const {
+    isChapterCompleted,
+    loadProgress,
+    completeChapter,
+    uncompleteChapter,
+    resetAllProgress,
+    calculateOverallProgress,
+    loading: progressLoading,
+    error: progressError,
+  } = useChapterProgress();
+
+  // Załaduj postęp po zalogowaniu/zmianie produktu
+  useEffect(() => {
+    if (productId && user?._id) {
+      loadProgress(productId);
     }
-  }, [productId]);
+  }, [productId, user?._id, loadProgress]);
 
-  // Zapis postępu do localStorage
-  const saveProgressToStorage = useCallback(
-    (progress: VideoProgress[]) => {
-      if (!productId) return;
-      try {
-        localStorage.setItem(
-          `videoProgress_${productId}`,
-          JSON.stringify(progress),
-        );
-      } catch (error) {
-        console.error("Błąd zapisywania postępu:", error);
-      }
-    },
-    [productId],
-  );
-
-  // Aktualizacja postępu rozdziału
-  const updateChapterProgress = useCallback(
-    (
-      chapterId: string,
-      progress: number, // 0-1
-      timeWatched: number, // sekundy
-      completed: boolean = false,
-    ) => {
-      if (!productId) return;
-
-      setVideoProgress((prev) => {
-        const existingIndex = prev.findIndex((p) => p.chapterId === chapterId);
-        const newProgress: VideoProgress = {
-          productId,
-          chapterId,
-          progress: Math.min(progress, 1), // maks 100%
-          timeWatched,
-          lastWatched: new Date().toISOString(),
-          completed,
-        };
-
-        let updated;
-        if (existingIndex >= 0) {
-          updated = [...prev];
-          updated[existingIndex] = newProgress;
-        } else {
-          updated = [...prev, newProgress];
-        }
-
-        saveProgressToStorage(updated);
-        return updated;
-      });
-    },
-    [productId, saveProgressToStorage],
-  );
-
-  // Oznacz rozdział jako ukończony (ręcznie)
-  const markChapterAsCompleted = useCallback(
-    (chapterId: string) => {
-      if (!productId || !chapterId) return;
-
-      // Znajdź rozdział
-      const chapter = chapters.find((ch) => ch._id === chapterId);
-      if (!chapter) return;
-
-      updateChapterProgress(
-        chapterId,
-        1, // 100% progress
-        chapter.duration || 300, // domyślnie 5 minut
-        true,
-      );
-    },
-    [productId, chapters, updateChapterProgress],
-  );
-
-  // Obsługa ręcznego oznaczania jako ukończone
-  const handleMarkAsCompleted = () => {
-    if (!currentChapter) return;
-    markChapterAsCompleted(currentChapter._id);
-  };
-
-  // Obliczanie ogólnego postępu
-  const calculateOverallProgress = useCallback(() => {
-    if (chapters.length === 0) return 0;
-    const completedChapters = videoProgress.filter((p) => p.completed);
-    return (completedChapters.length / chapters.length) * 100;
-  }, [chapters, videoProgress]);
+  // Obsługa błędów
+  useEffect(() => {
+    if (progressError) {
+      toast.error(progressError);
+    }
+  }, [progressError]);
 
   // Efekt pobierania resource
   useEffect(() => {
@@ -177,31 +97,58 @@ const ProductResources: React.FC = () => {
           order: chapter.number,
           duration: chapter.duration || 0,
           thumbnail: chapter.thumbnail,
-          isLocked: false,
         }))
         .sort((a, b) => (a.order || 0) - (b.order || 0)) || [];
 
     setChapters(formattedChapters);
 
-    const savedProgress = loadProgressFromStorage();
-    setVideoProgress(savedProgress);
+    // Poczekaj na załadowanie postępu
+    const waitForProgress = async () => {
+      if (!user?.id) {
+        // Dla niezalogowanych - po prostu pierwszy rozdział
+        if (formattedChapters.length > 0) {
+          setCurrentChapter(formattedChapters[0]);
+        }
+        setLoading(false);
+        return;
+      }
 
-    // Ustaw pierwszy nieukończony rozdział lub pierwszy
-    if (formattedChapters.length > 0) {
-      const firstUncompleted = formattedChapters.find(
-        (ch) =>
-          !savedProgress.find((p) => p.chapterId === ch._id && p.completed),
-      );
-      setCurrentChapter(firstUncompleted || formattedChapters[0]);
+      // Daj czas na załadowanie postępu
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Znajdź pierwszy nieukończony rozdział
+      if (formattedChapters.length > 0) {
+        const firstUncompleted = formattedChapters.find(
+          (ch) => !isChapterCompleted(productId, ch._id),
+        );
+        setCurrentChapter(firstUncompleted || formattedChapters[0]);
+      }
+
+      setLoading(false);
+    };
+
+    waitForProgress();
+  }, [resource, productId, user?._id, isChapterCompleted]);
+
+  // Funkcje obsługi
+  const handleVideoEnded = () => {
+    if (!currentChapter || !productId || !user?._id) return;
+
+    completeChapter(productId, currentChapter._id);
+    toast.success(`Chapter "${currentChapter.title}" marked as completed!`);
+  };
+
+  const handleToggleChapterCompletion = () => {
+    if (!currentChapter || !productId || !user?._id) return;
+
+    if (isChapterCompleted(productId, currentChapter._id)) {
+      uncompleteChapter(productId, currentChapter._id);
+      toast.success(`Chapter "${currentChapter.title}" marked as incomplete`);
+    } else {
+      completeChapter(productId, currentChapter._id);
+      toast.success(`Chapter "${currentChapter.title}" marked as completed!`);
     }
-
-    setLoading(false);
-  }, [resource, productId, loadProgressFromStorage]);
-
-  // Aktualizuj ogólny postęp
-  useEffect(() => {
-    setOverallProgress(calculateOverallProgress());
-  }, [chapters, videoProgress, calculateOverallProgress]);
+  };
 
   // Funkcje nawigacji
   const handleNextChapter = () => {
@@ -213,6 +160,14 @@ const ProductResources: React.FC = () => {
     if (currentIndex < chapters.length - 1) {
       const nextChapter = chapters[currentIndex + 1];
       setCurrentChapter(nextChapter);
+
+      // Automatycznie oznacz obecny rozdział jako ukończony
+      if (
+        user?._id &&
+        !isChapterCompleted(productId || "", currentChapter._id)
+      ) {
+        completeChapter(productId || "", currentChapter._id);
+      }
     }
   };
 
@@ -229,55 +184,21 @@ const ProductResources: React.FC = () => {
   };
 
   const handleChapterClick = (chapter: Chapter) => {
-    if (chapter.isLocked) {
-      alert("Complete previous chapters first!");
-      return;
-    }
     setCurrentChapter(chapter);
   };
 
-  const getChapterProgress = (chapterId: string) => {
-    return videoProgress.find((p) => p.chapterId === chapterId);
-  };
+  // Oblicz ogólny postęp
+  const overallProgress = calculateOverallProgress(
+    productId || "",
+    chapters.length,
+  );
 
-  // Przycisk do ręcznego zapisania postępu (np. 50%)
-  const handleSavePartialProgress = () => {
-    if (!currentChapter) return;
-    updateChapterProgress(
-      currentChapter._id,
-      0.5, // 50% progress
-      (currentChapter.duration || 300) * 0.5, // połowa czasu
-      false,
-    );
-  };
-
-  // Reset postępu dla rozdziału
-  const handleResetChapterProgress = (
-    chapterId: string,
-    e: React.MouseEvent,
-  ) => {
-    e.stopPropagation(); // Zapobiegaj kliknięciu rozdziału
-
-    setVideoProgress((prev) => {
-      const updated = prev.filter((p) => p.chapterId !== chapterId);
-      saveProgressToStorage(updated);
-      return updated;
-    });
-  };
-
-  if (loading) {
+  if (loading || progressLoading) {
     return (
-      <div className="max-w-7xl mx-auto p-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
-          <div className="flex flex-col lg:flex-row gap-8">
-            <div className="lg:w-2/3">
-              <div className="bg-gray-200 rounded-xl pt-[56.25%]"></div>
-            </div>
-            <div className="lg:w-1/3">
-              <div className="h-64 bg-gray-200 rounded-xl"></div>
-            </div>
-          </div>
+      <div className="max-w-7xl mx-auto p-8 flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin mx-auto text-blue-500 mb-4" />
+          <p className="text-gray-600">Loading course content...</p>
         </div>
       </div>
     );
@@ -298,9 +219,24 @@ const ProductResources: React.FC = () => {
     <div className="max-w-7xl mx-auto p-4 lg:p-8">
       {/* Nagłówek kursu */}
       <header className="mb-8">
-        <h1 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-3">
-          {resource.title}
-        </h1>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
+          <h1 className="text-3xl lg:text-4xl font-bold text-gray-800">
+            {resource.title}
+          </h1>
+
+          {!user?._id && (
+            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-2 rounded-lg">
+              <p className="text-sm">
+                <strong>Note:</strong> Progress is not saved. Please{" "}
+                <a href="/login" className="underline font-semibold">
+                  login
+                </a>{" "}
+                to save your progress.
+              </p>
+            </div>
+          )}
+        </div>
+
         {resource.content && (
           <p className="text-gray-600 text-lg">{resource.content}</p>
         )}
@@ -328,21 +264,27 @@ const ProductResources: React.FC = () => {
         <div className="lg:w-2/3">
           {/* Video Player */}
           <div className="mb-6">
-            <InlineVideoPlayer
-              videoGuid={currentChapter?.bunnyVideoId}
-              title={currentChapter?.title}
-              onNext={handleNextChapter}
-              onPrev={handlePrevChapter}
-              onEnded={handleMarkAsCompleted} // Oznacz jako ukończone po zakończeniu
-              className="w-full"
-            />
+            {currentChapter?.bunnyVideoId ? (
+              <InlineVideoPlayer
+                videoGuid={currentChapter.bunnyVideoId}
+                title={currentChapter.title}
+                onNext={handleNextChapter}
+                onPrev={handlePrevChapter}
+                onEnded={handleVideoEnded}
+                className="w-full"
+              />
+            ) : (
+              <div className="bg-gray-100 rounded-xl aspect-video flex items-center justify-center">
+                <p className="text-gray-500">Video not available</p>
+              </div>
+            )}
           </div>
 
           {/* Informacje o aktualnym rozdziale */}
           {currentChapter && (
             <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
-                <div>
+                <div className="flex-1">
                   <div className="flex items-center gap-3 mb-3">
                     <span className="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1.5 rounded-full">
                       Chapter {currentChapter.number}
@@ -378,21 +320,31 @@ const ProductResources: React.FC = () => {
                     ← Previous
                   </button>
 
-                  <div className="flex gap-2">
+                  {user?._id && (
                     <button
-                      onClick={handleSavePartialProgress}
-                      className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
-                      title="Save 50% progress"
+                      onClick={handleToggleChapterCompletion}
+                      className={`px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                        isChapterCompleted(productId || "", currentChapter._id)
+                          ? "bg-gray-500 hover:bg-gray-600 text-white"
+                          : "bg-green-500 hover:bg-green-600 text-white"
+                      }`}
                     >
-                      Save Progress
+                      {isChapterCompleted(
+                        productId || "",
+                        currentChapter._id,
+                      ) ? (
+                        <>
+                          <CheckCircle size={16} />
+                          Mark as Incomplete
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle size={16} />
+                          Mark as Completed
+                        </>
+                      )}
                     </button>
-                    <button
-                      onClick={handleMarkAsCompleted}
-                      className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                    >
-                      ✓ Mark as Completed
-                    </button>
-                  </div>
+                  )}
 
                   <button
                     onClick={handleNextChapter}
@@ -409,51 +361,22 @@ const ProductResources: React.FC = () => {
                 </div>
               </div>
 
-              {/* Postęp tego rozdziału */}
-              {(() => {
-                const progress = getChapterProgress(currentChapter._id);
-                if (progress) {
-                  return (
-                    <div className="border-t pt-6">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-medium">Your Progress</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-blue-600 font-semibold">
-                            {(progress.progress * 100).toFixed(0)}%
-                          </span>
-                          <button
-                            onClick={() =>
-                              handleResetChapterProgress(
-                                currentChapter._id,
-                                {} as React.MouseEvent,
-                              )
-                            }
-                            className="text-xs text-red-500 hover:text-red-700"
-                            title="Reset progress"
-                          >
-                            Reset
-                          </button>
-                        </div>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-blue-500 h-2 rounded-full transition-all duration-500"
-                          style={{ width: `${progress.progress * 100}%` }}
-                        ></div>
-                      </div>
-                      <div className="flex justify-between text-sm text-gray-500 mt-2">
-                        <span>
-                          {progress.completed ? "Completed" : "In Progress"}
-                        </span>
-                        <span>
-                          Last watched: {formatDate(progress.lastWatched)}
-                        </span>
-                      </div>
+              {/* Status rozdziału */}
+              {user?._id &&
+                isChapterCompleted(productId || "", currentChapter._id) && (
+                  <div className="border-t pt-6">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">Status</span>
+                      <span className="flex items-center gap-2 text-green-600 font-semibold">
+                        <CheckCircle size={16} />
+                        Completed
+                      </span>
                     </div>
-                  );
-                }
-                return null;
-              })()}
+                    <p className="text-sm text-gray-500 mt-1">
+                      This chapter has been marked as completed.
+                    </p>
+                  </div>
+                )}
             </div>
           )}
         </div>
@@ -487,15 +410,21 @@ const ProductResources: React.FC = () => {
 
               <div className="text-sm text-gray-600">
                 {chapters.length} chapters • {formatTotalDuration(chapters)}
+                {user?.id && (
+                  <div className="mt-1 text-xs text-green-600">
+                    ✓ Progress saved to your account
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Lista rozdziałów */}
             <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
               {chapters.map((chapter, index) => {
-                const progress = getChapterProgress(chapter._id);
+                const completed = user?._id
+                  ? isChapterCompleted(productId || "", chapter._id)
+                  : false;
                 const isCurrent = currentChapter?._id === chapter._id;
-                const isCompleted = progress?.completed;
 
                 return (
                   <div
@@ -505,30 +434,28 @@ const ProductResources: React.FC = () => {
                       isCurrent
                         ? "bg-blue-50 border-l-4 border-l-blue-500"
                         : "hover:bg-gray-50 border-l-4 border-l-transparent"
-                    } ${chapter.isLocked ? "opacity-75" : ""}`}
+                    }`}
                   >
                     <div className="flex items-start gap-4">
                       {/* Numer/status rozdziału */}
                       <div className="relative flex-shrink-0">
                         <div
                           className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                            isCompleted
+                            completed
                               ? "bg-green-100 border-green-300 text-green-600"
                               : isCurrent
                                 ? "bg-blue-500 border-blue-500 text-white"
                                 : "bg-gray-100 border-gray-200 text-gray-600"
                           }`}
                         >
-                          {isCompleted ? (
+                          {completed ? (
                             <CheckCircle size={18} />
-                          ) : chapter.isLocked ? (
-                            <Lock size={18} />
                           ) : (
                             <span className="font-semibold">{index + 1}</span>
                           )}
                         </div>
 
-                        {/* Linia łącząca (opcjonalnie) */}
+                        {/* Linia łącząca */}
                         {index < chapters.length - 1 && (
                           <div className="absolute left-1/2 top-full h-4 w-0.5 bg-gray-200 -translate-x-1/2"></div>
                         )}
@@ -539,7 +466,7 @@ const ProductResources: React.FC = () => {
                         <div className="flex justify-between items-start mb-1">
                           <h4
                             className={`font-medium truncate ${
-                              isCompleted
+                              completed
                                 ? "text-green-700"
                                 : isCurrent
                                   ? "text-blue-700"
@@ -548,24 +475,11 @@ const ProductResources: React.FC = () => {
                           >
                             {chapter.title}
                           </h4>
-                          <div className="flex items-center gap-2">
-                            {chapter.duration && (
-                              <span className="text-sm text-gray-500 whitespace-nowrap">
-                                {formatDuration(chapter.duration)}
-                              </span>
-                            )}
-                            {progress && (
-                              <button
-                                onClick={(e) =>
-                                  handleResetChapterProgress(chapter._id, e)
-                                }
-                                className="text-xs text-red-400 hover:text-red-600 px-1"
-                                title="Reset progress"
-                              >
-                                ×
-                              </button>
-                            )}
-                          </div>
+                          {chapter.duration && (
+                            <span className="text-sm text-gray-500 whitespace-nowrap">
+                              {formatDuration(chapter.duration)}
+                            </span>
+                          )}
                         </div>
 
                         {chapter.description && (
@@ -574,31 +488,14 @@ const ProductResources: React.FC = () => {
                           </p>
                         )}
 
-                        {/* Indikator postępu dla rozdziału */}
-                        {progress && !isCompleted && progress.progress > 0 && (
-                          <div className="flex items-center gap-2">
-                            <div className="w-full bg-gray-200 rounded-full h-1.5">
-                              <div
-                                className="bg-blue-400 h-1.5 rounded-full"
-                                style={{ width: `${progress.progress * 100}%` }}
-                              ></div>
-                            </div>
-                            <span className="text-xs text-gray-500 whitespace-nowrap">
-                              {Math.round(progress.progress * 100)}%
-                            </span>
-                          </div>
-                        )}
-
                         {/* Status */}
                         <div className="flex items-center justify-between mt-2">
                           <div className="text-xs text-gray-500">
-                            {isCompleted ? (
+                            {completed ? (
                               <span className="flex items-center gap-1 text-green-600">
                                 <CheckCircle size={12} />
                                 Completed
                               </span>
-                            ) : progress ? (
-                              <span className="text-blue-500">In Progress</span>
                             ) : (
                               <span className="text-gray-400">Not Started</span>
                             )}
@@ -619,38 +516,64 @@ const ProductResources: React.FC = () => {
 
             {/* Statystyki footer */}
             <div className="p-4 border-t bg-gray-50">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {videoProgress.filter((p) => p.completed).length}
+              {user?._id ? (
+                <>
+                  <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {
+                          chapters.filter((ch) =>
+                            isChapterCompleted(productId || "", ch._id),
+                          ).length
+                        }
+                      </div>
+                      <div className="text-gray-600">Completed</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">
+                        {formatTotalDurationHours(chapters)}
+                      </div>
+                      <div className="text-gray-600">Total Duration</div>
+                    </div>
                   </div>
-                  <div className="text-gray-600">Completed</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">
-                    {formatTotalDurationHours(chapters)}
-                  </div>
-                  <div className="text-gray-600">Total Duration</div>
-                </div>
-              </div>
 
-              {/* Przycisk resetu całego kursu */}
-              <div className="mt-4 text-center">
-                <button
-                  onClick={() => {
-                    if (window.confirm("Reset all progress for this course?")) {
-                      setVideoProgress([]);
-                      saveProgressToStorage([]);
-                      if (chapters.length > 0) {
-                        setCurrentChapter(chapters[0]);
-                      }
-                    }
-                  }}
-                  className="text-sm text-red-500 hover:text-red-700 px-3 py-1 border border-red-200 rounded hover:bg-red-50 transition-colors"
-                >
-                  Reset All Progress
-                </button>
-              </div>
+                  {/* Przycisk resetu całego kursu */}
+                  <div className="text-center">
+                    <button
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            "Reset all progress for this course? This cannot be undone.",
+                          )
+                        ) {
+                          resetAllProgress(productId || "");
+                          toast.success("All progress reset!");
+                        }
+                      }}
+                      className="text-sm text-red-500 hover:text-red-700 px-3 py-1 border border-red-200 rounded hover:bg-red-50 transition-colors"
+                    >
+                      Reset All Progress
+                    </button>
+                  </div>
+
+                  <div className="mt-2 text-xs text-gray-500 text-center">
+                    Progress saved for:{" "}
+                    <span className="font-medium">{user.email}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-2">
+                  <p className="text-gray-600 mb-2">
+                    Login to save your progress
+                  </p>
+                  <a
+                    href="/login"
+                    className="inline-block px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  >
+                    Sign In
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -690,14 +613,6 @@ const formatTotalDurationHours = (chapters: Chapter[]): string => {
   return `${hours}h`;
 };
 
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
-};
-
 export default ProductResources;
 
 // // components/products/ProductResources.tsx
@@ -718,6 +633,7 @@ export default ProductResources;
 //   Award,
 //   BookOpen,
 // } from "lucide-react";
+// import { toast } from "react-hot-toast";
 
 // interface Chapter {
 //   _id: string;
@@ -758,6 +674,8 @@ export default ProductResources;
 //       : undefined,
 //   );
 
+//   const { user } = useSelector((state: RootState) => state.auth);
+
 //   // Ładowanie postępu
 //   const loadProgressFromStorage = useCallback(() => {
 //     if (!productId) return [];
@@ -769,6 +687,83 @@ export default ProductResources;
 //       return [];
 //     }
 //   }, [productId]);
+
+//   // Zapis postępu do localStorage
+//   const saveProgressToStorage = useCallback(
+//     (progress: VideoProgress[]) => {
+//       if (!productId) return;
+//       try {
+//         localStorage.setItem(
+//           `videoProgress_${productId}`,
+//           JSON.stringify(progress),
+//         );
+//       } catch (error) {
+//         console.error("Błąd zapisywania postępu:", error);
+//       }
+//     },
+//     [productId],
+//   );
+
+//   // Aktualizacja postępu rozdziału
+//   const updateChapterProgress = useCallback(
+//     (
+//       chapterId: string,
+//       progress: number, // 0-1
+//       timeWatched: number, // sekundy
+//       completed: boolean = false,
+//     ) => {
+//       if (!productId) return;
+
+//       setVideoProgress((prev) => {
+//         const existingIndex = prev.findIndex((p) => p.chapterId === chapterId);
+//         const newProgress: VideoProgress = {
+//           productId,
+//           chapterId,
+//           progress: Math.min(progress, 1), // maks 100%
+//           timeWatched,
+//           lastWatched: new Date().toISOString(),
+//           completed,
+//         };
+
+//         let updated;
+//         if (existingIndex >= 0) {
+//           updated = [...prev];
+//           updated[existingIndex] = newProgress;
+//         } else {
+//           updated = [...prev, newProgress];
+//         }
+
+//         saveProgressToStorage(updated);
+//         return updated;
+//       });
+//     },
+//     [productId, saveProgressToStorage],
+//   );
+
+//   // Oznacz rozdział jako ukończony (ręcznie)
+//   const markChapterAsCompleted = useCallback(
+//     (chapterId: string) => {
+//       if (!productId || !chapterId) return;
+
+//       // Znajdź rozdział
+//       const chapter = chapters.find((ch) => ch._id === chapterId);
+//       if (!chapter) return;
+
+//       updateChapterProgress(
+//         chapterId,
+//         1, // 100% progress
+//         chapter.duration || 300, // domyślnie 5 minut
+//         true,
+//       );
+//     },
+//     [productId, chapters, updateChapterProgress],
+//   );
+
+//   // Obsługa ręcznego oznaczania jako ukończone
+//   const handleMarkAsCompleted = () => {
+//     if (!currentChapter) return;
+//     markChapterAsCompleted(currentChapter._id);
+//   };
 
 //   // Obliczanie ogólnego postępu
 //   const calculateOverallProgress = useCallback(() => {
@@ -865,6 +860,31 @@ export default ProductResources;
 //     return videoProgress.find((p) => p.chapterId === chapterId);
 //   };
 
+//   // Przycisk do ręcznego zapisania postępu (np. 50%)
+//   const handleSavePartialProgress = () => {
+//     if (!currentChapter) return;
+//     updateChapterProgress(
+//       currentChapter._id,
+//       0.5, // 50% progress
+//       (currentChapter.duration || 300) * 0.5, // połowa czasu
+//       false,
+//     );
+//   };
+
+//   // Reset postępu dla rozdziału
+//   const handleResetChapterProgress = (
+//     chapterId: string,
+//     e: React.MouseEvent,
+//   ) => {
+//     e.stopPropagation(); // Zapobiegaj kliknięciu rozdziału
+
+//     setVideoProgress((prev) => {
+//       const updated = prev.filter((p) => p.chapterId !== chapterId);
+//       saveProgressToStorage(updated);
+//       return updated;
+//     });
+//   };
+
 //   if (loading) {
 //     return (
 //       <div className="max-w-7xl mx-auto p-8">
@@ -933,6 +953,7 @@ export default ProductResources;
 //               title={currentChapter?.title}
 //               onNext={handleNextChapter}
 //               onPrev={handlePrevChapter}
+//               onEnded={handleMarkAsCompleted} // Oznacz jako ukończone po zakończeniu
 //               className="w-full"
 //             />
 //           </div>
@@ -976,6 +997,23 @@ export default ProductResources;
 //                   >
 //                     ← Previous
 //                   </button>
+
+//                   <div className="flex gap-2">
+//                     <button
+//                       onClick={handleSavePartialProgress}
+//                       className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+//                       title="Save 50% progress"
+//                     >
+//                       Save Progress
+//                     </button>
+//                     <button
+//                       onClick={handleMarkAsCompleted}
+//                       className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+//                     >
+//                       ✓ Mark as Completed
+//                     </button>
+//                   </div>
+
 //                   <button
 //                     onClick={handleNextChapter}
 //                     disabled={
@@ -999,9 +1037,23 @@ export default ProductResources;
 //                     <div className="border-t pt-6">
 //                       <div className="flex justify-between items-center mb-2">
 //                         <span className="font-medium">Your Progress</span>
-//                         <span className="text-blue-600 font-semibold">
-//                           {(progress.progress * 100).toFixed(0)}%
-//                         </span>
+//                         <div className="flex items-center gap-2">
+//                           <span className="text-blue-600 font-semibold">
+//                             {(progress.progress * 100).toFixed(0)}%
+//                           </span>
+//                           <button
+//                             onClick={() =>
+//                               handleResetChapterProgress(
+//                                 currentChapter._id,
+//                                 {} as React.MouseEvent,
+//                               )
+//                             }
+//                             className="text-xs text-red-500 hover:text-red-700"
+//                             title="Reset progress"
+//                           >
+//                             Reset
+//                           </button>
+//                         </div>
 //                       </div>
 //                       <div className="w-full bg-gray-200 rounded-full h-2">
 //                         <div
@@ -1116,11 +1168,24 @@ export default ProductResources;
 //                           >
 //                             {chapter.title}
 //                           </h4>
-//                           {chapter.duration && (
-//                             <span className="text-sm text-gray-500 whitespace-nowrap ml-2">
-//                               {formatDuration(chapter.duration)}
-//                             </span>
-//                           )}
+//                           <div className="flex items-center gap-2">
+//                             {chapter.duration && (
+//                               <span className="text-sm text-gray-500 whitespace-nowrap">
+//                                 {formatDuration(chapter.duration)}
+//                               </span>
+//                             )}
+//                             {progress && (
+//                               <button
+//                                 onClick={(e) =>
+//                                   handleResetChapterProgress(chapter._id, e)
+//                                 }
+//                                 className="text-xs text-red-400 hover:text-red-600 px-1"
+//                                 title="Reset progress"
+//                               >
+//                                 ×
+//                               </button>
+//                             )}
+//                           </div>
 //                         </div>
 
 //                         {chapter.description && (
@@ -1187,6 +1252,24 @@ export default ProductResources;
 //                   </div>
 //                   <div className="text-gray-600">Total Duration</div>
 //                 </div>
+//               </div>
+
+//               {/* Przycisk resetu całego kursu */}
+//               <div className="mt-4 text-center">
+//                 <button
+//                   onClick={() => {
+//                     if (window.confirm("Reset all progress for this course?")) {
+//                       setVideoProgress([]);
+//                       saveProgressToStorage([]);
+//                       if (chapters.length > 0) {
+//                         setCurrentChapter(chapters[0]);
+//                       }
+//                     }
+//                   }}
+//                   className="text-sm text-red-500 hover:text-red-700 px-3 py-1 border border-red-200 rounded hover:bg-red-50 transition-colors"
+//                 >
+//                   Reset All Progress
+//                 </button>
 //               </div>
 //             </div>
 //           </div>
