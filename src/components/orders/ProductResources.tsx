@@ -171,6 +171,8 @@ const ProductResources: React.FC = () => {
     }
   };
 
+  //console.log("Current chapter:", currentChapter);
+
   const handlePrevChapter = () => {
     if (!currentChapter || chapters.length === 0) return;
 
@@ -245,6 +247,7 @@ const ProductResources: React.FC = () => {
         <div className="flex flex-wrap items-center gap-4 mt-6">
           <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg">
             <BookOpen size={18} />
+
             <span>{chapters.length} chapters</span>
           </div>
           <div className="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-lg">
@@ -289,12 +292,6 @@ const ProductResources: React.FC = () => {
                     <span className="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1.5 rounded-full">
                       Chapter {currentChapter.number}
                     </span>
-                    {currentChapter.duration && (
-                      <span className="flex items-center gap-2 text-gray-600">
-                        <Clock size={16} />
-                        {formatDuration(currentChapter.duration)}
-                      </span>
-                    )}
                   </div>
                   <h2 className="text-2xl font-bold text-gray-800 mb-3">
                     {currentChapter.title}
@@ -410,7 +407,7 @@ const ProductResources: React.FC = () => {
 
               <div className="text-sm text-gray-600">
                 {chapters.length} chapters • {formatTotalDuration(chapters)}
-                {user?.id && (
+                {user?._id && (
                   <div className="mt-1 text-xs text-green-600">
                     ✓ Progress saved to your account
                   </div>
@@ -475,20 +472,24 @@ const ProductResources: React.FC = () => {
                           >
                             {chapter.title}
                           </h4>
-                          {chapter.duration && (
+                          {/* {chapter.duration && (
                             <span className="text-sm text-gray-500 whitespace-nowrap">
                               {formatDuration(chapter.duration)}
                             </span>
+                          )} */}
+                          {chapter.number && (
+                            <span className="text-sm text-gray-500 whitespace-nowrap">
+                              {chapter.number}
+                            </span>
                           )}
                         </div>
-
                         {chapter.description && (
                           <p className="text-sm text-gray-600 line-clamp-2 mb-2">
                             {chapter.description}
                           </p>
                         )}
-
                         {/* Status */}
+
                         <div className="flex items-center justify-between mt-2">
                           <div className="text-xs text-gray-500">
                             {completed ? (
