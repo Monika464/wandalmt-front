@@ -53,12 +53,12 @@ const UserPanel = () => {
       >
         Zobacz orders
       </Link>
-      <Link
+      {/* <Link
         to="userresources"
         className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
       >
         Zobacz produkty
-      </Link>
+      </Link> */}
       <Link
         to="/user/products"
         className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 ml-4"

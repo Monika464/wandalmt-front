@@ -20,29 +20,11 @@ const initialState: ProductState = {
   error: null,
 };
 
-// export const fetchProducts = createAsyncThunk(
-//   "admin/products/fetchAll",
-//   async () => {
-//     const res = await api.get("/products");
-//     //console.log("Fetched products:", res.data);
-//     return res.data as Product[];
-//   }
-// );
-// export const fetchProducts = createAsyncThunk(
-//   "products/fetchPublic",
-//   async ({ search }: { search?: string }) => {
-//     const response = await api.get(`/products/${search}`, {
-//       params: { q: search }, // ✅ zmiana tu
-//     });
-//     return response.data;
-//   }
-// );
-
 export const fetchProducts = createAsyncThunk<
   Product[],
   { search?: string } | void
 >("products/fetchAll", async (args) => {
-  const search = args?.search ?? ""; // bezpieczne pobranie
+  const search = args?.search ?? "";
   // console.log("search", search);
 
   const searchParams = new URLSearchParams();
@@ -63,7 +45,7 @@ export const fetchProductById = createAsyncThunk(
   async (id: string) => {
     const res = await api.get(`products/${id}`);
     return res.data as Product;
-  }
+  },
 );
 
 const productPublicSlice = createSlice({
@@ -79,11 +61,9 @@ const productPublicSlice = createSlice({
       .addCase(
         fetchProducts.fulfilled,
         (state, action: PayloadAction<Product[]>) => {
-          //  console.log("✅ fetchProducts.fulfilled został wywołany");
-          // console.log("📦 Dane produktów:", action.payload);
           state.loading = false;
           state.products = action.payload;
-        }
+        },
       )
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;

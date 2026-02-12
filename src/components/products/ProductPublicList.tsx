@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../store";
 
 import { useNavigate } from "react-router-dom";
-import AddToCartButton from "./AddToCartButton";
+import AddToCartButton from "../orders/AddToCartButton";
 import SearchPublicContainer from "./SearchContainerPublic";
 import Navbar from "../elements/Navbar";
 
@@ -15,7 +15,7 @@ const ProductList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   const { products, loading, error } = useSelector(
-    (state: RootState) => state.productsPublic
+    (state: RootState) => state.productsPublic,
   );
 
   const navigate = useNavigate();

@@ -8,7 +8,7 @@ import type { Product, IResource } from "../types";
 import type { RootState, AppDispatch } from "../store";
 import { formatCurrency } from "../utils/formatcurremcy";
 import ViewPublicResource from "../components/resources/ViewPublicResource";
-import AddToCartButton from "../components/products/AddToCartButton";
+import AddToCartButton from "../components/orders/AddToCartButton";
 import Navbar from "../components/elements/Navbar";
 
 export default function ProductResourcePage() {

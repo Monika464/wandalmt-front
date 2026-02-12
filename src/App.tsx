@@ -7,10 +7,8 @@ import UserPanel from "./pages/UserPanel";
 import AdminPanel from "./pages/AdminPanel";
 import Homepage from "./pages/Homepage";
 import ProtectedRoute from "./routes/ProtectedRoute";
-import "./App.css";
 import Register from "./components/auth/Register";
 import Login from "./components/auth/Login";
-//import ProductItem from "./components/products/ProductItem";
 import ProductResourcePage from "./pages/ProductResourcePage";
 import ProductResourcePublicPage from "./pages/ProducuResourcePublicPage";
 import ResourceEditPage from "./pages/ResourceEditPage";
@@ -18,25 +16,22 @@ import ResourceAdminListComponent from "./components/resources/ResourceList";
 import ProductListComponent from "./components/products/ProductList";
 import ProductListPublicComponent from "./components/products/ProductPublicList";
 import UserManagement from "./components/usermanagement/UserManagement";
-import Cart from "./components/products/Cart";
-import CartCheckout from "./components/products/CartCheckout";
-import CheckoutPage from "./pages/CheckoutPage";
-import ReturnPage from "./pages/ReturnPage";
 import CartReturnPage from "./pages/CartReturnPage";
-import UserOrders from "./components/orders/UserOrders";
-import UserResources from "./components/orders/UserResources";
 import CreateProductForm from "./components/products/CreateProductForm";
-
 import SetNewPassword from "./components/auth/SetNewPassword";
 import PasswordResetRequest from "./components/auth/PasswordResetRequest";
-//import VideoPlayer from "./components/video/VideoPlayer";
 import WatchVideo from "./pages/WatchVideoPage";
-import { useAutoRefresh } from "./hooks/useAutoRefresh";
 import CartCancelPage from "./pages/CartCancelPage";
 import FAQPage from "./pages/FAQPage";
 import ContactPage from "./pages/ContactPage";
-import ProductResources from "./components/orders/ProductResources";
 import UserProductsDashboard from "./pages/UserProductDashboard";
+import CartPage from "./pages/CartPage";
+import CartCheckoutPage from "./pages/CartCheckoutPage";
+import UserOrders from "./components/orders/UserOrders";
+//import UserResources from "./components/resources/UserResources";
+import ProductResources from "./components/resources/ProductResources";
+import { useAutoRefresh } from "./hooks/useAutoRefresh";
+import "./App.css";
 
 const App = () => {
   useAutoRefresh();
@@ -55,13 +50,15 @@ const App = () => {
               path="products/:productId"
               element={<ProductResourcePublicPage />}
             />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/cart/checkout" element={<CartCheckout />} />
+            {/* <Route path="/cart" element={<Cart />} /> */}
+            <Route path="/cart" element={<CartPage />} />
+            {/* <Route path="/cart/checkout" element={<CartCheckout />} /> */}
+            <Route path="/cart/checkout" element={<CartCheckoutPage />} />
             <Route path="/cart/return" element={<CartReturnPage />} />
             <Route path="/cart/cancel" element={<CartCancelPage />} />
 
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/return" element={<ReturnPage />} />
+            {/* <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/return" element={<ReturnPage />} /> */}
 
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/faq" element={<FAQPage />} />
@@ -155,14 +152,14 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            <Route
+            {/* <Route
               path="/userpanel/userresources"
               element={
                 <ProtectedRoute requiredRole="user">
                   <UserResources />
                 </ProtectedRoute>
               }
-            />
+            /> */}
 
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />

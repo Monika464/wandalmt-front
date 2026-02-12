@@ -5,7 +5,7 @@ import type { AppDispatch, RootState } from "../../store";
 import { fetchResourceByProductId } from "../../store/slices/resourcePublicSlice";
 
 const UserResources: React.FC = () => {
-  console.log("Rendering UserResources component");
+  //console.log("Rendering UserResources component");
   const dispatch = useDispatch<AppDispatch>();
   const { userOrders, loading } = useSelector(
     (state: RootState) => state.orders,

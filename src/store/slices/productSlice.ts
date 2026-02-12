@@ -4,9 +4,9 @@ import {
   type PayloadAction,
 } from "@reduxjs/toolkit";
 
-import type { NewProduct, Product } from "../../types";
-
 import { authorizedRequest } from "../../utils/authorizedRequest";
+
+import type { NewProduct, Product } from "../../types";
 
 interface ProductState {
   products: Product[];
@@ -45,7 +45,7 @@ export const fetchProducts = createAsyncThunk<Product[], { search?: string }>(
       console.error("Error fetching products:", error);
       throw error;
     }
-  }
+  },
 );
 
 //FETCH SINGLE PRODUCT
@@ -132,7 +132,7 @@ const productSlice = createSlice({
         (state, action: PayloadAction<Product[]>) => {
           state.loading = false;
           state.products = action.payload;
-        }
+        },
       )
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
@@ -172,14 +172,14 @@ const productSlice = createSlice({
       // 📌 editProduct
       .addCase(editProduct.fulfilled, (state, action) => {
         state.products = state.products.map((prod) =>
-          prod._id === action.payload._id ? action.payload : prod
+          prod._id === action.payload._id ? action.payload : prod,
         );
       })
 
       // 📌 deleteProduct
       .addCase(deleteProduct.fulfilled, (state, action) => {
         state.products = state.products.filter(
-          (prod) => prod._id !== action.payload
+          (prod) => prod._id !== action.payload,
         );
       });
   },

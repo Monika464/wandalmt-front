@@ -5,8 +5,18 @@ import {
   type PayloadAction,
 } from "@reduxjs/toolkit";
 
-import type { ChapterProgress } from "../../types";
 import { authorizedRequest } from "../../utils/authorizedRequest";
+
+interface ChapterProgress {
+  _id?: string;
+  productId: string;
+  chapterId: string;
+  userId: string;
+  completed: boolean;
+  lastWatched: string;
+  completedAt?: string;
+  progress: number;
+}
 
 interface ProgressState {
   progressByProductId: Record<string, ChapterProgress[]>;

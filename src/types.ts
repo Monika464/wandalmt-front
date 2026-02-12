@@ -30,7 +30,6 @@ export interface IChapter {
   bunnyVideoId?: string;
   videoId?: string;
   video?: {
-    // Opcjonalne szczegóły video (jeśli backend populuje)
     _id: string;
     bunnyGuid: string;
     title: string;
@@ -106,15 +105,4 @@ export interface ImportMetaEnv {
 
 export interface ImportMeta {
   readonly env: ImportMetaEnv;
-}
-
-export interface ChapterProgress {
-  _id?: string;
-  productId: string;
-  chapterId: string;
-  userId: string;
-  completed: boolean; // TYLKO to się liczy!
-  lastWatched: string; // Kiedy ostatnio oznaczono jako obejrzane
-  completedAt?: string; // Data ukończenia
-  progress: number; // Procent obejrzanego materiału (0-100)
 }

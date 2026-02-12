@@ -139,7 +139,7 @@ export const fetchResourceById = createAsyncThunk<IResource, string>(
       console.error("❌ Error in fetchResourceById:", error);
       return thunkApi.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const fetchResourceByProductId = createAsyncThunk<IResource, string>(
@@ -162,7 +162,7 @@ export const fetchResourceByProductId = createAsyncThunk<IResource, string>(
       console.error("❌ Error in fetchResourceByProductId:", error);
       return thunkApi.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const createResource = createAsyncThunk<IResource, any>(
@@ -186,7 +186,7 @@ export const createResource = createAsyncThunk<IResource, any>(
       console.error("❌ Error creating resource:", error);
       return thunkApi.rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const editResource = createAsyncThunk<
@@ -228,7 +228,7 @@ export const deleteResource = createAsyncThunk<string, string>(
       console.error("❌ Error deleting resource:", error);
       return thunkApi.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // 📌 Dodaj chapter do resource - ZAKTUALIZOWANE
@@ -256,7 +256,7 @@ export const addChapter = createAsyncThunk<IResource, AddChapterPayload>(
       console.error("❌ Error adding chapter:", error);
       return thunkApi.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // 📌 Usuń chapter z resource (razem z video)
@@ -284,7 +284,7 @@ export const deleteChapter = createAsyncThunk<
       console.error("❌ Error deleting chapter:", error);
       return thunkApi.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // 📌 Edytuj chapter w resource - ZAKTUALIZOWANE
@@ -319,10 +319,8 @@ export const editChapter = createAsyncThunk<
       console.error("❌ Error editing chapter:", error);
       return thunkApi.rejectWithValue(error);
     }
-  }
+  },
 );
-
-
 
 // 📌 Get Chapter with Video Details - ZAKTUALIZOWANE
 export const fetchChapterWithVideo = createAsyncThunk<
@@ -352,7 +350,7 @@ export const fetchChapterWithVideo = createAsyncThunk<
       console.error("❌ Error fetching chapter with video:", error);
       return thunkApi.rejectWithValue(error);
     }
-  }
+  },
 );
 
 // 📌 Dodatkowy thunk dla backward compatibility
@@ -384,7 +382,7 @@ export const setChapterVideo = createAsyncThunk<
       console.error("❌ Error setting chapter video:", error);
       return thunkApi.rejectWithValue(error);
     }
-  }
+  },
 );
 
 const resourceSlice = createSlice({
@@ -405,14 +403,14 @@ const resourceSlice = createSlice({
         resourceId: string;
         chapterId: string;
         bunnyVideoId: string;
-      }>
+      }>,
     ) => {
       const { resourceId, chapterId, bunnyVideoId } = action.payload;
 
       // Aktualizuj w selected resource
       if (state.selected && state.selected._id === resourceId) {
         const chapter = state.selected.chapters.find(
-          (ch: IChapter) => ch._id === chapterId
+          (ch: IChapter) => ch._id === chapterId,
         );
         if (chapter) {
           chapter.bunnyVideoId = bunnyVideoId;
@@ -425,7 +423,9 @@ const resourceSlice = createSlice({
           return {
             ...resource,
             chapters: resource.chapters.map((chapter) =>
-              chapter._id === chapterId ? { ...chapter, bunnyVideoId } : chapter
+              chapter._id === chapterId
+                ? { ...chapter, bunnyVideoId }
+                : chapter,
             ),
           };
         }
@@ -437,14 +437,14 @@ const resourceSlice = createSlice({
       action: PayloadAction<{
         resourceId: string;
         chapterId: string;
-      }>
+      }>,
     ) => {
       const { resourceId, chapterId } = action.payload;
 
       // Wyczyść w selected resource
       if (state.selected && state.selected._id === resourceId) {
         const chapter = state.selected.chapters.find(
-          (ch: IChapter) => ch._id === chapterId
+          (ch: IChapter) => ch._id === chapterId,
         );
         if (chapter) {
           chapter.bunnyVideoId = undefined;
@@ -459,7 +459,7 @@ const resourceSlice = createSlice({
             chapters: resource.chapters.map((chapter) =>
               chapter._id === chapterId
                 ? { ...chapter, bunnyVideoId: undefined }
-                : chapter
+                : chapter,
             ),
           };
         }
@@ -482,7 +482,7 @@ const resourceSlice = createSlice({
           state.total = action.payload.total;
           state.page = action.payload.page;
           state.pageSize = action.payload.pageSize;
-        }
+        },
       )
       .addCase(fetchResources.rejected, (state, action) => {
         state.loading = false;
@@ -498,7 +498,7 @@ const resourceSlice = createSlice({
         fetchResourceById.fulfilled,
         (
           state: WritableDraft<ResourceState>,
-          action: PayloadAction<IResource>
+          action: PayloadAction<IResource>,
         ) => {
           state.loading = false;
           state.error = null;
@@ -506,7 +506,7 @@ const resourceSlice = createSlice({
           if (action.payload._id) {
             state.resourcesById[action.payload._id] = action.payload;
           }
-        }
+        },
       )
       .addCase(fetchResourceById.rejected, (state, action) => {
         state.loading = false;
@@ -522,13 +522,13 @@ const resourceSlice = createSlice({
         fetchResourceByProductId.fulfilled,
         (
           state: WritableDraft<ResourceState>,
-          action: PayloadAction<IResource>
+          action: PayloadAction<IResource>,
         ) => {
           state.loading = false;
           state.error = null;
           state.selected = action.payload;
           state.resourcesByProductId[action.payload.productId] = action.payload;
-        }
+        },
       )
       .addCase(fetchResourceByProductId.rejected, (state, action) => {
         state.loading = false;
@@ -557,7 +557,7 @@ const resourceSlice = createSlice({
       .addCase(editResource.fulfilled, (state, action) => {
         state.loading = false;
         state.items = state.items.map((res) =>
-          res._id === action.payload._id ? action.payload : res
+          res._id === action.payload._id ? action.payload : res,
         );
         if (state.selected && state.selected._id === action.payload._id) {
           state.selected = action.payload;
@@ -585,7 +585,7 @@ const resourceSlice = createSlice({
         }
         // Aktualizuj również w items
         state.items = state.items.map((res) =>
-          res._id === action.payload._id ? action.payload : res
+          res._id === action.payload._id ? action.payload : res,
         );
       })
 
@@ -595,7 +595,7 @@ const resourceSlice = createSlice({
           state.selected = action.payload;
         }
         state.items = state.items.map((res) =>
-          res._id === action.payload._id ? action.payload : res
+          res._id === action.payload._id ? action.payload : res,
         );
       })
 
@@ -606,7 +606,7 @@ const resourceSlice = createSlice({
           state.selected._id === action.payload.resourceId
         ) {
           state.selected.chapters = state.selected.chapters.filter(
-            (ch: IChapter) => ch._id !== action.payload.chapterId
+            (ch: IChapter) => ch._id !== action.payload.chapterId,
           );
         }
         // Aktualizuj również w items
@@ -615,7 +615,7 @@ const resourceSlice = createSlice({
             return {
               ...resource,
               chapters: resource.chapters.filter(
-                (ch: IChapter) => ch._id !== action.payload.chapterId
+                (ch: IChapter) => ch._id !== action.payload.chapterId,
               ),
             };
           }
@@ -660,7 +660,7 @@ const resourceSlice = createSlice({
         if (state.selected && state.selected._id === resourceId) {
           state.selected.chapters = state.selected.chapters.map(
             (ch: IChapter) =>
-              ch._id === chapterId ? { ...ch, ...chapter } : ch
+              ch._id === chapterId ? { ...ch, ...chapter } : ch,
           );
         }
 
@@ -670,7 +670,7 @@ const resourceSlice = createSlice({
             return {
               ...resource,
               chapters: resource.chapters.map((ch) =>
-                ch._id === chapterId ? { ...ch, ...chapter } : ch
+                ch._id === chapterId ? { ...ch, ...chapter } : ch,
               ),
             };
           }
@@ -684,7 +684,7 @@ const resourceSlice = createSlice({
           state.selected = action.payload;
         }
         state.items = state.items.map((res) =>
-          res._id === action.payload._id ? action.payload : res
+          res._id === action.payload._id ? action.payload : res,
         );
       });
   },
