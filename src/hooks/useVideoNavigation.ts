@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import type { IChapter } from "../types";
+import type { IChapter } from "../types/types";
 
 export const useVideoNavigation = () => {
   const navigate = useNavigate();

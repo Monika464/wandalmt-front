@@ -4,8 +4,8 @@ import {
   type PayloadAction,
   type WritableDraft,
 } from "@reduxjs/toolkit";
-import type { IChapter, IResourceListResponse } from "../../types";
-import type { IResource } from "../../types";
+import type { IChapter, IResourceListResponse } from "../../types/types";
+import type { IResource } from "../../types/types";
 import { authorizedRequest } from "../../utils/authorizedRequest";
 
 interface FetchParams {

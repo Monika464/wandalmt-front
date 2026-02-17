@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../store";
-import type { IResource, IChapter } from "../../types"; // Zaktualizowany import
+import type { IResource, IChapter } from "../../types/types"; // Zaktualizowany import
 import {
   editResource,
   addChapter,
@@ -40,7 +40,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
   // );
   // Pobierz aktualny resource z Redux
   const selectedResource = useSelector(
-    (state: RootState) => state.resources.selected
+    (state: RootState) => state.resources.selected,
   );
   const selecteddVideo = useSelector((state: RootState) => state.video);
   const videoIdforTitle = selecteddVideo.video
@@ -69,7 +69,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
         selectedResource.chapters.map((ch, index) => ({
           ...ch,
           number: ch.number ?? index + 1,
-        }))
+        })),
       );
     }
   }, [selectedResource]);
@@ -80,7 +80,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
         editResource({
           id: resource._id!,
           resourceData: { title, content },
-        })
+        }),
       ).unwrap();
       alert("Resource updated!");
       setIsEditingResource(false);
@@ -123,12 +123,12 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
         addChapter({
           resourceId: resource._id!,
           chapterData,
-        })
+        }),
       ).unwrap();
 
       // Refresh chapters list
       const updatedResource = await dispatch(
-        fetchResourceById(resource._id!)
+        fetchResourceById(resource._id!),
       ).unwrap();
 
       setChapters(updatedResource.chapters || []);
@@ -154,7 +154,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
           resourceId: resource._id!,
           chapterId,
           chapterData: updated,
-        })
+        }),
       ).unwrap();
 
       //setChapters(updatedResource.chapters || []);
@@ -174,12 +174,12 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
           resourceId: resource._id!,
           chapterId: chapter._id,
           videoId: chapter.videoId,
-        })
+        }),
       ).unwrap();
 
       // Refresh chapters list
       const updatedResource = await dispatch(
-        fetchResourceById(resource._id!)
+        fetchResourceById(resource._id!),
       ).unwrap();
 
       setChapters(updatedResource.chapters || []);
@@ -193,7 +193,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
   const handleVideoUploaded = async (
     chapterId: string,
     videoId: string,
-    bunnyGuid: string
+    bunnyGuid: string,
   ) => {
     console.log("Video uploaded for chapter:", chapterId, {
       videoId,
@@ -236,12 +236,12 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
             resourceId: resource._id!,
             chapterId,
             chapterData,
-          })
+          }),
         ).unwrap();
 
         // Odśwież dane
         const updatedResource = await dispatch(
-          fetchResourceById(resource._id!)
+          fetchResourceById(resource._id!),
         ).unwrap();
         setChapters(updatedResource.chapters || []);
       } catch (err) {
@@ -315,7 +315,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
                 <button
                   onClick={() =>
                     setEditingChapterId(
-                      editingChapterId === ch._id ? null : ch._id!
+                      editingChapterId === ch._id ? null : ch._id!,
                     )
                   }
                   className="bg-blue-500 text-white px-3 py-1 rounded text-sm"
@@ -399,8 +399,8 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
                           prev.map((c2) =>
                             c2._id === ch._id
                               ? { ...c2, number: Number(e.target.value) }
-                              : c2
-                          )
+                              : c2,
+                          ),
                         )
                       }
                       className="border p-2 rounded mb-2 w-full"
@@ -418,8 +418,8 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
                           prev.map((c2) =>
                             c2._id === ch._id
                               ? { ...c2, title: e.target.value }
-                              : c2
-                          )
+                              : c2,
+                          ),
                         )
                       }
                       className="border p-1 rounded mb-1 w-full"
@@ -436,8 +436,8 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
                           prev.map((c2) =>
                             c2._id === ch._id
                               ? { ...c2, description: e.target.value }
-                              : c2
-                          )
+                              : c2,
+                          ),
                         )
                       }
                       className="border p-1 rounded mb-1 w-full"
@@ -450,7 +450,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
                       onClick={() => {
                         handleEditChapter(
                           ch._id!,
-                          chapters.find((c) => c._id === ch._id)!
+                          chapters.find((c) => c._id === ch._id)!,
                         );
                       }}
                       className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"

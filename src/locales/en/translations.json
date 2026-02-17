@@ -1,0 +1,72 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "userPanel": "User Panel",
+    "adminPanel": "Admin Panel"
+  },
+  "register": {
+    "title": "Register",
+    "nameLabel": "First Name",
+    "namePlaceholder": "Enter your first name",
+    "surnameLabel": "Last Name",
+    "surnamePlaceholder": "Enter your last name",
+    "emailLabel": "Email",
+    "emailPlaceholder": "enter@email.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter password",
+    "roleLabel": "Role",
+    "roleUser": "User",
+    "roleAdmin": "Admin",
+    "roleAdminInfo": "Only admin can register other admins.",
+    "submitButton": "Register",
+    "submittingButton": "Registering...",
+    "successUser": "Registration successful! You will be redirected to login.",
+    "successAdmin": "Admin has been successfully registered!",
+    "captchaLabel": "Confirm you're not a robot"
+  },
+  "login": {
+    "title": "Login",
+    "emailLabel": "Email",
+    "emailPlaceholder": "enter@email.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter password",
+    "submitButton": "Login",
+    "submittingButton": "Logging in...",
+    "noAccount": "Don't have an account?",
+    "registerLink": "Register here",
+    "forgotPassword": "Forgot password?"
+  },
+  "errors": {
+    "required": "Field is required",
+    "nameRequired": "First name is required",
+    "surnameRequired": "Last name is required",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Invalid email format",
+    "passwordRequired": "Password is required",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "captchaRequired": "Please confirm you're not a robot",
+    "general": "An error occurred during registration",
+    "userExists": "User with this email already exists",
+    "wrongCredentials": "Invalid email or password"
+  },
+  "captcha": {
+    "info": "This site is protected by reCAPTCHA and the Google",
+    "privacy": "Privacy Policy",
+    "and": "and",
+    "terms": "Terms of Service",
+    "ofGoogle": "apply"
+  }
+}

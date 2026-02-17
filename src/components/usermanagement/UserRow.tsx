@@ -1,4 +1,4 @@
-import type { User } from "../../types";
+import type { User } from "../../types/types";
 interface UserRowProps {
   user: User;
   onToggleStatus: (userId: string, newStatus: boolean) => void;
@@ -17,7 +17,7 @@ const UserRow: React.FC<UserRowProps> = ({
 
   const handleDelete = () => {
     const confirmText = prompt(
-      `Aby usunąć użytkownika ${user.email}, wpisz: delete`
+      `Aby usunąć użytkownika ${user.email}, wpisz: delete`,
     );
     if (confirmText === "delete") {
       onDelete(user._id);

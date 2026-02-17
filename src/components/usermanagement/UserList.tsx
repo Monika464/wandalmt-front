@@ -1,6 +1,6 @@
 import UserRow from "./UserRow";
 
-import type { User } from "../../types";
+import type { User } from "../../types/types";
 
 interface UserListProps {
   users: User[];

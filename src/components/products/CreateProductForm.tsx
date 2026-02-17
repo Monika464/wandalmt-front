@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../store";
 import { createProduct } from "../../store/slices/productSlice";
-import type { NewProduct } from "../../types";
+import type { NewProduct } from "../../types/types";
 
 const CreateProductForm: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();

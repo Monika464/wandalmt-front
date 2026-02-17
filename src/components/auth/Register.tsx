@@ -10,6 +10,7 @@ import type { AppDispatch, RootState } from "../../store";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../elements/Navbar";
 import ReCAPTCHA from "react-google-recaptcha";
+import { useTranslation } from "react-i18next";
 
 type Role = "user" | "admin";
 
@@ -22,6 +23,7 @@ interface RegisterFormData {
 }
 
 const Register: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const dispatch = useDispatch<AppDispatch>();
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -243,11 +245,40 @@ const Register: React.FC = () => {
 
           {error && <p className="text-red-500 mt-2">{error}</p>}
           {success && <p className="text-green-600 mt-2">{success}</p>}
-
           <ReCAPTCHA
+            key={i18n.language} // <-- KLUCZOWE: wymusza przeładowanie przy zmianie języka
             sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
             onChange={(token) => setCaptchaToken(token || "")}
+            hl={i18n.language === "pl" ? "pl" : "en"} // <-- Ustawienie języka captcha
           />
+
+          {/* Tekst informacyjny pod captcha (przetłumaczony) */}
+          <p className="text-xs text-gray-500 mt-2">
+            {t("captcha.info")}{" "}
+            <a
+              href="https://policies.google.com/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500"
+            >
+              {t("captcha.privacy")}
+            </a>{" "}
+            {/* {t("captcha.and")}{" "} */}
+            {/* <a
+              href="https://policies.google.com/terms"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500"
+            >
+              {t("captcha.terms")}
+            </a>{" "}
+            {t("captcha.ofGoogle")}. */}
+          </p>
+
+          {/* <ReCAPTCHA
+            sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+            onChange={(token) => setCaptchaToken(token || "")}
+          /> */}
         </form>
       </div>
     </>

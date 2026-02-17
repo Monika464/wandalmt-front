@@ -6,7 +6,7 @@ import {
 
 import { authorizedRequest } from "../../utils/authorizedRequest";
 
-import type { NewProduct, Product } from "../../types";
+import type { NewProduct, Product } from "../../types/types";
 
 interface ProductState {
   products: Product[];

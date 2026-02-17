@@ -1,5 +1,5 @@
 import React from "react";
-import type { IResource } from "../../types";
+import type { IResource } from "../../types/types";
 import VideoTitle from "../video/VideoTitle";
 import { useVideoNavigation } from "../../hooks/useVideoNavigation";
 

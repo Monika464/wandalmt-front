@@ -5,7 +5,7 @@ import { fetchProductById } from "../store/slices/productSlice";
 import { fetchResourceByProductId } from "../store/slices/resourceSlice";
 //import { fetchResources } from "../store/slices/resourceSlice";
 
-import type { Product, IResource } from "../types";
+import type { Product, IResource } from "../types/types";
 import type { RootState, AppDispatch } from "../store";
 import { formatCurrency } from "../utils/formatcurremcy";
 import ViewResource from "../components/resources/ViewResource";
@@ -19,11 +19,11 @@ export default function ProductResourcePage() {
   const dispatch = useDispatch<AppDispatch>();
 
   const product: Product | undefined = useSelector((state: RootState) =>
-    productId ? state.products.byId[productId] : undefined
+    productId ? state.products.byId[productId] : undefined,
   );
 
   const resource: IResource | undefined = useSelector((state: RootState) =>
-    productId ? state.resources.resourcesByProductId[productId] : undefined
+    productId ? state.resources.resourcesByProductId[productId] : undefined,
   );
 
   //console.log("resurce from state:", resource);
@@ -31,10 +31,10 @@ export default function ProductResourcePage() {
   const [creatingResourceProduct, setCreatingResourceProduct] =
     useState<Product | null>(null);
   const [editingResource, setEditingResource] = useState<IResource | null>(
-    null
+    null,
   );
   const [viewingResource, setViewingResource] = useState<IResource | null>(
-    null
+    null,
   );
   const [refreshView, setRefreshView] = useState(false);
 

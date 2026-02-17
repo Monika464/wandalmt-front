@@ -4,7 +4,7 @@ import {
   type PayloadAction,
   type WritableDraft,
 } from "@reduxjs/toolkit";
-import type { IResource } from "../../types";
+import type { IResource } from "../../types/types";
 import axios from "axios";
 import api from "../../utils/api";
 

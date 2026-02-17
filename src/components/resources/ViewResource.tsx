@@ -1,5 +1,5 @@
 import React from "react";
-import type { IChapter, IResource } from "../../types";
+import type { IChapter, IResource } from "../../types/types";
 import Thumbnail from "../video/Thumbnail";
 import VideoTitle from "../video/VideoTitle";
 import { useNavigate } from "react-router-dom";

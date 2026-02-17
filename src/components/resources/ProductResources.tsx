@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import type { AppDispatch, RootState } from "../../store";
-import type { IChapter, IResource } from "../../types";
+import type { IChapter, IResource } from "../../types/types";
 import { fetchResourceByProductId } from "../../store/slices/resourcePublicSlice";
 import { useChapterProgress } from "../../hooks/useChapterProgress";
 import InlineVideoPlayer from "../video/InlineVideoPlayer";

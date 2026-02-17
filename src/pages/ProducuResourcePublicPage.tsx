@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { fetchProductById } from "../store/slices/productPublicSlice";
 import { fetchResourceByProductId } from "../store/slices/resourcePublicSlice";
 
-import type { Product, IResource } from "../types";
+import type { Product, IResource } from "../types/types";
 import type { RootState, AppDispatch } from "../store";
 import { formatCurrency } from "../utils/formatcurremcy";
 import ViewPublicResource from "../components/resources/ViewPublicResource";

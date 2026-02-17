@@ -1,0 +1,72 @@
+{
+  "common": {
+    "loading": "Ładowanie...",
+    "save": "Zapisz",
+    "cancel": "Anuluj",
+    "delete": "Usuń",
+    "edit": "Edytuj",
+    "back": "Powrót"
+  },
+  "nav": {
+    "home": "Strona główna",
+    "about": "O nas",
+    "contact": "Kontakt",
+    "login": "Logowanie",
+    "register": "Rejestracja",
+    "logout": "Wyloguj",
+    "userPanel": "Panel użytkownika",
+    "adminPanel": "Panel administratora"
+  },
+  "register": {
+    "title": "Rejestracja",
+    "nameLabel": "Imię",
+    "namePlaceholder": "Wpisz swoje imię",
+    "surnameLabel": "Nazwisko",
+    "surnamePlaceholder": "Wpisz swoje nazwisko",
+    "emailLabel": "Email",
+    "emailPlaceholder": "wpisz@email.com",
+    "passwordLabel": "Hasło",
+    "passwordPlaceholder": "Wpisz hasło",
+    "roleLabel": "Rola",
+    "roleUser": "Użytkownik",
+    "roleAdmin": "Administrator",
+    "roleAdminInfo": "Tylko administrator może rejestrować innych administratorów.",
+    "submitButton": "Zarejestruj",
+    "submittingButton": "Rejestrowanie...",
+    "successUser": "Rejestracja zakończona pomyślnie! Za chwilę zostaniesz przekierowany do logowania.",
+    "successAdmin": "Administrator został pomyślnie zarejestrowany!",
+    "captchaLabel": "Potwierdź, że nie jesteś robotem"
+  },
+  "login": {
+    "title": "Logowanie",
+    "emailLabel": "Email",
+    "emailPlaceholder": "wpisz@email.com",
+    "passwordLabel": "Hasło",
+    "passwordPlaceholder": "Wpisz hasło",
+    "submitButton": "Zaloguj",
+    "submittingButton": "Logowanie...",
+    "noAccount": "Nie masz jeszcze konta?",
+    "registerLink": "Zarejestruj się",
+    "forgotPassword": "Zapomniałeś hasła?"
+  },
+  "errors": {
+    "required": "Pole jest wymagane",
+    "nameRequired": "Imię jest wymagane",
+    "surnameRequired": "Nazwisko jest wymagane",
+    "emailRequired": "Email jest wymagany",
+    "emailInvalid": "Nieprawidłowy format email",
+    "passwordRequired": "Hasło jest wymagane",
+    "passwordMinLength": "Hasło musi mieć co najmniej 6 znaków",
+    "captchaRequired": "Potwierdź, że nie jesteś robotem",
+    "general": "Wystąpił błąd podczas rejestracji",
+    "userExists": "Użytkownik z takim emailem już istnieje",
+    "wrongCredentials": "Nieprawidłowy email lub hasło"
+  },
+  "captcha": {
+    "info": "Ta strona jest chroniona przez reCAPTCHA i obowiązuje ją",
+    "privacy": "Polityka prywatności",
+    "and": "oraz",
+    "terms": "Warunki korzystania z usługi",
+    "ofGoogle": "Google"
+  }
+}

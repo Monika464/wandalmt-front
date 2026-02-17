@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../store";
 import { editProduct } from "../../store/slices/productSlice";
 
-import type { Product } from "../../types";
+import type { Product } from "../../types/types";
 
 interface Props {
   product: Product;
@@ -38,7 +38,7 @@ const EditProductForm: React.FC<Props> = ({ product, onClose }) => {
             imageUrl,
             _id: "",
           },
-        })
+        }),
       ).unwrap();
 
       alert("Produkt został zaktualizowany!");

@@ -1,4 +1,4 @@
-import type { ProductPublicItemProps } from "../../types";
+import type { ProductPublicItemProps } from "../../types/types";
 
 import { formatCurrency } from "../../utils/formatcurremcy";
 

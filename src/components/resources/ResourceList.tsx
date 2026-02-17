@@ -7,20 +7,20 @@ import {
 } from "../../store/slices/resourceSlice";
 import VideoTitle from "../video/VideoTitle";
 import Thumbnail from "../video/Thumbnail";
-import type { IChapter } from "../../types";
+import type { IChapter } from "../../types/types";
 import { useNavigate } from "react-router-dom";
 
 export default function ResourceListComponent() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { items, total, loading, error, page, pageSize } = useSelector(
-    (state: RootState) => state.resources
+    (state: RootState) => state.resources,
   );
 
   const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(
-    null
+    null,
   );
   const [deleteInput, setDeleteInput] = useState("");
 
@@ -247,7 +247,7 @@ export default function ResourceListComponent() {
           <button
             onClick={() =>
               dispatch(
-                fetchResources({ page: page > 1 ? page - 1 : 1, pageSize })
+                fetchResources({ page: page > 1 ? page - 1 : 1, pageSize }),
               )
             }
             className="px-3 py-1 border rounded disabled:opacity-50"

@@ -1,5 +1,5 @@
 import { useDispatch } from "react-redux";
-import type { ProductItemProps } from "../../types";
+import type { ProductItemProps } from "../../types/types";
 import type { AppDispatch } from "../../store";
 import { deleteProduct } from "../../store/slices/productSlice";
 import { formatCurrency } from "../../utils/formatcurremcy";
