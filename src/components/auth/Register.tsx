@@ -80,38 +80,43 @@ const Register: React.FC = () => {
 
     // Walidacja
     if (!captchaToken) {
-      setLocalError("Potwierdź, że nie jesteś robotem.");
+      //setLocalError("Potwierdź, że nie jesteś robotem.");
+      setLocalError(t("errors.captchaRequired"));
       return;
     }
 
     if (!formData.name.trim()) {
-      setLocalError("Imię jest wymagane");
+      //setLocalError("Imię jest wymagane");
+      setLocalError(t("errors.nameRequired"));
       return;
     }
 
     if (!formData.surname.trim()) {
-      setLocalError("Nazwisko jest wymagane");
+      //setLocalError("Nazwisko jest wymagane");
+      setLocalError(t("errors.surnameRequired"));
       return;
     }
 
     if (!formData.email.trim()) {
-      setLocalError("Email jest wymagany");
+      //setLocalError("Email jest wymagany");
+      setLocalError(t("errors.emailRequired"));
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      setLocalError("Nieprawidłowy format email");
+      //setLocalError("Nieprawidłowy format email");
+      setLocalError(t("errors.emailInvalid"));
       return;
     }
 
     if (!formData.password) {
-      setLocalError("Hasło jest wymagane");
+      setLocalError(t("errors.passwordRequired"));
       return;
     }
 
     if (formData.password.length < 6) {
-      setLocalError("Hasło musi mieć co najmniej 6 znaków");
+      setLocalError(t("errors.passwordMinLength"));
       return;
     }
 
@@ -125,7 +130,8 @@ const Register: React.FC = () => {
             password: formData.password,
           }),
         ).unwrap();
-        setSuccess("Admin został pomyślnie zarejestrowany!");
+        //setSuccess("Admin został pomyślnie zarejestrowany!");
+        setSuccess(t("register.successAdmin"));
       } else {
         // Rejestracja zwykłego usera + automatyczne logowanie
         //await dispatch(registerUser(formData)).unwrap();
@@ -177,6 +183,7 @@ const Register: React.FC = () => {
   // };
 
   // const errorMessage = getErrorMessage();
+  //console.log("Current error:", localError);
 
   return (
     <>
@@ -280,6 +287,7 @@ const Register: React.FC = () => {
             onChange={(token) => setCaptchaToken(token || "")}
           /> */}
         </form>
+        {localError && <p className="text-red-500 mt-2">{localError}</p>}
       </div>
     </>
   );
