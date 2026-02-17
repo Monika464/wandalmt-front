@@ -15,7 +15,8 @@
     "register": "Rejestracja",
     "logout": "Wyloguj",
     "userPanel": "Panel użytkownika",
-    "adminPanel": "Panel administratora"
+    "adminPanel": "Panel administratora",
+    "shop": "Sklep"
   },
   "register": {
     "title": "Rejestracja",

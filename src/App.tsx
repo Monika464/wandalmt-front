@@ -31,7 +31,7 @@ import UserOrders from "./components/orders/UserOrders";
 //import UserResources from "./components/resources/UserResources";
 import ProductResources from "./components/resources/ProductResources";
 import { useAutoRefresh } from "./hooks/useAutoRefresh";
-import "./App.css";
+//import "./App.css";
 
 const App = () => {
   useAutoRefresh();

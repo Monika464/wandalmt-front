@@ -15,7 +15,8 @@
     "register": "Register",
     "logout": "Logout",
     "userPanel": "User Panel",
-    "adminPanel": "Admin Panel"
+    "adminPanel": "Admin Panel",
+    "shop": "Shop"
   },
   "register": {
     "title": "Register",
