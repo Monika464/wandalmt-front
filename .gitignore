@@ -73,6 +73,8 @@ Thumbs.db
 ehthumbs.db
 [Dd]esktop.ini
 
-# Visual Studio Code (optional)
+# Visual Studio Code
+.vscode/
 !.vscode/launch.json
 !.vscode/tasks.json
+.VSCodeCounter/ 

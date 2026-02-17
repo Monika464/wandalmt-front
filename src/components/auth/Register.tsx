@@ -156,25 +156,25 @@ const Register: React.FC = () => {
         password: "",
         role: "user",
       });
-    } catch (err: any) {
+    } catch (err) {
       console.error("Błąd rejestracji:", err);
     }
   };
 
   // Funkcja do wyświetlania błędów
-  const getErrorMessage = () => {
-    if (localError) return localError;
-    if (error) {
-      // Przekształć różne formaty błędów
-      if (typeof error === "string") return error;
-      if (error.error) return error.error;
-      if (error.message) return error.message;
-      return "Wystąpił błąd podczas rejestracji";
-    }
-    return null;
-  };
+  // const getErrorMessage = () => {
+  //   if (localError) return localError;
+  //   if (error) {
+  //     // Przekształć różne formaty błędów
+  //     if (typeof error === "string") return error;
+  //     if (error.error) return error.error;
+  //     if (error.message) return error.message;
+  //     return "Wystąpił błąd podczas rejestracji";
+  //   }
+  //   return null;
+  // };
 
-  const errorMessage = getErrorMessage();
+  // const errorMessage = getErrorMessage();
 
   return (
     <>

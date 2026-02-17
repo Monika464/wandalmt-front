@@ -7,7 +7,7 @@ import type { Order } from "../../store/slices/orderSlice";
 const AdminOrdersSummary: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { allOrders, loading, error } = useSelector(
-    (state: RootState) => state.orders
+    (state: RootState) => state.orders,
   );
 
   useEffect(() => {
@@ -23,7 +23,7 @@ const AdminOrdersSummary: React.FC = () => {
     return <p className="text-center py-4">Brak zamówień</p>;
   }
 
-  console.log("All orders data:", allOrders); // Debug
+  //console.log("All orders data:", allOrders); // Debug
 
   // 🔹 Grupowanie po produkcie z obsługą obu struktur
   const productMap = new Map<
@@ -43,7 +43,7 @@ const AdminOrdersSummary: React.FC = () => {
   >();
 
   allOrders.forEach((order: Order) => {
-    console.log(`Order ${order._id}:`, order.products); // Debug
+    //console.log(`Order ${order._id}:`, order.products); // Debug
 
     order.products.forEach((item: any) => {
       // Obsługa obu struktur danych
@@ -84,8 +84,8 @@ const AdminOrdersSummary: React.FC = () => {
         refundedAt: order.refundedAt
           ? new Date(order.refundedAt).toLocaleDateString()
           : isPartiallyRefunded
-          ? `Częściowo zwrócono (${refundQuantity}/${item.quantity})`
-          : undefined,
+            ? `Częściowo zwrócono (${refundQuantity}/${item.quantity})`
+            : undefined,
         refundQuantity: item.refundQuantity || 0,
         quantity: item.quantity || 1,
         purchasedAt: order.paidAt
@@ -99,18 +99,18 @@ const AdminOrdersSummary: React.FC = () => {
 
   // Sortowanie produktów po liczbie kupujących
   const sortedProducts = [...productMap.values()].sort(
-    (a, b) => b.buyers.length - a.buyers.length
+    (a, b) => b.buyers.length - a.buyers.length,
   );
 
   // Statystyki
   const totalProducts = sortedProducts.length;
   const totalBuyers = sortedProducts.reduce(
     (sum, item) => sum + item.buyers.length,
-    0
+    0,
   );
   const refundedCount = sortedProducts.reduce(
     (sum, item) => sum + item.buyers.filter((b) => b.refunded).length,
-    0
+    0,
   );
 
   return (
