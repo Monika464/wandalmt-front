@@ -22,16 +22,16 @@ const UserOrders: React.FC = () => {
     dispatch(fetchUserOrders());
   }, [dispatch]);
 
-  console.log("📦 UserOrders state:", {
-    userOrders,
-    ordersLoading,
-    ordersError,
-  });
+  // console.log("📦 UserOrders state:", {
+  //   userOrders,
+  //   ordersLoading,
+  //   ordersError,
+  // });
 
   // Funkcja do otwierania modala dla częściowego zwrotu
-  const openPartialRefundModal = (orderId: string) => {
-    setOrderForPartialRefund(orderId);
-  };
+  // const openPartialRefundModal = (orderId: string) => {
+  //   setOrderForPartialRefund(orderId);
+  // };
 
   // Funkcja do zamykania modala
   const closePartialRefundModal = () => {
@@ -110,13 +110,13 @@ const UserOrders: React.FC = () => {
 
   // Sprawdź czy można zwrócić zamówienie
   const canRefundOrder = (order: any) => {
-    console.log("🔍 Checking if order can be refunded:", {
-      id: order._id,
-      status: order.status,
-      refundedAt: order.refundedAt,
-      hasProductsToRefund: hasRefundableProducts(order),
-      hasDiscount: hasDiscount(order),
-    });
+    // console.log("🔍 Checking if order can be refunded:", {
+    //   id: order._id,
+    //   status: order.status,
+    //   refundedAt: order.refundedAt,
+    //   hasProductsToRefund: hasRefundableProducts(order),
+    //   hasDiscount: hasDiscount(order),
+    // });
 
     // Nie można zwrócić jeśli całe zamówienie już zwrócone
     if (order.status === "refunded" || order.refundedAt) {

@@ -49,29 +49,68 @@ const Cart: React.FC = () => {
 
   // Poprawione: Użyj item._id zamiast item.product._id
   const alreadyOwnedProducts = React.useMemo(() => {
+    console.log("🔍 Checking already owned products...");
+    console.log(
+      "Items in cart:",
+      items.map((i) => ({ id: i._id, title: i.title })),
+    );
+
     if (!Array.isArray(userOrders) || !Array.isArray(items)) {
       return [];
     }
 
-    return items.filter((item) => {
-      if (!item || !item._id) {
-        console.warn("Item missing _id:", item);
-        return false;
-      }
+    // Filtruj tylko opłacone zamówienia
+    const paidOrders = userOrders.filter(
+      (order) =>
+        order.status === "paid" || order.status === "partially_refunded",
+    );
 
-      return userOrders.some((order) => {
-        if (!order || !order.products) return false;
+    // Zbierz wszystkie ID produktów z zamówień (płaska struktura)
+    const orderedProductIds = paidOrders.flatMap((order) =>
+      order.products
+        .filter((p) => (p.refundQuantity || 0) < p.quantity) // tylko niezwrócone
+        .map((p) => p.productId?.toString())
+        .filter((id) => id != null),
+    );
 
-        return order.products.some((p) => {
-          if (!p) return false;
+    console.log("📦 Ordered product IDs:", orderedProductIds);
 
-          // Sprawdź różne możliwe struktury produktów w zamówieniach
-          const productIdInOrder = p.product?._id.toString();
-          return productIdInOrder === item._id.toString();
-        });
-      });
+    const result = items.filter((item) => {
+      if (!item || !item._id) return false;
+
+      const found = orderedProductIds.includes(item._id.toString());
+      if (found) console.log(`✅ Found: ${item.title} is already owned`);
+      return found;
     });
+
+    console.log("📦 Already owned products:", result);
+    return result;
   }, [userOrders, items]);
+
+  // const alreadyOwnedProducts = React.useMemo(() => {
+  //   if (!Array.isArray(userOrders) || !Array.isArray(items)) {
+  //     return [];
+  //   }
+
+  //   return items.filter((item) => {
+  //     if (!item || !item._id) {
+  //       console.warn("Item missing _id:", item);
+  //       return false;
+  //     }
+
+  //     return userOrders.some((order) => {
+  //       if (!order || !order.products) return false;
+
+  //       return order.products.some((p) => {
+  //         if (!p) return false;
+
+  //         // Sprawdź różne możliwe struktury produktów w zamówieniach
+  //         const productIdInOrder = p.product?._id.toString();
+  //         return productIdInOrder === item._id.toString();
+  //       });
+  //     });
+  //   });
+  // }, [userOrders, items]);
 
   //console.log("Already owned products in cart:", alreadyOwnedProducts);
 

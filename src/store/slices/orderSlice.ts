@@ -36,8 +36,15 @@ export interface ProductDetails {
 }
 
 export interface OrderProduct {
-  product: ProductDetails;
+  productId: string; // <-- zmiana: zamiast product._id
+  title: string;
+  price: number;
+  discountedPrice?: number;
   quantity: number;
+  imageUrl?: string;
+  content?: string;
+  description?: string;
+
   // Pola do częściowych zwrotów
   refunded?: boolean;
   refundedAt?: string;
@@ -144,7 +151,13 @@ interface RejectValue {
   message: string;
 }
 
-// Dodaj ten selektor
+interface Chapter {
+  title: string;
+  content?: string;
+  videoUrl?: string;
+  duration?: number;
+}
+
 export const selectUserProducts = (state: RootState) => {
   const userOrders = state.orders.userOrders;
 
@@ -161,22 +174,17 @@ export const selectUserProducts = (state: RootState) => {
       // Pomiń w pełni zwrócone produkty
       if ((item.refundQuantity || 0) >= item.quantity) return;
 
-      const product = item.product;
-      // Jeśli z jakiegoś powodu product nie istnieje, pomiń
-      if (!product) return;
-
-      const productId = product.productId || product._id;
-      const imageUrl =
-        product.imageUrl || product.thumbnail || "/placeholder-product.png";
-      const chapters = product.chapters || [];
+      const productId = item.productId?.toString();
+      const imageUrl = item.imageUrl || "/placeholder-product.png";
+      const chapters: Chapter[] = [];
 
       if (productId && !productIds.has(productId)) {
         productIds.add(productId);
         products.push({
           id: productId,
-          title: product.title,
+          title: item.title,
           imageUrl: imageUrl,
-          description: product.description,
+          description: item.description || "",
           purchasedDate: order.createdAt,
           chapters: chapters,
           orderId: order._id,
