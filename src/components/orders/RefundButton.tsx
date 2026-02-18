@@ -9,6 +9,9 @@ interface RefundButtonProps {
   orderId: string;
   disabled?: boolean;
   variant?: "normal" | "discount";
+  orderStatus?: string;
+  hasPartialRefunds?: boolean;
+  allProductsRefunded?: boolean;
 }
 
 const RefundButton: React.FC<RefundButtonProps> = ({

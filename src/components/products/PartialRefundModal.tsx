@@ -3,11 +3,13 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { partialRefundOrder } from "../../store/slices/orderSlice";
 import type { Order } from "../../store/slices/orderSlice";
+import type { AppDispatch } from "../../store";
 
 interface PartialRefundModalProps {
   order: Order;
   isOpen: boolean;
   onClose: () => void;
+  onRefundSuccess?: () => void;
 }
 
 const PartialRefundModal: React.FC<PartialRefundModalProps> = ({
@@ -15,7 +17,7 @@ const PartialRefundModal: React.FC<PartialRefundModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const [selectedProducts, setSelectedProducts] = useState<
     Record<string, number>
   >({});
@@ -88,7 +90,7 @@ const PartialRefundModal: React.FC<PartialRefundModalProps> = ({
         const productInfo = getProductInfo(product);
         return total + productInfo.price * quantity;
       },
-      0
+      0,
     );
   };
   const handleSubmit = async () => {
@@ -100,7 +102,7 @@ const PartialRefundModal: React.FC<PartialRefundModalProps> = ({
         .filter(([_, quantity]) => quantity > 0)
         .map(([productId, quantity]) => {
           // Znajdź produkt w zamówieniu
-          const product = order.products.find((p: any) => {
+          order.products.find((p: any) => {
             const pId = getProductId(p);
             return pId === productId;
           });
@@ -125,13 +127,13 @@ const PartialRefundModal: React.FC<PartialRefundModalProps> = ({
         partialRefundOrder({
           orderId: order._id,
           refundItems,
-        })
+        }),
       ).unwrap();
 
       alert(
         `✅ Wniosek o zwrot ${calculateTotalRefund().toFixed(
-          2
-        )} PLN został złożony`
+          2,
+        )} PLN został złożony`,
       );
       onClose();
     } catch (err: any) {

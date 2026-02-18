@@ -532,6 +532,7 @@ const UserOrders: React.FC = () => {
                       ) : null}
 
                       {/* Przyciski zwrotów */}
+                      {/* Przyciski zwrotów */}
                       {canRefund && hasProductsToRefund && (
                         <div className="space-y-4">
                           <h4 className="font-semibold text-gray-800">
@@ -541,7 +542,7 @@ const UserOrders: React.FC = () => {
                           <div
                             className={`grid ${discountDetails ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"} gap-4`}
                           >
-                            {/* Zwrot całego zamówienia - ZAWSZE dostępny */}
+                            {/* Zwrot całego zamówienia */}
                             <div className="border border-gray-300 rounded-lg p-4">
                               <h5 className="font-medium text-gray-800 mb-2">
                                 Zwrot całego zamówienia
@@ -549,15 +550,39 @@ const UserOrders: React.FC = () => {
                               <p className="text-sm text-gray-600 mb-3">
                                 {discountDetails
                                   ? "Zwróć całe zamówienie (kwota po zniżce zostanie zwrócona)."
-                                  : "Zwróć wszystkie pozostałe produkty z tego zamówienia."}
+                                  : "Zwróć wszystkie produkty z tego zamówienia."}
                               </p>
+
+                              {/* 🔥 POPRAWIONE: Przekazanie wszystkich props do RefundButton */}
                               <RefundButton
                                 orderId={order._id}
-                                disabled={!canFullRefund}
+                                orderStatus={order.status}
+                                hasPartialRefunds={
+                                  order.partialRefunds &&
+                                  order.partialRefunds.length > 0
+                                }
+                                allProductsRefunded={order.products?.every(
+                                  (item: any) =>
+                                    (item.refundQuantity || 0) ===
+                                    item.quantity,
+                                )}
+                                disabled={
+                                  !canFullRefund ||
+                                  order.status === "refunded" ||
+                                  order.status === "partially_refunded" ||
+                                  (order.partialRefunds &&
+                                    order.partialRefunds.length > 0) ||
+                                  order.products?.every(
+                                    (item: any) =>
+                                      (item.refundQuantity || 0) ===
+                                      item.quantity,
+                                  )
+                                }
                                 variant={
                                   discountDetails ? "discount" : "normal"
                                 }
                               />
+
                               {discountDetails && (
                                 <p className="text-xs text-purple-600 mt-2">
                                   💰 Zostanie zwrócone:{" "}

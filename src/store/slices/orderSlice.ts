@@ -21,23 +21,29 @@ export interface Resource {
   productId: string;
 }
 
+export interface ProductDetails {
+  _id: string;
+  title: string;
+  price: number;
+  description: string;
+  imageUrl: string;
+  content: string;
+  userId: string;
+  // Dodatkowe opcjonalne pola
+  productId?: string;
+  thumbnail?: string;
+  chapters?: ResourceChapter[];
+}
+
 export interface OrderProduct {
-  product: {
-    _id: string;
-    title: string;
-    price: number;
-    description: string;
-    imageUrl: string;
-    content: string;
-    userId: string;
-  };
+  product: ProductDetails;
   quantity: number;
   // Pola do częściowych zwrotów
   refunded?: boolean;
   refundedAt?: string;
   refundId?: string;
   refundAmount?: number;
-  refundQuantity?: number; // ile sztuk zwrócono (częściowy zwrot)
+  refundQuantity?: number;
 }
 
 export interface Order {
@@ -85,6 +91,13 @@ export interface Order {
     address: any;
   };
 
+  //Invoice details
+  invoiceDetails?: {
+    invoicePdf?: string;
+    invoiceNumber?: string;
+    invoiceDate?: string;
+  };
+
   // Zasoby użytkownika
   userResources?: Resource[];
 
@@ -127,6 +140,56 @@ const initialState: OrderState = {
   partialRefundLoading: {},
 };
 
+interface RejectValue {
+  message: string;
+}
+
+// Dodaj ten selektor
+export const selectUserProducts = (state: RootState) => {
+  const userOrders = state.orders.userOrders;
+
+  // Filtruj zamówienia aktywne (paid lub partially_refunded)
+  const activeOrders = userOrders.filter(
+    (order) => order.status === "paid" || order.status === "partially_refunded",
+  );
+
+  const products: any[] = [];
+  const productIds = new Set();
+
+  activeOrders.forEach((order) => {
+    order.products.forEach((item) => {
+      // Pomiń w pełni zwrócone produkty
+      if ((item.refundQuantity || 0) >= item.quantity) return;
+
+      const product = item.product;
+      // Jeśli z jakiegoś powodu product nie istnieje, pomiń
+      if (!product) return;
+
+      const productId = product.productId || product._id;
+      const imageUrl =
+        product.imageUrl || product.thumbnail || "/placeholder-product.png";
+      const chapters = product.chapters || [];
+
+      if (productId && !productIds.has(productId)) {
+        productIds.add(productId);
+        products.push({
+          id: productId,
+          title: product.title,
+          imageUrl: imageUrl,
+          description: product.description,
+          purchasedDate: order.createdAt,
+          chapters: chapters,
+          orderId: order._id,
+          isPartiallyRefunded: (item.refundQuantity || 0) > 0,
+          refundedQuantity: item.refundQuantity || 0,
+          originalQuantity: item.quantity,
+        });
+      }
+    });
+  });
+
+  return products;
+};
 // ==================== ASYNC THUNKS ====================
 
 // 🔹 Zamówienia użytkownika
@@ -189,7 +252,7 @@ export const fetchOrderById = createAsyncThunk<
 export const refundOrder = createAsyncThunk<
   { order: Order; message: string },
   string, // id zamówienia
-  { state: RootState }
+  { state: RootState; rejectValue: RejectValue }
 >("orders/refundOrder", async (orderId, thunkAPI) => {
   try {
     const token = thunkAPI.getState().auth.token;
@@ -217,7 +280,7 @@ export const partialRefundOrder = createAsyncThunk<
       reason?: string;
     }>;
   },
-  { state: RootState }
+  { state: RootState; rejectValue: RejectValue }
 >("orders/partialRefundOrder", async ({ orderId, refundItems }, thunkAPI) => {
   try {
     const token = thunkAPI.getState().auth.token;

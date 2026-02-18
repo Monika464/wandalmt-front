@@ -16,7 +16,8 @@
     "logout": "Wyloguj",
     "userPanel": "Panel użytkownika",
     "adminPanel": "Panel administratora",
-    "shop": "Sklep"
+    "shop": "Sklep",
+    "cart": "Koszyk"
   },
   "register": {
     "title": "Rejestracja",
