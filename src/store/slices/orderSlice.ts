@@ -523,8 +523,18 @@ export const selectRefundableProducts =
       .map((product) => ({
         ...product,
         availableToRefund: product.quantity - (product.refundQuantity || 0),
-        refundAmountPerUnit: product.product.price,
+        refundAmountPerUnit: product.discountedPrice ?? product.price ?? 0,
+        // Dodatkowe pomocne pola
+        productId: product.productId,
+        title: product.title,
+        quantity: product.quantity,
+        refundQuantity: product.refundQuantity || 0,
       }));
+    // .map((product) => ({
+    //   ...product,
+    //   availableToRefund: product.quantity - (product.refundQuantity || 0),
+    //   refundAmountPerUnit: product.product.price,
+    // }));
   };
 
 // ==================== EXPORTS ====================
