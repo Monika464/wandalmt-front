@@ -415,7 +415,11 @@ const orderSlice = createSlice({
       })
       .addCase(fetchOrderById.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        //state.error = action.payload as string;
+        state.error =
+          (action.payload as RejectValue)?.message ||
+          action.error.message ||
+          "Wystąpił błąd";
       })
 
       // 🔹 Full refund
@@ -442,7 +446,11 @@ const orderSlice = createSlice({
       })
       .addCase(refundOrder.rejected, (state, action) => {
         state.refundLoading[action.meta.arg] = false;
-        state.error = action.payload as string;
+        state.error =
+          (action.payload as RejectValue)?.message ||
+          action.error.message ||
+          "Błąd zwrotu";
+        //state.error = action.payload as string;
       })
 
       // 🔹 Partial refund
@@ -469,7 +477,11 @@ const orderSlice = createSlice({
       })
       .addCase(partialRefundOrder.rejected, (state, action) => {
         state.partialRefundLoading[action.meta.arg.orderId] = false;
-        state.error = action.payload as string;
+        //state.error = action.payload as string;
+        state.error =
+          (action.payload as RejectValue)?.message ||
+          action.error.message ||
+          "Błąd zwrotu";
       });
   },
 });
