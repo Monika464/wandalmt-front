@@ -18,6 +18,7 @@ export interface Product {
   price: number;
   imageUrl: string;
   status?: string;
+  language: "pl" | "en";
 }
 
 export type NewProduct = Omit<Product, "_id">;
@@ -43,11 +44,11 @@ export interface IResource {
   title: string;
   description: string;
   content: string;
-  //videoUrl?: string;
   productId: string;
   chapters: IChapter[];
   createdAt?: string;
   updatedAt?: string;
+  language: "pl" | "en";
 }
 
 export interface IResourceListResponse {

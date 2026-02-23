@@ -4,9 +4,11 @@ import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../store";
 import { createProduct } from "../../store/slices/productSlice";
 import type { NewProduct } from "../../types/types";
+import { useTranslation } from "react-i18next";
 
 const CreateProductForm: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const { i18n } = useTranslation();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -27,6 +29,7 @@ const CreateProductForm: React.FC = () => {
         description,
         price,
         imageUrl,
+        language: i18n.language as "pl" | "en",
       };
 
       await dispatch(createProduct(productData)).unwrap();
@@ -45,11 +48,19 @@ const CreateProductForm: React.FC = () => {
     }
   };
 
+  const currentLanguage = i18n.language === "pl" ? "🇵🇱 Polski" : "🇬🇧 English";
+
   return (
     <form
       onSubmit={handleSubmit}
       className="max-w-md mx-auto p-4 border rounded-md flex flex-col gap-4"
     >
+      <h2 className="text-xl font-bold mb-2">Dodaj nowy produkt</h2>
+
+      <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm">
+        <span className="font-medium">Język produktu:</span> {currentLanguage}
+      </div>
+
       <input
         type="text"
         placeholder="Tytuł"
@@ -78,12 +89,7 @@ const CreateProductForm: React.FC = () => {
         onChange={(e) => setImageUrl(e.target.value)}
         className="border p-2 rounded"
       />
-      {/* <textarea
-        placeholder="Treść"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        className="border p-2 rounded"
-      /> */}
+
       <button type="submit" className="bg-green-500 text-white p-2 rounded">
         Dodaj produkt
       </button>

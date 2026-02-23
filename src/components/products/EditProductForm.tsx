@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../store";
 import { editProduct } from "../../store/slices/productSlice";
-
+import { useTranslation } from "react-i18next";
 import type { Product } from "../../types/types";
 
 interface Props {
@@ -12,12 +12,13 @@ interface Props {
 
 const EditProductForm: React.FC<Props> = ({ product, onClose }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const { i18n } = useTranslation();
 
   const [title, setTitle] = useState(product.title);
   const [description, setDescription] = useState(product.description);
   const [price, setPrice] = useState(product.price);
   const [imageUrl, setImageUrl] = useState(product.imageUrl);
-  //const [content, setContent] = useState(product.content);
+  const [language, setLanguage] = useState<"pl" | "en">(product.language);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +37,9 @@ const EditProductForm: React.FC<Props> = ({ product, onClose }) => {
             description,
             price,
             imageUrl,
-            _id: "",
+            //_id: "",
+            _id: product._id,
+            language,
           },
         }),
       ).unwrap();
@@ -54,6 +57,34 @@ const EditProductForm: React.FC<Props> = ({ product, onClose }) => {
       onSubmit={handleSubmit}
       className="max-w-md mx-auto p-4 border rounded-md flex flex-col gap-4"
     >
+      <h2 className="text-xl font-bold mb-2">Edytuj produkt</h2>
+
+      {/* 🔥 Dodajemy wybór języka */}
+      <div className="bg-blue-50 border border-blue-200 rounded p-3">
+        <label className="block text-sm font-medium mb-2">Język produktu</label>
+        <div className="flex gap-4">
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              value="pl"
+              checked={language === "pl"}
+              onChange={(e) => setLanguage(e.target.value as "pl")}
+              className="form-radio"
+            />
+            <span>🇵🇱 Polski</span>
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              value="en"
+              checked={language === "en"}
+              onChange={(e) => setLanguage(e.target.value as "en")}
+              className="form-radio"
+            />
+            <span>🇬🇧 English</span>
+          </label>
+        </div>
+      </div>
       <input
         type="text"
         placeholder="Tytuł"

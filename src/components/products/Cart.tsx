@@ -49,11 +49,11 @@ const Cart: React.FC = () => {
 
   // Poprawione: Użyj item._id zamiast item.product._id
   const alreadyOwnedProducts = React.useMemo(() => {
-    console.log("🔍 Checking already owned products...");
-    console.log(
-      "Items in cart:",
-      items.map((i) => ({ id: i._id, title: i.title })),
-    );
+    // console.log("🔍 Checking already owned products...");
+    // console.log(
+    //   "Items in cart:",
+    //   items.map((i) => ({ id: i._id, title: i.title })),
+    // );
 
     if (!Array.isArray(userOrders) || !Array.isArray(items)) {
       return [];
@@ -73,17 +73,17 @@ const Cart: React.FC = () => {
         .filter((id) => id != null),
     );
 
-    console.log("📦 Ordered product IDs:", orderedProductIds);
+    //console.log("📦 Ordered product IDs:", orderedProductIds);
 
     const result = items.filter((item) => {
       if (!item || !item._id) return false;
 
       const found = orderedProductIds.includes(item._id.toString());
-      if (found) console.log(`✅ Found: ${item.title} is already owned`);
+      //if (found) console.log(`✅ Found: ${item.title} is already owned`);
       return found;
     });
 
-    console.log("📦 Already owned products:", result);
+    //console.log("📦 Already owned products:", result);
     return result;
   }, [userOrders, items]);
 

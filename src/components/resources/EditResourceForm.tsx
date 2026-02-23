@@ -2,22 +2,20 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../store";
-import type { IResource, IChapter } from "../../types/types"; // Zaktualizowany import
+import type { IResource, IChapter } from "../../types/types";
 import {
   editResource,
   addChapter,
   editChapter,
   deleteChapter,
-  //deleteChapterVideo,
   fetchResourceById,
 } from "../../store/slices/resourceSlice";
-
 import VideoUploader from "../video/VideoUploader";
 import { useNavigate } from "react-router-dom";
-
 import Thumbnail from "../video/Thumbnail";
 import VideoTitle from "../video/VideoTitle";
 import { useVideoNavigation } from "../../hooks/useVideoNavigation";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   resource: IResource;
@@ -26,38 +24,27 @@ interface Props {
 
 const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
-
+  //const navigate = useNavigate();
+  const { i18n } = useTranslation();
   const { handlePlayVideo } = useVideoNavigation();
 
   const [title, setTitle] = useState(resource.title);
   const [content, setContent] = useState(resource.content || "");
-  // const [chapters, setChapters] = useState<IChapter[]>(
-  //   (resource.chapters || []).map((ch, index) => ({
-  //     ...ch,
-  //     number: ch.number ?? index + 1,
-  //   }))
-  // );
-  // Pobierz aktualny resource z Redux
+  const [language, setLanguage] = useState<"pl" | "en">(
+    resource.language || "pl",
+  );
   const selectedResource = useSelector(
     (state: RootState) => state.resources.selected,
   );
-  const selecteddVideo = useSelector((state: RootState) => state.video);
-  const videoIdforTitle = selecteddVideo.video
-    ? selecteddVideo.video._id
-    : null;
 
   const [chapters, setChapters] = useState<IChapter[]>([]);
-  const [activeUploads, setActiveUploads] = useState<
-    Record<string, { videoId: string | null; bunnyGuid: string | null }>
-  >({});
-  // UWAGA: Teraz używamy bunnyVideoId zamiast videoId
+
   const [newChapter, setNewChapter] = useState<IChapter>({
     _id: "",
     number: chapters.length + 1,
     title: "",
     description: "",
-    bunnyVideoId: "", // ZMIANA: z videoId na bunnyVideoId
+    bunnyVideoId: "",
   });
 
   const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
@@ -79,7 +66,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
       await dispatch(
         editResource({
           id: resource._id!,
-          resourceData: { title, content },
+          resourceData: { title, content, language },
         }),
       ).unwrap();
       alert("Resource updated!");
@@ -90,14 +77,12 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
     }
   };
 
-  // Add new chapter - ZAKTUALIZOWANE
   const handleAddChapter = async () => {
     console.log("Adding new chapter:", newChapter);
     if (!newChapter.title) {
       alert("Chapter title is required");
       return;
     }
-    // Sprawdź czy mamy bunnyVideoId (musi być!)
     if (!newChapter.bunnyVideoId) {
       alert("Proszę najpierw wgrać wideo przed dodaniem rozdziału!");
       return;
@@ -105,12 +90,10 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
 
     const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(newChapter.videoId || "");
 
-    // Używamy bunnyVideoId zamiast videoId
     const chapterData: any = {
       number: newChapter.number ?? chapters.length + 1,
       title: newChapter.title,
       description: newChapter.description || undefined,
-      //bunnyVideoId: newChapter.bunnyVideoId || undefined,
       bunnyVideoId: newChapter.bunnyVideoId,
     };
 
@@ -126,14 +109,12 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
         }),
       ).unwrap();
 
-      // Refresh chapters list
-      const updatedResource = await dispatch(
-        fetchResourceById(resource._id!),
-      ).unwrap();
+      // 🔥 Usuwamy nieużywane 'updatedResource'
+      await dispatch(fetchResourceById(resource._id!)).unwrap();
 
-      setChapters(updatedResource.chapters || []);
+      setChapters(selectedResource?.chapters || []);
       setNewChapter({
-        number: (updatedResource.chapters?.length || chapters.length) + 1,
+        number: (selectedResource?.chapters?.length || chapters.length) + 1,
         title: "",
         description: "",
         bunnyVideoId: "",
@@ -146,10 +127,9 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
     }
   };
 
-  // Edit chapter - ZAKTUALIZOWANE
   const handleEditChapter = async (chapterId: string, updated: IChapter) => {
     try {
-      const updatedResource = await dispatch(
+      await dispatch(
         editChapter({
           resourceId: resource._id!,
           chapterId,
@@ -157,7 +137,6 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
         }),
       ).unwrap();
 
-      //setChapters(updatedResource.chapters || []);
       setEditingChapterId(null);
     } catch (err) {
       console.error(err);
@@ -165,31 +144,25 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
     }
   };
 
-  // Delete chapter
   const handleDeleteChapter = async (chapter: IChapter) => {
     if (!window.confirm("Na pewno chcesz usunąć ten rozdział?")) return;
     try {
       await dispatch(
         deleteChapter({
           resourceId: resource._id!,
-          chapterId: chapter._id,
-          videoId: chapter.videoId,
+          chapterId: chapter._id!,
+          videoId: chapter.videoId!,
         }),
       ).unwrap();
 
-      // Refresh chapters list
-      const updatedResource = await dispatch(
-        fetchResourceById(resource._id!),
-      ).unwrap();
-
-      setChapters(updatedResource.chapters || []);
+      await dispatch(fetchResourceById(resource._id!)).unwrap();
+      setChapters(selectedResource?.chapters || []);
     } catch (err) {
       console.error(err);
       alert("Error deleting chapter");
     }
   };
 
-  // Handle video uploaded - ZAKTUALIZOWANE
   const handleVideoUploaded = async (
     chapterId: string,
     videoId: string,
@@ -200,25 +173,12 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
       bunnyGuid,
     });
 
-    // Ustaw aktywny upload dla tego rozdziału
-    setActiveUploads((prev) => ({
-      ...prev,
-      [chapterId]: { videoId, bunnyGuid },
-    }));
     const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(videoId);
 
-    if (!isValidObjectId) {
-      console.warn("Invalid videoId format:", videoId);
-      // Możesz tutaj wywołać API żeby znaleźć video po bunnyGuid
-      // i uzyskać prawidłowe videoId
-    }
-
     if (chapterId === "new") {
-      // For new chapter - zapisujemy TYLKO bunnyGuid jako bunnyVideoId
       setNewChapter((prev) => ({
         ...prev,
         bunnyVideoId: bunnyGuid,
-        //videoId: videoId,
         videoId: videoId === "pending" ? "" : videoId,
       }));
     } else {
@@ -239,24 +199,53 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
           }),
         ).unwrap();
 
-        // Odśwież dane
-        const updatedResource = await dispatch(
-          fetchResourceById(resource._id!),
-        ).unwrap();
-        setChapters(updatedResource.chapters || []);
+        await dispatch(fetchResourceById(resource._id!)).unwrap();
+        setChapters(selectedResource?.chapters || []);
       } catch (err) {
         console.error("Error updating chapter with video:", err);
       }
     }
   };
 
+  // 🔥 Poprawka dla VideoTitle - dodajemy sprawdzenie
+  const getVideoId = (chapter: IChapter): string => {
+    return chapter.videoId || chapter.bunnyVideoId || "";
+  };
+
   return (
     <div className="p-4 border rounded-md bg-gray-50 relative">
       <h2 className="text-xl font-bold mb-4">Editing Resource</h2>
 
-      {/* Resource fields - bez zmian */}
+      {/* Resource fields */}
       {isEditingResource ? (
         <>
+          <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4">
+            <label className="block text-sm font-medium mb-2">
+              Język resource
+            </label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  value="pl"
+                  checked={language === "pl"}
+                  onChange={(e) => setLanguage(e.target.value as "pl")}
+                  className="form-radio"
+                />
+                <span>🇵🇱 Polski</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  value="en"
+                  checked={language === "en"}
+                  onChange={(e) => setLanguage(e.target.value as "en")}
+                  className="form-radio"
+                />
+                <span>🇬🇧 English</span>
+              </label>
+            </div>
+          </div>
           <input
             type="text"
             placeholder="Title"
@@ -270,7 +259,6 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
             onChange={(e) => setContent(e.target.value)}
             className="border p-2 rounded mb-2 w-full"
           />
-
           <button
             onClick={handleSaveResource}
             className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
@@ -286,7 +274,6 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
           <p>
             <strong>Content:</strong> {content}
           </p>
-
           <button
             onClick={() => setIsEditingResource(true)}
             className="bg-yellow-500 text-white px-4 py-2 rounded mb-4"
@@ -298,7 +285,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
 
       <hr className="my-4" />
 
-      {/* Chapter list - ZAKTUALIZOWANE: używamy bunnyVideoId */}
+      {/* Chapter list */}
       <h3 className="text-lg font-semibold mb-2">Chapters</h3>
       {chapters && chapters.length > 0 ? (
         chapters.map((ch) => (
@@ -331,7 +318,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
               </div>
             </div>
 
-            {/* Video Section - ZAKTUALIZOWANE: używamy bunnyVideoId */}
+            {/* Video Section */}
             <div className="mt-4 p-3 bg-gray-50 rounded border">
               <h5 className="font-semibold mb-2">Video</h5>
 
@@ -346,19 +333,13 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">Video:</span>
                         <code className="bg-gray-100 px-2 py-1 rounded text-sm">
-                          {/* {ch.videoId} */}{" "}
-                          <VideoTitle videoId={ch.videoId} />
+                          {/* 🔥 Poprawka: używamy getVideoId */}
+                          <VideoTitle videoId={getVideoId(ch)} />
                         </code>
                       </div>
                     </div>
 
                     <div className="flex gap-2 mt-3">
-                      {/* <button
-                        onClick={() => handleDeleteChapterVideo(ch._id!)}
-                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-                      >
-                        🗑️ Delete Video
-                      </button> */}
                       <button
                         onClick={() => handlePlayVideo(ch)}
                         className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
@@ -381,7 +362,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
               )}
             </div>
 
-            {/* Formularz edycji chaptera - ZAKTUALIZOWANE */}
+            {/* Edit Chapter Form */}
             {editingChapterId === ch._id && (
               <div className="mt-4 p-4 border-t border-gray-200">
                 <h5 className="font-semibold mb-3">Edit Chapter Details</h5>
@@ -473,7 +454,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
         <p>No chapters yet.</p>
       )}
 
-      {/* Add New Chapter - ZAKTUALIZOWANE */}
+      {/* Add New Chapter */}
       <div className="mt-8 p-4 border rounded-md bg-white">
         <h4 className="text-lg font-semibold mt-4">Add New Chapter</h4>
         <div className="space-y-3">

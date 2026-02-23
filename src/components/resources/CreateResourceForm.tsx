@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../store";
 import { createResource } from "../../store/slices/resourceSlice";
+import { useTranslation } from "react-i18next";
 
 interface Props {
-  productId: string; // resource będzie powiązany z tym produktem
+  productId: string;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -15,6 +16,7 @@ const CreateResourceForm: React.FC<Props> = ({
   onSuccess,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const { i18n } = useTranslation();
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -30,13 +32,18 @@ const CreateResourceForm: React.FC<Props> = ({
     }
 
     try {
-      await dispatch(createResource({ productId, title, content })).unwrap();
+      await dispatch(
+        createResource({
+          productId,
+          title,
+          content,
+          language: i18n.language as "pl" | "en",
+        }),
+      ).unwrap();
 
       alert("Resource został utworzony!");
       setTitle("");
       setContent("");
-      // setImageUrl("");
-      //setVideoUrl("");
       onClose();
       onSuccess();
     } catch (err) {
@@ -51,6 +58,11 @@ const CreateResourceForm: React.FC<Props> = ({
       className="p-4 border rounded-md flex flex-col gap-3 bg-gray-50 max-w-md"
     >
       <h3 className="text-lg font-semibold">Create Resource</h3>
+      {/* 🔥 Informacja o języku */}
+      <div className="bg-blue-50 border border-blue-200 rounded p-2 text-sm">
+        <span className="font-medium">Język resource:</span> {currentLanguage}
+      </div>
+
       <input
         type="text"
         placeholder="Title"

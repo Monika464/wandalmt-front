@@ -1,22 +1,16 @@
 import { useEffect, useState } from "react";
-//import { fetchResource } from "../../store/slices/resourceSlice";
-//import CreateResourceForm from "../resources/CreateResourceForm";
-//import EditResourceForm from "../resources/EditResourceForm";
-//import ViewResource from "../resources/ViewResource";
 import EditProductForm from "./EditProductForm";
 import ProductItem from "./ProductItem";
 import { fetchProducts } from "../../store/slices/productSlice";
-//import type { Product } from "../../types";
-//import type { IResource } from "../../types";
+
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../store";
-
 import { useNavigate } from "react-router-dom";
 import CreateProductForm from "./CreateProductForm";
 
 import SearchContainer from "./SearchContainer";
+import { useTranslation } from "react-i18next";
 
-// ...
 const ProductList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
 
@@ -28,6 +22,7 @@ const ProductList: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
 
   const navigate = useNavigate();
+  const { i18n } = useTranslation();
 
   useEffect(() => {
     dispatch(fetchProducts({}));
@@ -38,12 +33,19 @@ const ProductList: React.FC = () => {
   if (loading) return <p>Ładowanie...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
+  console.log("📦 All products:", products);
+  const filteredProducts = products.filter(
+    (product) => product.language === i18n.language,
+  );
+  console.log("📦 Filtered products:", filteredProducts);
   return (
     <div>
       <br></br>
       <SearchContainer>
-        {Array.isArray(products) &&
-          products
+        {/* {Array.isArray(products) && */}
+        {Array.isArray(filteredProducts) &&
+          // products
+          filteredProducts
             .filter((product) => !!product?._id)
             .map((product) => (
               <div key={product._id} className="relative">

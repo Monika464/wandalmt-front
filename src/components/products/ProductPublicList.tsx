@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import AddToCartButton from "../orders/AddToCartButton";
 import SearchPublicContainer from "./SearchContainerPublic";
 import Navbar from "../elements/Navbar";
+import { useTranslation } from "react-i18next";
 
 const ProductList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -19,6 +20,7 @@ const ProductList: React.FC = () => {
   );
 
   const navigate = useNavigate();
+  const { i18n } = useTranslation();
 
   useEffect(() => {
     dispatch(fetchProducts({}));
@@ -27,12 +29,19 @@ const ProductList: React.FC = () => {
   if (loading) return <p>Ładowanie...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
+  console.log("📦 All products:", products);
+  const filteredProducts = products.filter(
+    (product) => product.language === i18n.language,
+  );
+
+  console.log("📦 Filtered products:", filteredProducts);
   return (
     <div>
       <Navbar />
       <br></br>
       <SearchPublicContainer>
-        {products.map((product) => {
+        {/* {products.map((product) => { */}
+        {filteredProducts.map((product) => {
           return (
             <div key={product._id} className="relative">
               <ProductPublicItem {...product} />
