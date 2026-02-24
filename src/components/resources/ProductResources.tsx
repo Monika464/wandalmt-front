@@ -45,7 +45,6 @@ const ProductResources: React.FC = () => {
     isChapterCompleted,
     loadProgress,
     completeChapter,
-    uncompleteChapter,
     resetAllProgress,
     calculateOverallProgress,
     loading: progressLoading,
@@ -525,10 +524,10 @@ const ProductResources: React.FC = () => {
                       <div className="text-gray-600">Completed</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-green-600">
+                      {/* <div className="text-2xl font-bold text-green-600">
                         {formatTotalDurationHours(chapters)}
                       </div>
-                      <div className="text-gray-600">Total Duration</div>
+                      <div className="text-gray-600">Total Duration</div> */}
                     </div>
                   </div>
 
@@ -578,34 +577,34 @@ const ProductResources: React.FC = () => {
 };
 
 // Helper functions
-const formatDuration = (seconds: number): string => {
-  if (!seconds) return "0:00";
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
-};
+// const formatDuration = (seconds: number): string => {
+//   if (!seconds) return "0:00";
+//   const mins = Math.floor(seconds / 60);
+//   const secs = Math.floor(seconds % 60);
+//   return `${mins}:${secs.toString().padStart(2, "0")}`;
+// };
 
-const formatTotalDuration = (chapters: Chapter[]): string => {
-  const totalSeconds = chapters.reduce(
-    (acc, ch) => acc + (ch.duration || 0),
-    0,
-  );
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
+// const formatTotalDuration = (chapters: Chapter[]): string => {
+//   const totalSeconds = chapters.reduce(
+//     (acc, ch) => acc + (ch.duration || 0),
+//     0,
+//   );
+//   const hours = Math.floor(totalSeconds / 3600);
+//   const minutes = Math.floor((totalSeconds % 3600) / 60);
 
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  }
-  return `${minutes}m`;
-};
+//   if (hours > 0) {
+//     return `${hours}h ${minutes}m`;
+//   }
+//   return `${minutes}m`;
+// };
 
-const formatTotalDurationHours = (chapters: Chapter[]): string => {
-  const totalSeconds = chapters.reduce(
-    (acc, ch) => acc + (ch.duration || 0),
-    0,
-  );
-  const hours = (totalSeconds / 3600).toFixed(1);
-  return `${hours}h`;
-};
+// const formatTotalDurationHours = (chapters: Chapter[]): string => {
+//   const totalSeconds = chapters.reduce(
+//     (acc, ch) => acc + (ch.duration || 0),
+//     0,
+//   );
+//   const hours = (totalSeconds / 3600).toFixed(1);
+//   return `${hours}h`;
+// };
 
 export default ProductResources;

@@ -1,9 +1,8 @@
 // components/video/VideoTitle.tsx
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState } from "../../store";
-import { fetchVideoUrl } from "../../store/slices/videoSlice"; // lub resourceSlice
-
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "../../store";
+import { fetchVideoUrl } from "../../store/slices/videoSlice";
 interface VideoTitleProps {
   videoId: string;
   short?: boolean;

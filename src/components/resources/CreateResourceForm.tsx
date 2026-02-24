@@ -32,7 +32,7 @@ const CreateResourceForm: React.FC<Props> = ({
     }
 
     try {
-      const result = await dispatch(
+      await dispatch(
         createResource({
           productId,
           title,

@@ -119,16 +119,16 @@ const UserOrders: React.FC = () => {
     // });
 
     // Nie można zwrócić jeśli całe zamówienie już zwrócone
-    if (order.status === "refunded" || order.refundedAt) {
-      console.log("❌ Order fully refunded or refundedAt exists");
-      return false;
-    }
+    // if (order.status === "refunded" || order.refundedAt) {
+    //   console.log("❌ Order fully refunded or refundedAt exists");
+    //   return false;
+    // }
 
-    // Akceptuj tylko zamówienia które są opłacone lub częściowo zwrócone
-    if (order.status !== "paid" && order.status !== "partially_refunded") {
-      console.log("❌ Order status not suitable for refund");
-      return false;
-    }
+    // // Akceptuj tylko zamówienia które są opłacone lub częściowo zwrócone
+    // if (order.status !== "paid" && order.status !== "partially_refunded") {
+    //   console.log("❌ Order status not suitable for refund");
+    //   return false;
+    // }
 
     const purchaseDate = new Date(order.paidAt || order.createdAt);
     const now = new Date();
@@ -137,9 +137,9 @@ const UserOrders: React.FC = () => {
     );
 
     const canRefund = daysSincePurchase <= 14;
-    console.log(
-      `📅 Days since purchase: ${daysSincePurchase}, Can refund: ${canRefund}`,
-    );
+    // console.log(
+    //   `📅 Days since purchase: ${daysSincePurchase}, Can refund: ${canRefund}`,
+    // );
 
     return canRefund;
   };
@@ -149,10 +149,10 @@ const UserOrders: React.FC = () => {
     if (!canRefundOrder(order)) return false;
 
     // ⚠️ Częściowy zwrot jest NIEMOŻLIWY jeśli zamówienie ma kupon/zniżkę
-    if (hasDiscount(order)) {
-      console.log("🚫 Partial refund blocked - order has discount/coupon");
-      return false;
-    }
+    // if (hasDiscount(order)) {
+    //   console.log("🚫 Partial refund blocked - order has discount/coupon");
+    //   return false;
+    // }
 
     // Sprawdź czy są produkty do zwrotu
     return hasRefundableProducts(order);

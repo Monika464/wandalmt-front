@@ -24,7 +24,7 @@ const ViewPublicResource: React.FC<Props> = ({ resource }) => {
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">Video:</span>
                   <code className="bg-gray-100 px-2 py-1 rounded text-sm">
-                    <VideoTitle videoId={ch.videoId} />
+                    {ch.videoId && <VideoTitle videoId={ch.videoId} />}
                   </code>
                   {index === 0 && (
                     <div className="flex gap-2 mt-3">

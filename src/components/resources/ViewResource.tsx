@@ -1,8 +1,8 @@
 import React from "react";
-import type { IChapter, IResource } from "../../types/types";
+import type { IResource } from "../../types/types";
 import Thumbnail from "../video/Thumbnail";
 import VideoTitle from "../video/VideoTitle";
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
 import { useVideoNavigation } from "../../hooks/useVideoNavigation";
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
 }
 
 const ViewResource: React.FC<Props> = ({ resource, onClose }) => {
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   const { handlePlayVideo } = useVideoNavigation();
 
@@ -38,7 +38,7 @@ const ViewResource: React.FC<Props> = ({ resource, onClose }) => {
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">Video:</span>
                       <code className="bg-gray-100 px-2 py-1 rounded text-sm">
-                        <VideoTitle videoId={ch.videoId} />
+                        {ch.videoId && <VideoTitle videoId={ch.videoId} />}
                       </code>
                     </div>
                   </div>

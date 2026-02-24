@@ -1,26 +1,83 @@
 import { useEffect, useRef } from "react";
 
-interface Props {
+interface BunnyPlayerProps {
   guid: string;
   libraryId: string;
+  className?: string;
+  onEnded?: () => void;
 }
 
-export default function BunnyPlayer({ guid, libraryId }: Props) {
+//export default function BunnyPlayer({ guid, libraryId }: Props) {
+const BunnyPlayer: React.FC<BunnyPlayerProps> = ({
+  guid,
+  libraryId,
+  className = "",
+  onEnded,
+}) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     if (!guid || !libraryId) return;
 
-    // Wstawiamy iframe Bunny Player dynamicznie
     const iframe = iframeRef.current;
     if (iframe) {
-      //iframe.src = `https://iframe.mediadelivery.net/player?video=${guid}&library=${libraryId}&autoplay=false`;
       iframe.src = `https://player.mediadelivery.net/embed/${libraryId}/${guid}?autoplay=false`;
     }
   }, [guid, libraryId]);
 
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // Sprawdź czy wiadomość pochodzi z Bunny.net
+      if (event.origin !== "https://player.mediadelivery.net") return;
+
+      // Sprawdź typ wiadomości
+      if (event.data?.event === "ended" && onEnded) {
+        console.log("🎬 Video ended, calling onEnded");
+        onEnded();
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, [onEnded]);
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== "https://player.mediadelivery.net") return;
+
+      const data = event.data;
+      //console.log("Bunny player event:", data);
+
+      switch (data?.event) {
+        case "play":
+          console.log("Video started playing");
+          break;
+        case "pause":
+          console.log("Video paused");
+          break;
+        case "ended":
+          if (onEnded) {
+            console.log("🎬 Video ended, calling onEnded");
+            onEnded();
+          }
+          break;
+        case "timeupdate":
+          // Możesz śledzić postęp
+          // console.log("Current time:", data.currentTime);
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [onEnded]);
+
   return (
-    <div style={{ width: "100%", aspectRatio: "16/9" }}>
+    <div style={{ width: "100%", aspectRatio: "16/9" }} className={className}>
       <iframe
         ref={iframeRef}
         title="Bunny Stream Player"
@@ -31,4 +88,6 @@ export default function BunnyPlayer({ guid, libraryId }: Props) {
       />
     </div>
   );
-}
+};
+
+export default BunnyPlayer;

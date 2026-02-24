@@ -194,7 +194,13 @@ export default function ResourceListComponent() {
                                         Video:
                                       </span>
                                       <code className="bg-gray-100 px-2 py-1 rounded text-sm">
-                                        <VideoTitle videoId={ch.videoId} />
+                                        {ch.videoId ? (
+                                          <VideoTitle videoId={ch.videoId} />
+                                        ) : (
+                                          <span className="text-gray-400">
+                                            Brak wideo
+                                          </span>
+                                        )}
                                       </code>
                                     </div>
                                   </div>

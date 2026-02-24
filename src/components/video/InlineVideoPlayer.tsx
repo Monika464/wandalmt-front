@@ -1,7 +1,7 @@
 // components/video/InlineVideoPlayer.tsx
 import React, { useState } from "react";
 import BunnyPlayer from "./BunnyPlayer";
-import { Play, Pause, Volume2, Settings, Maximize } from "lucide-react";
+import { Maximize } from "lucide-react";
 
 interface InlineVideoPlayerProps {
   videoGuid?: string;
@@ -10,6 +10,7 @@ interface InlineVideoPlayerProps {
   onNext?: () => void;
   onPrev?: () => void;
   showControls?: boolean;
+  onEnded?: () => void;
 }
 
 const InlineVideoPlayer: React.FC<InlineVideoPlayerProps> = ({
@@ -19,6 +20,7 @@ const InlineVideoPlayer: React.FC<InlineVideoPlayerProps> = ({
   onNext,
   onPrev,
   showControls = true,
+  onEnded,
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -74,6 +76,7 @@ const InlineVideoPlayer: React.FC<InlineVideoPlayerProps> = ({
             guid={videoGuid}
             libraryId={libraryId}
             className="w-full h-full"
+            onEnded={onEnded}
           />
         </div>
       </div>

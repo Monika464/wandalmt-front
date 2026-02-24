@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../store";
 import { editProduct } from "../../store/slices/productSlice";
-import { useTranslation } from "react-i18next";
+//import { useTranslation } from "react-i18next";
 import type { Product } from "../../types/types";
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
 
 const EditProductForm: React.FC<Props> = ({ product, onClose }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { i18n } = useTranslation();
+  //const { i18n } = useTranslation();
 
   const [title, setTitle] = useState(product.title);
   const [description, setDescription] = useState(product.description);

@@ -11,11 +11,11 @@ import {
   fetchResourceById,
 } from "../../store/slices/resourceSlice";
 import VideoUploader from "../video/VideoUploader";
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
 import Thumbnail from "../video/Thumbnail";
 import VideoTitle from "../video/VideoTitle";
 import { useVideoNavigation } from "../../hooks/useVideoNavigation";
-import { useTranslation } from "react-i18next";
+//import { useTranslation } from "react-i18next";
 
 interface Props {
   resource: IResource;
@@ -25,7 +25,7 @@ interface Props {
 const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
   const dispatch = useDispatch<AppDispatch>();
   //const navigate = useNavigate();
-  const { i18n } = useTranslation();
+  //const { i18n } = useTranslation();
   const { handlePlayVideo } = useVideoNavigation();
 
   const [title, setTitle] = useState(resource.title);
