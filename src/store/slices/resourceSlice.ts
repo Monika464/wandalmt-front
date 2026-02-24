@@ -14,6 +14,7 @@ interface FetchParams {
   q?: string;
   sortField?: string;
   sortOrder?: "asc" | "desc";
+  language?: string;
 }
 
 interface ResourceState {
@@ -40,7 +41,6 @@ const initialState: ResourceState = {
   error: null,
 };
 
-// ZAKTUALIZOWANE: Teraz chapterData używa bunnyVideoId zamiast videoId
 interface AddChapterPayload {
   resourceId: string;
   chapterData: {
@@ -52,7 +52,6 @@ interface AddChapterPayload {
   };
 }
 
-// 📌 Helper function do transformacji danych (backward compatibility)
 const transformChapterDataForApi = (chapterData: any): IChapter => {
   // Jeśli frontend wysyła stare pole videoId, przekonwertuj na bunnyVideoId
   if (chapterData.videoId && !chapterData.bunnyVideoId) {
@@ -68,7 +67,7 @@ const transformChapterDataForApi = (chapterData: any): IChapter => {
     return {
       ...chapterData,
       bunnyVideoId: chapterData.bunnyGuid,
-      bunnyGuid: undefined, // Nie wysyłaj starego pola
+      bunnyGuid: undefined,
     };
   }
 
@@ -99,13 +98,13 @@ export const fetchResources = createAsyncThunk<
     if (params.q) searchParams.set("q", params.q);
     if (params.sortField) searchParams.set("sortField", params.sortField);
     if (params.sortOrder) searchParams.set("sortOrder", params.sortOrder);
+    if (params.language) searchParams.set("language", params.language);
 
     const data = await authorizedRequest<IResourceListResponse>(thunkApi, {
       url: `/admin/resources?${searchParams.toString()}`,
       method: "GET",
     });
 
-    // Transformuj chapters jeśli potrzeba
     if (data.items) {
       data.items = data.items.map((resource) => ({
         ...resource,
@@ -133,7 +132,7 @@ export const fetchResourceById = createAsyncThunk<IResource, string>(
         resource.chapters = resource.chapters.map(transformChapterFromApi);
       }
 
-      console.log("✅ Fetched resource by ID:", resource._id);
+      //console.log("✅ Fetched resource by ID:", resource._id);
       return resource;
     } catch (error: any) {
       console.error("❌ Error in fetchResourceById:", error);
@@ -142,56 +141,77 @@ export const fetchResourceById = createAsyncThunk<IResource, string>(
   },
 );
 
-export const fetchResourceByProductId = createAsyncThunk<IResource, string>(
-  "resources/fetchByProductId",
-  async (productId, thunkApi) => {
-    try {
-      const resource = await authorizedRequest<IResource>(thunkApi, {
-        url: `/admin/resources/product/${productId}`,
-        method: "GET",
-      });
+export const fetchResourceByProductId = createAsyncThunk<
+  IResource,
+  { productId: string; language?: string }
+>("resources/fetchByProductId", async ({ productId, language }, thunkApi) => {
+  try {
+    console.log(
+      "🔍 Fetching resource for product:",
+      productId,
+      "language:",
+      language,
+    );
 
-      // Transformuj chapters
-      if (resource.chapters) {
-        resource.chapters = resource.chapters.map(transformChapterFromApi);
-      }
+    const url = language
+      ? `/admin/resources/product/${productId}?language=${language}`
+      : `/admin/resources/product/${productId}`;
 
-      //console.log("✅ Fetched resource by product ID:", productId);
-      return resource;
-    } catch (error: any) {
-      console.error("❌ Error in fetchResourceByProductId:", error);
-      return thunkApi.rejectWithValue(error);
+    console.log("📡 Request URL:", url);
+
+    const resource = await authorizedRequest<IResource>(thunkApi, {
+      url: url,
+      method: "GET",
+    });
+
+    console.log("✅ Resource fetched:", resource?._id);
+
+    if (resource?.chapters) {
+      resource.chapters = resource.chapters.map(transformChapterFromApi);
     }
-  },
-);
 
-export const createResource = createAsyncThunk<IResource, any>(
-  "resources/create",
-  async (resourceData, thunkApi) => {
-    try {
-      const resource = await authorizedRequest<IResource>(thunkApi, {
-        url: "/admin/resources",
-        method: "POST",
-        data: resourceData,
-      });
+    return resource;
+  } catch (error: any) {
+    console.error("❌ Error in fetchResourceByProductId:", {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+      config: error.config,
+    });
+    return thunkApi.rejectWithValue(error);
+  }
+});
 
-      // Transformuj chapters
-      if (resource.chapters) {
-        resource.chapters = resource.chapters.map(transformChapterFromApi);
-      }
+export const createResource = createAsyncThunk<
+  IResource,
+  { productId: string; title: string; content: string; language: "pl" | "en" }
+>("resources/create", async (resourceData, thunkApi) => {
+  try {
+    const resource = await authorizedRequest<IResource>(thunkApi, {
+      url: "/admin/resources",
+      method: "POST",
+      data: resourceData,
+    });
 
-      console.log("✅ Resource created:", resource._id);
-      return resource;
-    } catch (error: any) {
-      console.error("❌ Error creating resource:", error);
-      return thunkApi.rejectWithValue(error);
+    // Transformuj chapters
+    if (resource.chapters) {
+      resource.chapters = resource.chapters.map(transformChapterFromApi);
     }
-  },
-);
+
+    console.log("✅ Resource created:", resource._id);
+    return resource;
+  } catch (error: any) {
+    console.error("❌ Error creating resource:", error);
+    return thunkApi.rejectWithValue(error);
+  }
+});
 
 export const editResource = createAsyncThunk<
   IResource,
-  { id: string; resourceData: any }
+  {
+    id: string;
+    resourceData: { title: string; content: string; language?: "pl" | "en" };
+  }
 >("resources/edit", async ({ id, resourceData }, thunkApi) => {
   try {
     const resource = await authorizedRequest<IResource>(thunkApi, {

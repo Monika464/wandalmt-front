@@ -32,7 +32,7 @@ const CreateResourceForm: React.FC<Props> = ({
     }
 
     try {
-      await dispatch(
+      const result = await dispatch(
         createResource({
           productId,
           title,
@@ -40,6 +40,8 @@ const CreateResourceForm: React.FC<Props> = ({
           language: i18n.language as "pl" | "en",
         }),
       ).unwrap();
+
+      //console.log("✅ Create result:", result);
 
       alert("Resource został utworzony!");
       setTitle("");
@@ -58,9 +60,11 @@ const CreateResourceForm: React.FC<Props> = ({
       className="p-4 border rounded-md flex flex-col gap-3 bg-gray-50 max-w-md"
     >
       <h3 className="text-lg font-semibold">Create Resource</h3>
+
       {/* 🔥 Informacja o języku */}
       <div className="bg-blue-50 border border-blue-200 rounded p-2 text-sm">
-        <span className="font-medium">Język resource:</span> {currentLanguage}
+        <span className="font-medium">Język resource:</span>{" "}
+        {i18n.language === "pl" ? "🇵🇱 Polski" : "🇬🇧 English"}
       </div>
 
       <input

@@ -33,11 +33,11 @@ const ProductList: React.FC = () => {
   if (loading) return <p>Ładowanie...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
-  console.log("📦 All products:", products);
+  //console.log("📦 All products:", products);
   const filteredProducts = products.filter(
     (product) => product.language === i18n.language,
   );
-  console.log("📦 Filtered products:", filteredProducts);
+  //console.log("📦 Filtered products:", filteredProducts);
   return (
     <div>
       <br></br>

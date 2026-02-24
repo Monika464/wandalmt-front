@@ -3,8 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { fetchProductById } from "../store/slices/productSlice";
 import { fetchResourceByProductId } from "../store/slices/resourceSlice";
-//import { fetchResources } from "../store/slices/resourceSlice";
-
+import { useTranslation } from "react-i18next";
 import type { Product, IResource } from "../types/types";
 import type { RootState, AppDispatch } from "../store";
 import { formatCurrency } from "../utils/formatcurremcy";
@@ -14,8 +13,8 @@ import CreateResourceForm from "../components/resources/CreateResourceForm";
 
 export default function ProductResourcePage() {
   const { productId } = useParams<{ productId: string }>();
+  const { i18n } = useTranslation();
 
-  //console.log("id changed:", productId);
   const dispatch = useDispatch<AppDispatch>();
 
   const product: Product | undefined = useSelector((state: RootState) =>
@@ -45,7 +44,13 @@ export default function ProductResourcePage() {
       try {
         await Promise.all([
           dispatch(fetchProductById(productId)),
-          dispatch(fetchResourceByProductId(productId)),
+
+          dispatch(
+            fetchResourceByProductId({
+              productId,
+              language: i18n.language as "pl" | "en",
+            }),
+          ),
           // .unwrap()
           // .then(() => console.log("✅ thunk resolved"))
           // .catch((e) => console.error("❌ thunk rejected", e)),
@@ -59,11 +64,24 @@ export default function ProductResourcePage() {
     };
 
     fetchData();
-  }, [productId, dispatch, refreshView]);
+  }, [productId, dispatch, refreshView, i18n.language]);
 
   if (!product) {
     //console.log("❌ NO PRODUCT FOUND");
     return <p>Nie znaleziono produktu</p>;
+  }
+
+  // 🔥 Sprawdź czy język produktu zgadza się z aktualnym językiem
+  if (product.language && product.language !== i18n.language) {
+    return (
+      <div className="p-4">
+        <p className="text-yellow-600">
+          Ten produkt jest dostępny tylko w języku{" "}
+          {product.language === "pl" ? "polskim" : "angielskim"}. Zmień język w
+          nawigacji, aby go zobaczyć.
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -77,6 +95,14 @@ export default function ProductResourcePage() {
       <p className="text-sm text-gray-600">{product.description}</p>
       <p className="font-bold">{formatCurrency(product.price)}</p>
 
+      {/* 🔥 Informacja o języku produktu */}
+      <div className="mt-2 text-sm">
+        <span className="text-gray-500">Język produktu: </span>
+        <span className="font-medium">
+          {product.language === "pl" ? "🇵🇱 Polski" : "🇬🇧 English"}
+        </span>
+      </div>
+
       <div className="mt-4">
         <h2 className="text-lg">Zasób:</h2>
         {resource ? (
@@ -87,6 +113,14 @@ export default function ProductResourcePage() {
             <p>
               <strong>Opis:</strong> {resource.description}
             </p>
+
+            {/* 🔥 Informacja o języku resource */}
+            <div className="mt-1 text-sm">
+              <span className="text-gray-500">Język zasobu: </span>
+              <span className="font-medium">
+                {resource.language === "pl" ? "🇵🇱 Polski" : "🇬🇧 English"}
+              </span>
+            </div>
             <div className="mt-2">
               {!editingResource && !viewingResource && (
                 <>
