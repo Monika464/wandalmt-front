@@ -164,7 +164,7 @@ export const fetchResourceByProductId = createAsyncThunk<
       method: "GET",
     });
 
-    console.log("✅ Resource fetched:", resource?._id);
+    console.log("✅ Resource fetched:", resource);
 
     if (resource?.chapters) {
       resource.chapters = resource.chapters.map(transformChapterFromApi);

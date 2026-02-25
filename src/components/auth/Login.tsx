@@ -22,6 +22,8 @@ const Login = () => {
   const params = new URLSearchParams(location.search);
   const redirectTo = params.get("redirect") || "/userpanel";
 
+  console.log("Current User:", user);
+
   // Efekt do przekierowania jeśli użytkownik jest już zalogowany
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -30,6 +32,8 @@ const Login = () => {
       navigate(targetPath);
     }
   }, [isAuthenticated, user, navigate, redirectTo]);
+
+  console.log("localError:", localError);
 
   // Cleanup timer przy odmontowaniu komponentu
   useEffect(() => {

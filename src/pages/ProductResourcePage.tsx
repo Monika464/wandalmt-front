@@ -25,7 +25,7 @@ export default function ProductResourcePage() {
     productId ? state.resources.resourcesByProductId[productId] : undefined,
   );
 
-  //console.log("resurce from state:", resource);
+  console.log("resurce from state:", resource);
 
   const [creatingResourceProduct, setCreatingResourceProduct] =
     useState<Product | null>(null);
@@ -84,6 +84,8 @@ export default function ProductResourcePage() {
     );
   }
 
+  //console.log("📦 Product:", product);
+  console.log("📦 Resource:", resource);
   return (
     <div className="p-4">
       <h1 className="text-xl font-bold">Produkt: {product.title}</h1>
