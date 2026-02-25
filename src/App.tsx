@@ -36,6 +36,7 @@ import RootLayout from "./layouts/RootLayout";
 import PanelLayout from "./layouts/PanelLayout";
 import AuthLayout from "./layouts/AuthLayout";
 import AdminOrdersSummary from "./components/orders/AdminOrdersSummary";
+import UserProfile from "./components/orders/UserProfile";
 
 const App = () => {
   useAutoRefresh();
@@ -169,6 +170,15 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/userprofile"
+            element={
+              <ProtectedRoute requiredRole="user">
+                <UserProfile />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/userpanel/userorders"
             element={
@@ -177,7 +187,6 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-          {/* Dodatkowe trasy usera jeśli będą potrzebne */}
         </Route>
 
         {/* Layout dla stron autoryzacji (login/register) */}

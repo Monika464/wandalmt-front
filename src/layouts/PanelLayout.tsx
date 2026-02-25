@@ -45,6 +45,7 @@ const PanelLayout = () => {
     { path: "/userpanel/userorders", icon: ShoppingBag, label: "Zamówienia" },
     { path: "/user/products", icon: Heart, label: "Moje produkty" },
     { path: "/userpanel/settings", icon: Settings, label: "Ustawienia" },
+    { path: "/userprofile", icon: Users, label: "Mój profil" },
   ];
 
   const menu = user?.role === "admin" ? adminMenu : userMenu;

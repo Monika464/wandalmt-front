@@ -41,15 +41,16 @@
   },
   "login": {
     "title": "Login",
-    "emailLabel": "Email",
-    "emailPlaceholder": "enter@email.com",
-    "passwordLabel": "Password",
-    "passwordPlaceholder": "Enter password",
-    "submitButton": "Login",
-    "submittingButton": "Logging in...",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "submit": "Sign in",
+    "loggingIn": "Logging in...",
     "noAccount": "Don't have an account?",
-    "registerLink": "Register here",
-    "forgotPassword": "Forgot password?"
+    "register": "Register",
+    "forgotPassword": "Forgot password?",
+    "alreadyLoggedIn": "You are already logged in. Redirecting..."
   },
   "errors": {
     "required": "Field is required",

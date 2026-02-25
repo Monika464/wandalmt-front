@@ -187,7 +187,6 @@ const Register: React.FC = () => {
 
   return (
     <>
-      <Navbar />
       <div className="max-w-md mx-auto mt-10 p-6 border rounded">
         <h2 className="text-xl font-bold mb-4">Rejestracja</h2>
         <form onSubmit={handleSubmit} className="space-y-4">

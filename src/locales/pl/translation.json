@@ -39,18 +39,21 @@
     "successAdmin": "Administrator został pomyślnie zarejestrowany!",
     "captchaLabel": "Potwierdź, że nie jesteś robotem"
   },
+
   "login": {
     "title": "Logowanie",
-    "emailLabel": "Email",
-    "emailPlaceholder": "wpisz@email.com",
-    "passwordLabel": "Hasło",
-    "passwordPlaceholder": "Wpisz hasło",
-    "submitButton": "Zaloguj",
-    "submittingButton": "Logowanie...",
-    "noAccount": "Nie masz jeszcze konta?",
-    "registerLink": "Zarejestruj się",
-    "forgotPassword": "Zapomniałeś hasła?"
+    "email": "Email",
+    "emailPlaceholder": "Wprowadź swój email",
+    "password": "Hasło",
+    "passwordPlaceholder": "Wprowadź swoje hasło",
+    "submit": "Zaloguj się",
+    "loggingIn": "Logowanie...",
+    "noAccount": "Nie masz konta?",
+    "register": "Zarejestruj się",
+    "forgotPassword": "Zapomniałeś hasła?",
+    "alreadyLoggedIn": "Jesteś już zalogowany. Przekierowuję..."
   },
+
   "errors": {
     "required": "Pole jest wymagane",
     "nameRequired": "Imię jest wymagane",

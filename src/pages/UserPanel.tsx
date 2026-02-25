@@ -5,10 +5,10 @@ import { formatTimeRemaining } from "../utils/authUtils";
 
 //import type { RootState } from "../store";
 
-import Navbar from "../components/elements/Navbar";
 import { Link } from "react-router-dom";
 import { ChangeEmail } from "../components/auth/ChangeEmail";
 import UserProfile from "../components/orders/UserProfile";
+import UserProductsDashboard from "./UserProductDashboard";
 
 const UserPanel = () => {
   //const { user } = useSelector((state: RootState) => state.auth);
@@ -30,7 +30,6 @@ const UserPanel = () => {
 
   return (
     <div>
-      <Navbar />
       {timeUntilExpiry > 0 && (
         <div
           style={{
@@ -46,20 +45,21 @@ const UserPanel = () => {
         </div>
       )}
       <h1>Witaj, {user ? user.name : "Gościu"}!</h1>
+      <UserProductsDashboard />
       {/* {user && <LogoutButton />} */}
-      <Link
+      {/* <Link
         to="userorders"
         className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
       >
         Zobacz orders
-      </Link>
+      </Link> */}
       {/* <Link
         to="userresources"
         className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
       >
         Zobacz produkty
       </Link> */}
-      <Link
+      {/* <Link
         to="/user/products"
         className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 ml-4"
       >
@@ -68,7 +68,7 @@ const UserPanel = () => {
 
       <ChangeEmail />
 
-      <UserProfile />
+      <UserProfile /> */}
     </div>
   );
 };
