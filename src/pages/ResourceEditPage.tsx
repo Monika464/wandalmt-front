@@ -22,7 +22,10 @@ export default function ResourceEditPage() {
 
   const handleSave = () => {
     dispatch(
-      editResource({ id: resource._id, resourceData: { title: "Nowy tytuł" } })
+      editResource({
+        id: resource._id,
+        resourceData: { title: "Nowy tytuł", content: resource.content },
+      }),
     );
   };
 

@@ -245,7 +245,7 @@ const ProductResources: React.FC = () => {
           </div>
           <div className="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-lg">
             <Clock size={18} />
-            <span>{formatTotalDuration(chapters)} total</span>
+            {/* <span>{formatTotalDuration(chapters)} total</span> */}
           </div>
           <div className="flex items-center gap-2 bg-purple-50 text-purple-700 px-4 py-2 rounded-lg">
             <BarChart3 size={18} />
@@ -399,7 +399,7 @@ const ProductResources: React.FC = () => {
               </div>
 
               <div className="text-sm text-gray-600">
-                {chapters.length} chapters • {formatTotalDuration(chapters)}
+                {/* {chapters.length} chapters • {formatTotalDuration(chapters)} */}
                 {user?._id && (
                   <div className="mt-1 text-xs text-green-600">
                     ✓ Progress saved to your account

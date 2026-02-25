@@ -1,5 +1,5 @@
 // components/video/VideoUploader.tsx
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import React, { useState, useEffect, useRef } from "react";
 
 interface Props {
@@ -20,14 +20,24 @@ interface VideoStatus {
   updatedAt?: string;
 }
 
+// 🔥 Helper do sprawdzania typu błędu
+const isAxiosError = (error: unknown): error is AxiosError => {
+  return axios.isAxiosError(error);
+};
+
+// 🔥 Helper do sprawdzania czy błąd ma response.data
+const hasResponseData = (error: any): error is { response: { data: any } } => {
+  return error?.response?.data !== undefined;
+};
+
 export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<string>("Wybierz plik wideo");
   const [uploading, setUploading] = useState(false);
   const [createdVideoId, setCreatedVideoId] = useState<string | null>(
-    existingVideoId || null
+    existingVideoId || null,
   );
-  const [createdBunnyGuid, setCreatedBunnyGuid] = useState<string | null>(null);
+  // 🔥 Usunięto createdBunnyGuid - nieużywane
   const [videoStatus, setVideoStatus] = useState<VideoStatus | null>(null);
   const [abortController, setAbortController] =
     useState<AbortController | null>(null);
@@ -51,7 +61,7 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
     try {
       const response = await axios.get(
         `http://localhost:3000/vbp/stream/webhook/bunny/${videoId}`,
-        { timeout: 10000 }
+        { timeout: 10000 },
       );
 
       if (response.data.success && response.data.video) {
@@ -125,7 +135,7 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
       setCreatedVideoId(existingVideoId);
       startStatusPolling(existingVideoId);
     }
-  }, [existingVideoId]);
+  }, [existingVideoId, createdVideoId]);
 
   const createVideo = async (title?: string) => {
     setStatus("Tworzenie obiektu wideo...");
@@ -139,7 +149,7 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
           description: `Uploaded ${new Date().toLocaleString()}`,
           fileName: file?.name,
         },
-        { timeout: 300000 }
+        { timeout: 300000 },
       );
 
       if (response.data?.video) {
@@ -148,18 +158,22 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
 
       return response.data;
     } catch (error) {
-      console.error("Server error:", error.response?.data);
+      // 🔥 Poprawiona obsługa błędów z type guard
+      if (isAxiosError(error)) {
+        console.error("Server error:", error.response?.data);
 
-      if (error.response?.status === 429) {
-        throw new Error("Too many requests. Please wait and try again.");
+        if (error.response?.status === 429) {
+          throw new Error("Too many requests. Please wait and try again.");
+        }
+        if (error.code === "ECONNABORTED") {
+          throw new Error(
+            "Request timeout. Bunny.net may be experiencing delays.",
+          );
+        }
       }
+
       if (axios.isCancel(error)) {
         throw new Error("Request cancelled");
-      }
-      if (error.code === "ECONNABORTED") {
-        throw new Error(
-          "Request timeout. Bunny.net may be experiencing delays."
-        );
       }
 
       throw error;
@@ -167,9 +181,9 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
   };
 
   const uploadToBackend = async (
-    videoId: string,
+    _videoId: string, // 🔥 Prefix z _ oznacza że jest celowo nieużywane
     bunnyGuid: string,
-    f: File
+    f: File,
   ) => {
     setStatus("Wysyłanie pliku...");
     const controller = new AbortController();
@@ -186,7 +200,15 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
           timeout: 600000,
           signal: controller.signal,
           headers: { "Content-Type": "multipart/form-data" },
-        }
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const percent = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total,
+              );
+              setStatus(`📤 Wysyłanie: ${percent}%`);
+            }
+          },
+        },
       );
 
       setAbortController(null);
@@ -207,6 +229,58 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
       videoId: created.video?._id || created.videoId || created.id,
       bunnyGuid: created.video?.bunnyGuid || created.guid || created.bunnyGuid,
     };
+  };
+
+  const uploadWithRetry = async (
+    videoId: string,
+    bunnyGuid: string,
+    f: File,
+    maxRetries = 2,
+  ) => {
+    let lastError: unknown;
+
+    for (let i = 0; i <= maxRetries; i++) {
+      try {
+        return await uploadToBackend(videoId, bunnyGuid, f);
+      } catch (error) {
+        lastError = error;
+
+        if (axios.isCancel(error)) {
+          throw error;
+        }
+
+        // 🔥 Poprawiona obsługa błędów z type guard
+        if (i < maxRetries) {
+          let shouldRetry = false;
+
+          if (isAxiosError(error)) {
+            shouldRetry =
+              error.code === "ECONNABORTED" ||
+              error.message?.includes("network") ||
+              error.message?.includes("timeout");
+          } else if (error instanceof Error) {
+            shouldRetry =
+              error.message.includes("network") ||
+              error.message.includes("timeout");
+          }
+
+          if (shouldRetry) {
+            const delay = 1000 * Math.pow(2, i);
+            setStatus(
+              `Upload failed, retrying in ${delay / 1000}s... (${
+                i + 1
+              }/${maxRetries})`,
+            );
+            await new Promise((resolve) => setTimeout(resolve, delay));
+            continue;
+          }
+        }
+
+        break;
+      }
+    }
+
+    throw lastError;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -231,7 +305,6 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
       }
 
       setCreatedVideoId(videoId);
-      setCreatedBunnyGuid(bunnyGuid);
       startStatusPolling(videoId);
 
       // 2. Wyślij plik
@@ -240,56 +313,24 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
       if (!uploadCancelled) {
         setStatus("📤 Plik wysłany - trwa przetwarzanie przez Bunny...");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (!uploadCancelled) {
-        console.error("Upload error:", err);
-        setStatus("❌ Błąd: " + err.message);
+        // 🔥 Poprawiona obsługa błędów
+        if (err instanceof Error) {
+          console.error("Upload error:", err.message);
+          setStatus("❌ Błąd: " + err.message);
+        } else if (typeof err === "string") {
+          console.error("Upload error:", err);
+          setStatus("❌ Błąd: " + err);
+        } else {
+          console.error("Upload error:", err);
+          setStatus("❌ Błąd: Nieznany błąd");
+        }
       }
       stopPolling();
     } finally {
       setUploading(false);
     }
-  };
-
-  const uploadWithRetry = async (
-    videoId: string,
-    bunnyGuid: string,
-    f: File,
-    maxRetries = 2
-  ) => {
-    let lastError;
-
-    for (let i = 0; i <= maxRetries; i++) {
-      try {
-        return await uploadToBackend(videoId, bunnyGuid, f);
-      } catch (error) {
-        lastError = error;
-
-        if (axios.isCancel(error)) {
-          throw error; // Nie ponawiaj jeśli użytkownik przerwał
-        }
-
-        if (
-          i < maxRetries &&
-          (error.code === "ECONNABORTED" ||
-            error.message.includes("network") ||
-            error.message.includes("timeout"))
-        ) {
-          const delay = 1000 * Math.pow(2, i);
-          setStatus(
-            `Upload failed, retrying in ${delay / 1000}s... (${
-              i + 1
-            }/${maxRetries})`
-          );
-          await new Promise((resolve) => setTimeout(resolve, delay));
-          continue;
-        }
-
-        break;
-      }
-    }
-
-    throw lastError;
   };
 
   // Progress bar komponent
@@ -389,8 +430,8 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
                     setFile(file);
                     setStatus(
                       `Wybrano: ${file.name} (${Math.round(
-                        file.size / 1024 / 1024
-                      )}MB)`
+                        file.size / 1024 / 1024,
+                      )}MB)`,
                     );
                     // Ustaw tytuł z nazwy pliku
                     setVideoTitle(file.name.replace(/\.[^/.]+$/, ""));
@@ -494,10 +535,10 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
               displayStatus === "ready"
                 ? "bg-green-50 border border-green-200"
                 : displayStatus === "error"
-                ? "bg-red-50 border border-red-200"
-                : displayStatus === "processing"
-                ? "bg-blue-50 border border-blue-200"
-                : "bg-yellow-50 border border-yellow-200"
+                  ? "bg-red-50 border border-red-200"
+                  : displayStatus === "processing"
+                    ? "bg-blue-50 border border-blue-200"
+                    : "bg-yellow-50 border border-yellow-200"
             }`}
           >
             <div className="flex justify-between items-center mb-3">
@@ -506,10 +547,10 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
                   {displayStatus === "uploading"
                     ? "📤 Wysyłanie"
                     : displayStatus === "processing"
-                    ? "🔄 Przetwarzanie"
-                    : displayStatus === "ready"
-                    ? "✅ Gotowe"
-                    : "❌ Błąd"}
+                      ? "🔄 Przetwarzanie"
+                      : displayStatus === "ready"
+                        ? "✅ Gotowe"
+                        : "❌ Błąd"}
                 </span>
                 {(displayStatus === "uploading" ||
                   displayStatus === "processing") && (
@@ -598,7 +639,6 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
             <button
               onClick={() => {
                 setCreatedVideoId(null);
-                setCreatedBunnyGuid(null);
                 setVideoStatus(null);
                 setFile(null);
                 setVideoTitle("");
@@ -636,12 +676,12 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
             status.includes("✅")
               ? "bg-green-100 text-green-700 border border-green-200"
               : status.includes("❌")
-              ? "bg-red-100 text-red-700 border border-red-200"
-              : status.includes("⏹️")
-              ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
-              : status.includes("🔄") || status.includes("📤")
-              ? "bg-blue-100 text-blue-700 border border-blue-200"
-              : "bg-gray-100 text-gray-700 border border-gray-200"
+                ? "bg-red-100 text-red-700 border border-red-200"
+                : status.includes("⏹️")
+                  ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
+                  : status.includes("🔄") || status.includes("📤")
+                    ? "bg-blue-100 text-blue-700 border border-blue-200"
+                    : "bg-gray-100 text-gray-700 border border-gray-200"
           }`}
         >
           <div className="flex items-center">
@@ -683,33 +723,34 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
 //   const [status, setStatus] = useState<string>("Wybierz plik wideo");
 //   const [uploading, setUploading] = useState(false);
 //   const [createdVideoId, setCreatedVideoId] = useState<string | null>(
-//     existingVideoId || null
+//     existingVideoId || null,
 //   );
 //   const [createdBunnyGuid, setCreatedBunnyGuid] = useState<string | null>(null);
 //   const [videoStatus, setVideoStatus] = useState<VideoStatus | null>(null);
 //   const [abortController, setAbortController] =
 //     useState<AbortController | null>(null);
+//   const [uploadCancelled, setUploadCancelled] = useState(false);
+//   const [videoTitle, setVideoTitle] = useState<string>("");
 
 //   const pollingIntervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 //   const handleCancelUpload = () => {
 //     if (abortController) {
 //       abortController.abort();
-//       setStatus("Upload cancelled");
+//       setUploadCancelled(true);
+//       setStatus("⏹️ Upload został przerwany przez użytkownika");
 //       stopPolling();
+//       setUploading(false);
 //     }
 //   };
+
 //   // Funkcja do sprawdzania statusu
 //   const checkStatus = async (videoId: string) => {
 //     try {
 //       const response = await axios.get(
 //         `http://localhost:3000/vbp/stream/webhook/bunny/${videoId}`,
-//         { timeout: 10000 } // 10 sekund timeout
+//         { timeout: 10000 },
 //       );
-//       // const response = await fetch(
-//       //   `http://localhost:3000/vbp/stream/webhook/bunny/${videoId}`
-//       // );
-//       // const data = await response.json();
 
 //       if (response.data.success && response.data.video) {
 //         const newStatus = response.data.video;
@@ -735,23 +776,10 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
 //             setStatus("✅ Video gotowe do odtwarzania");
 //             stopPolling();
 
-//             //console.log("Video is ready:", newStatus);
-
 //             // Powiadom parent component
 //             if (onUploaded && newStatus.bunnyGuid && newStatus._id) {
 //               onUploaded(newStatus._id, newStatus.bunnyGuid);
 //             }
-//             console.log("Created Video ID:", newStatus._id);
-//             console.log("Bunny GUID:", newStatus.bunnyGuid);
-
-//             // if (onUploaded && newStatus.bunnyGuid && createdVideoId) {
-//             //   // Użyj newStatus._id jako videoId jeśli jest prawidłowy
-//             //   const finalVideoId = /^[0-9a-fA-F]{24}$/.test(newStatus._id || "")
-//             //     ? newStatus._id
-//             //     : createdVideoId;
-
-//             //   onUploaded(finalVideoId, newStatus.bunnyGuid);
-//             // }
 //             break;
 //           case "error":
 //             setStatus(`❌ Błąd: ${newStatus.errorMessage || "Nieznany błąd"}`);
@@ -766,13 +794,9 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
 
 //   // Rozpocznij polling statusu
 //   const startStatusPolling = (videoId: string) => {
-//     // Najpierw zatrzymaj istniejący
 //     stopPolling();
-
-//     // Sprawdź od razu
 //     checkStatus(videoId);
 
-//     // Sprawdzaj co 3 sekundy
 //     pollingIntervalRef.current = setInterval(() => {
 //       checkStatus(videoId);
 //     }, 3000);
@@ -799,13 +823,12 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
 //       setCreatedVideoId(existingVideoId);
 //       startStatusPolling(existingVideoId);
 //     }
-//   }, [createdVideoId]);
+//   }, [existingVideoId]);
 
 //   const createVideo = async (title?: string) => {
 //     setStatus("Tworzenie obiektu wideo...");
-//     // const controller = new AbortController();
-//     //const timeoutId = setTimeout(() => controller.abort(), 300000);
 //     const videoTitle = title || file?.name || "untitled";
+
 //     try {
 //       const response = await axios.post(
 //         "http://localhost:3000/api/stream/create-video",
@@ -814,87 +837,42 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
 //           description: `Uploaded ${new Date().toLocaleString()}`,
 //           fileName: file?.name,
 //         },
-//         { timeout: 300000 } // 5 minut timeout
+//         { timeout: 300000 },
 //       );
 
-//       // Walidacja response
-//       if (!response.data?.video?._id && !response.data?.guid) {
-//         console.warn("Unexpected response structure:", response.data);
-//       }
 //       if (response.data?.video) {
 //         response.data.video.title = response.data.video.title || videoTitle;
 //       }
+
 //       return response.data;
-//       // const resp = await fetch(
-//       //   "http://localhost:3000/api/stream/create-video",
-//       //   {
-//       //     method: "POST",
-//       //     headers: { "Content-Type": "application/json" },
-//       //     body: JSON.stringify({ title: title || file?.name || "untitled" }),
-//       //     signal: controller.signal,
-//       //   }
-//       // );
-//       // clearTimeout(timeoutId);
-
-//       // if (!resp.ok) {
-//       //   throw new Error(
-//       //     `Create video failed: ${resp.status} ${resp.statusText}`
-//       //   );
-//       // }
-//       // return await resp.json();
 //     } catch (error) {
-//       console.error("Server error:", {
-//         status: error.response.status,
-//         data: error.response.data,
-//         headers: error.response.headers,
-//       });
+//       console.error("Server error:", error.response?.data);
 
-//       if (error.response.status === 429) {
+//       if (error.response?.status === 429) {
 //         throw new Error("Too many requests. Please wait and try again.");
 //       }
 //       if (axios.isCancel(error)) {
-//         console.error("Request was cancelled");
 //         throw new Error("Request cancelled");
 //       }
 //       if (error.code === "ECONNABORTED") {
 //         throw new Error(
-//           "Request timeout. Bunny.net may be experiencing delays."
+//           "Request timeout. Bunny.net may be experiencing delays.",
 //         );
 //       }
 
-//       if (error.response) {
-//         // Server responded with error status
-//         console.error(
-//           "Server error:",
-//           error.response.status,
-//           error.response.data
-//         );
-//         throw new Error(`Create video failed: ${error.response.status}`);
-//       }
-
-//       console.error("Error creating video:", error.message);
 //       throw error;
-//       // clearTimeout(timeoutId);
-//       // if (error.name === "AbortError") {
-//       //   console.error(
-//       //     "Create video timeout - Bunny may be experiencing delays"
-//       //   );
-//       //   throw new Error(
-//       //     "Operation timed out. Bunny.net is experiencing delays. Please try again later."
-//       //   );
-//       // }
-//       // console.error("Error creating video:", error);
-//       // throw error;
 //     }
 //   };
+
 //   const uploadToBackend = async (
 //     videoId: string,
 //     bunnyGuid: string,
-//     f: File
+//     f: File,
 //   ) => {
 //     setStatus("Wysyłanie pliku...");
 //     const controller = new AbortController();
 //     setAbortController(controller);
+
 //     const fd = new FormData();
 //     fd.append("file", f);
 
@@ -903,20 +881,12 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
 //         `http://localhost:3000/api/stream/upload/${bunnyGuid}`,
 //         fd,
 //         {
-//           timeout: 600000, // 10 minut dla uploadu
-//           headers: {
-//             "Content-Type": "multipart/form-data",
-//           },
-//           onUploadProgress: (progressEvent) => {
-//             // TU MOŻESZ DODAĆ PROGRESS BAR DLA UPLOADU!
-//             const percent = Math.round(
-//               (progressEvent.loaded * 100) / (progressEvent.total || 1)
-//             );
-//             console.log(`Upload progress: ${percent}%`);
-//             // Możesz ustawić dodatkowy progress state
-//           },
-//         }
+//           timeout: 600000,
+//           signal: controller.signal,
+//           headers: { "Content-Type": "multipart/form-data" },
+//         },
 //       );
+
 //       setAbortController(null);
 //       return response.data;
 //     } catch (error) {
@@ -936,49 +906,22 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
 //       bunnyGuid: created.video?.bunnyGuid || created.guid || created.bunnyGuid,
 //     };
 //   };
-//   // const uploadToBackend = async (
-//   //   videoId: string,
-//   //   bunnyGuid: string,
-//   //   f: File
-//   // ) => {
-//   //   setStatus("Wysyłanie pliku...");
-//   //   const fd = new FormData();
-//   //   fd.append("file", f);
-
-//   //   const resp = await fetch(
-//   //     `http://localhost:3000/api/stream/upload/${bunnyGuid}`,
-//   //     {
-//   //       method: "POST",
-//   //       body: fd,
-//   //     }
-//   //   );
-
-//   //   if (!resp.ok) {
-//   //     const txt = await resp.text();
-//   //     throw new Error("upload failed: " + txt);
-//   //   }
-//   //   return resp.json();
-//   // };
-
-//   // const extractVideoData = (created: any) => {
-//   //   if (!created) return { videoId: null, bunnyGuid: null };
-
-//   //   return {
-//   //     videoId: created.video?._id || created.videoId || created.id,
-//   //     bunnyGuid: created.video?.bunnyGuid || created.guid || created.bunnyGuid,
-//   //   };
-//   // };
 
 //   const handleSubmit = async (e: React.FormEvent) => {
 //     e.preventDefault();
 //     if (!file) return setStatus("Wybierz plik wideo");
 
 //     setUploading(true);
+//     setUploadCancelled(false);
 //     setStatus("Rozpoczynanie uploadu...");
 
 //     try {
+//       // Ustaw tytuł z nazwy pliku (bez rozszerzenia)
+//       const title = file.name.replace(/\.[^/.]+$/, "");
+//       setVideoTitle(title);
+
 //       // 1. Stwórz video w systemie
-//       const created = await createVideo();
+//       const created = await createVideo(title);
 //       const { videoId, bunnyGuid } = extractVideoData(created);
 
 //       if (!videoId || !bunnyGuid) {
@@ -989,18 +932,62 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
 //       setCreatedBunnyGuid(bunnyGuid);
 //       startStatusPolling(videoId);
 
-//       // 4. Wyślij plik
+//       // 2. Wyślij plik
 //       await uploadWithRetry(videoId, bunnyGuid, file, 2);
-//       //await uploadToBackend(videoId, bunnyGuid, file);
 
-//       setStatus("📤 Plik wysłany - trwa przetwarzanie przez Bunny...");
+//       if (!uploadCancelled) {
+//         setStatus("📤 Plik wysłany - trwa przetwarzanie przez Bunny...");
+//       }
 //     } catch (err: any) {
-//       console.error("Upload error:", err);
-//       setStatus("❌ Błąd: " + err.message);
+//       if (!uploadCancelled) {
+//         console.error("Upload error:", err);
+//         setStatus("❌ Błąd: " + err.message);
+//       }
 //       stopPolling();
 //     } finally {
 //       setUploading(false);
 //     }
+//   };
+
+//   const uploadWithRetry = async (
+//     videoId: string,
+//     bunnyGuid: string,
+//     f: File,
+//     maxRetries = 2,
+//   ) => {
+//     let lastError;
+
+//     for (let i = 0; i <= maxRetries; i++) {
+//       try {
+//         return await uploadToBackend(videoId, bunnyGuid, f);
+//       } catch (error) {
+//         lastError = error;
+
+//         if (axios.isCancel(error)) {
+//           throw error; // Nie ponawiaj jeśli użytkownik przerwał
+//         }
+
+//         if (
+//           i < maxRetries &&
+//           (error.code === "ECONNABORTED" ||
+//             error.message.includes("network") ||
+//             error.message.includes("timeout"))
+//         ) {
+//           const delay = 1000 * Math.pow(2, i);
+//           setStatus(
+//             `Upload failed, retrying in ${delay / 1000}s... (${
+//               i + 1
+//             }/${maxRetries})`,
+//           );
+//           await new Promise((resolve) => setTimeout(resolve, delay));
+//           continue;
+//         }
+
+//         break;
+//       }
+//     }
+
+//     throw lastError;
 //   };
 
 //   // Progress bar komponent
@@ -1041,11 +1028,10 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
 //     );
 //   };
 
-//   // Oblicz wyświetlany status (fix dla progress 100%)
+//   // Oblicz wyświetlany status
 //   const getDisplayStatus = () => {
 //     if (!videoStatus) return "checking";
 
-//     // Jeśli processing ale progress 100%, pokaż jako ready
 //     if (
 //       videoStatus.status === "processing" &&
 //       videoStatus.processingProgress >= 100
@@ -1058,161 +1044,36 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
 
 //   const displayStatus = getDisplayStatus();
 
-//   const uploadWithRetry = async (
-//     videoId: string,
-//     bunnyGuid: string,
-//     f: File,
-//     maxRetries = 2
-//   ) => {
-//     let lastError;
-
-//     for (let i = 0; i <= maxRetries; i++) {
-//       try {
-//         return await uploadToBackend(videoId, bunnyGuid, f);
-//       } catch (error) {
-//         lastError = error;
-
-//         // Jeśli to network error/timeout - retry
-//         if (
-//           i < maxRetries &&
-//           (error.code === "ECONNABORTED" ||
-//             error.message.includes("network") ||
-//             error.message.includes("timeout"))
-//         ) {
-//           const delay = 1000 * Math.pow(2, i); // 1s, 2s, 4s...
-//           setStatus(
-//             `Upload failed, retrying in ${delay / 1000}s... (${
-//               i + 1
-//             }/${maxRetries})`
-//           );
-//           await new Promise((resolve) => setTimeout(resolve, delay));
-//           continue;
-//         }
-
-//         break;
-//       }
-//     }
-
-//     throw lastError;
-//   };
-
 //   return (
 //     <div className="border p-4 rounded bg-gray-50 max-w-md">
 //       <h4 className="font-semibold mb-3 text-lg">Upload Wideo</h4>
 
-//       {/* KLUCZOWA ZMIANA: Używamy createdVideoId zamiast videoStatus */}
-//       {/* {createdVideoId ? ( */}
-//       {createdVideoId && videoStatus ? (
-//         <div className="space-y-4">
-//           <div
-//             className={`p-4 rounded-lg ${
-//               displayStatus === "ready"
-//                 ? "bg-green-50 border border-green-200"
-//                 : displayStatus === "error"
-//                 ? "bg-red-50 border border-red-200"
-//                 : displayStatus === "processing"
-//                 ? "bg-blue-50 border border-blue-200"
-//                 : "bg-yellow-50 border border-yellow-200"
-//             }`}
-//           >
-//             <div className="flex justify-between items-center mb-3">
-//               <div className="flex items-center space-x-2">
-//                 <span className="font-medium">
-//                   {displayStatus === "uploading"
-//                     ? "📤 Wysyłanie"
-//                     : displayStatus === "processing"
-//                     ? "🔄 Przetwarzanie"
-//                     : displayStatus === "ready"
-//                     ? "✅ Gotowe"
-//                     : "❌ Błąd"}
-//                 </span>
-//                 {(displayStatus === "uploading" ||
-//                   displayStatus === "processing") && (
-//                   <span className="text-sm font-bold bg-white px-2 py-1 rounded">
-//                     {videoStatus?.processingProgress || 0}%
-//                   </span>
-//                 )}
-//               </div>
-
-//               {(displayStatus === "uploading" ||
-//                 displayStatus === "processing") && (
-//                 <div className="text-xs text-gray-500 animate-pulse">Live</div>
-//               )}
-//             </div>
-
-//             {(displayStatus === "uploading" ||
-//               displayStatus === "processing") && (
-//               <ProgressBar progress={videoStatus?.processingProgress || 0} />
-//             )}
-
-//             {displayStatus === "ready" && (
-//               <div className="mt-3">
-//                 {videoStatus?.thumbnailUrl && (
-//                   <Thumbnail
-//                     url={videoStatus.thumbnailUrl}
-//                     bunnyGuid={videoStatus.bunnyGuid}
-//                   />
-//                 )}
-//                 <p className="text-sm text-green-600 mt-2">
-//                   Video jest gotowe do odtwarzania!
-//                 </p>
-//                 {videoStatus?.duration && (
-//                   <p className="text-xs text-gray-500">
-//                     Czas trwania: {videoStatus.duration}s
-//                   </p>
-//                 )}
-//               </div>
-//             )}
-
-//             {videoStatus?.errorMessage && (
-//               <p className="text-sm text-red-600 mt-2 p-2 bg-red-100 rounded">
-//                 {videoStatus.errorMessage}
+//       {/* Stan 1: Upload został przerwany */}
+//       {uploadCancelled && (
+//         <div className="p-4 rounded-lg bg-yellow-50 border border-yellow-200 mb-4">
+//           <div className="flex items-center space-x-2">
+//             <span className="text-xl">⏹️</span>
+//             <div>
+//               <p className="font-medium text-yellow-700">Upload przerwany</p>
+//               <p className="text-sm text-yellow-600">
+//                 Możesz spróbować ponownie.
 //               </p>
-//             )}
-
-//             <div className="text-xs text-gray-500 mt-3 space-y-1">
-//               <p>
-//                 <span className="font-medium">Video ID:</span>{" "}
-//                 {videoStatus?._id || createdVideoId}
-//               </p>
-//               <p>
-//                 <span className="font-medium">Bunny GUID:</span>{" "}
-//                 {videoStatus?.bunnyGuid || createdBunnyGuid}
-//               </p>
-//               <p>
-//                 <span className="font-medium">Status:</span> {displayStatus}
-//               </p>
-//               <p>
-//                 <span className="font-medium">Progress:</span>{" "}
-//                 {videoStatus?.processingProgress || 0}%
-//               </p>
-//               {videoStatus?.updatedAt && (
-//                 <p>
-//                   <span className="font-medium">Ostatnia aktualizacja:</span>{" "}
-//                   {new Date(videoStatus.updatedAt).toLocaleTimeString()}
-//                 </p>
-//               )}
 //             </div>
 //           </div>
-
-//           {/* Przycisk resetu */}
-//           {(displayStatus === "ready" || displayStatus === "error") && (
-//             <button
-//               onClick={() => {
-//                 setCreatedVideoId(null);
-//                 setCreatedBunnyGuid(null);
-//                 setVideoStatus(null);
-//                 setFile(null);
-//                 setStatus("Wybierz plik wideo");
-//                 stopPolling();
-//               }}
-//               className="px-3 py-1 text-sm border rounded hover:bg-gray-100"
-//             >
-//               Wgraj kolejne video
-//             </button>
-//           )}
+//           <button
+//             onClick={() => {
+//               setUploadCancelled(false);
+//               setStatus("Wybierz plik wideo");
+//             }}
+//             className="mt-3 px-3 py-1 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600"
+//           >
+//             Spróbuj ponownie
+//           </button>
 //         </div>
-//       ) : (
+//       )}
+
+//       {/* Stan 2: Formularz uploadu (kiedy nie ma videoId) */}
+//       {!createdVideoId && !uploadCancelled && (
 //         <form onSubmit={handleSubmit} className="space-y-4">
 //           <div>
 //             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
@@ -1226,9 +1087,11 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
 //                     setFile(file);
 //                     setStatus(
 //                       `Wybrano: ${file.name} (${Math.round(
-//                         file.size / 1024 / 1024
-//                       )}MB)`
+//                         file.size / 1024 / 1024,
+//                       )}MB)`,
 //                     );
+//                     // Ustaw tytuł z nazwy pliku
+//                     setVideoTitle(file.name.replace(/\.[^/.]+$/, ""));
 //                   }
 //                 }}
 //                 className="hidden"
@@ -1249,6 +1112,9 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
 //               <div className="mt-2 text-sm text-gray-600">
 //                 <p>Rozmiar: {Math.round(file.size / 1024 / 1024)}MB</p>
 //                 <p>Typ: {file.type || "Nieznany"}</p>
+//                 <p className="font-medium mt-1">
+//                   Tytuł: {videoTitle || file.name.replace(/\.[^/.]+$/, "")}
+//                 </p>
 //               </div>
 //             )}
 //           </div>
@@ -1273,14 +1139,217 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
 //           </button>
 //         </form>
 //       )}
-//       {uploading && (
-//         <button
-//           onClick={handleCancelUpload}
-//           className="px-3 py-2 text-sm border border-red-300 text-red-600 rounded hover:bg-red-50 ml-2"
-//         >
-//           Przerwij upload
-//         </button>
+
+//       {/* Stan 3: Ładowanie (videoId istnieje, ale brak statusu) */}
+//       {createdVideoId && !videoStatus && !uploadCancelled && (
+//         <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+//           <div className="flex items-center space-x-3">
+//             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+//             <div>
+//               <p className="font-medium text-blue-700">
+//                 Inicjalizacja wideo...
+//               </p>
+//               <p className="text-sm text-blue-600">
+//                 {videoTitle ? `"${videoTitle}"` : "Tworzenie obiektu wideo"}
+//               </p>
+//               <p className="text-xs text-gray-500 mt-1">Proszę czekać...</p>
+//             </div>
+//           </div>
+//         </div>
 //       )}
+
+//       {/* Stan 4: Pełne informacje o wideo */}
+//       {createdVideoId && videoStatus && !uploadCancelled && (
+//         <div className="space-y-4">
+//           {/* Karta z informacjami o wideo */}
+//           <div className="bg-white p-4 rounded-lg border shadow-sm">
+//             <h5 className="font-medium text-gray-800 mb-2">
+//               Informacje o wideo
+//             </h5>
+//             <div className="space-y-2">
+//               <p className="text-sm">
+//                 <span className="font-medium">Tytuł:</span>{" "}
+//                 <span className="text-blue-600">
+//                   {videoStatus.title || videoTitle || "Bez tytułu"}
+//                 </span>
+//               </p>
+//               {file && (
+//                 <p className="text-sm">
+//                   <span className="font-medium">Plik:</span> {file.name}
+//                 </p>
+//               )}
+//               {videoStatus.createdAt && (
+//                 <p className="text-xs text-gray-500">
+//                   Utworzono: {new Date(videoStatus.createdAt).toLocaleString()}
+//                 </p>
+//               )}
+//             </div>
+//           </div>
+
+//           {/* Karta ze statusem */}
+//           <div
+//             className={`p-4 rounded-lg ${
+//               displayStatus === "ready"
+//                 ? "bg-green-50 border border-green-200"
+//                 : displayStatus === "error"
+//                   ? "bg-red-50 border border-red-200"
+//                   : displayStatus === "processing"
+//                     ? "bg-blue-50 border border-blue-200"
+//                     : "bg-yellow-50 border border-yellow-200"
+//             }`}
+//           >
+//             <div className="flex justify-between items-center mb-3">
+//               <div className="flex items-center space-x-2">
+//                 <span className="font-medium">
+//                   {displayStatus === "uploading"
+//                     ? "📤 Wysyłanie"
+//                     : displayStatus === "processing"
+//                       ? "🔄 Przetwarzanie"
+//                       : displayStatus === "ready"
+//                         ? "✅ Gotowe"
+//                         : "❌ Błąd"}
+//                 </span>
+//                 {(displayStatus === "uploading" ||
+//                   displayStatus === "processing") && (
+//                   <span className="text-sm font-bold bg-white px-2 py-1 rounded">
+//                     {videoStatus.processingProgress}%
+//                   </span>
+//                 )}
+//               </div>
+
+//               {(displayStatus === "uploading" ||
+//                 displayStatus === "processing") && (
+//                 <div className="text-xs text-gray-500 animate-pulse">Live</div>
+//               )}
+//             </div>
+
+//             {(displayStatus === "uploading" ||
+//               displayStatus === "processing") && (
+//               <ProgressBar progress={videoStatus.processingProgress} />
+//             )}
+
+//             {displayStatus === "ready" && (
+//               <div className="mt-3">
+//                 <div className="flex items-start space-x-4">
+//                   {videoStatus.thumbnailUrl && (
+//                     <Thumbnail
+//                       url={videoStatus.thumbnailUrl}
+//                       bunnyGuid={videoStatus.bunnyGuid}
+//                     />
+//                   )}
+//                   <div className="flex-1">
+//                     <p className="text-sm text-green-600 font-medium">
+//                       ✅ Video gotowe do odtwarzania
+//                     </p>
+//                     {videoStatus.duration && (
+//                       <p className="text-sm text-gray-600">
+//                         Czas trwania: {Math.round(videoStatus.duration)} sekund
+//                       </p>
+//                     )}
+//                     {file && (
+//                       <p className="text-xs text-gray-500 mt-1">
+//                         Rozmiar: {Math.round(file.size / 1024 / 1024)}MB
+//                       </p>
+//                     )}
+//                   </div>
+//                 </div>
+//               </div>
+//             )}
+
+//             {videoStatus.errorMessage && (
+//               <p className="text-sm text-red-600 mt-2 p-2 bg-red-100 rounded">
+//                 {videoStatus.errorMessage}
+//               </p>
+//             )}
+
+//             <div className="text-xs text-gray-500 mt-3 space-y-1">
+//               <p>
+//                 <span className="font-medium">Postęp:</span>{" "}
+//                 {videoStatus.processingProgress}%
+//               </p>
+//               <p>
+//                 <span className="font-medium">Status:</span> {displayStatus}
+//               </p>
+//               {videoStatus.updatedAt && (
+//                 <p>
+//                   <span className="font-medium">Ostatnia aktualizacja:</span>{" "}
+//                   {new Date(videoStatus.updatedAt).toLocaleTimeString()}
+//                 </p>
+//               )}
+//             </div>
+//           </div>
+
+//           {/* Przyciski akcji */}
+//           <div className="flex space-x-2 pt-2">
+//             {displayStatus === "ready" && onUploaded && (
+//               <button
+//                 onClick={() => {
+//                   if (onUploaded && videoStatus.bunnyGuid && videoStatus._id) {
+//                     onUploaded(videoStatus._id, videoStatus.bunnyGuid);
+//                   }
+//                 }}
+//                 className="px-3 py-2 text-sm bg-green-500 text-white rounded hover:bg-green-600"
+//               >
+//                 Zapisz video
+//               </button>
+//             )}
+//             <button
+//               onClick={() => {
+//                 setCreatedVideoId(null);
+//                 setCreatedBunnyGuid(null);
+//                 setVideoStatus(null);
+//                 setFile(null);
+//                 setVideoTitle("");
+//                 setStatus("Wybierz plik wideo");
+//                 stopPolling();
+//               }}
+//               className="px-3 py-2 text-sm border rounded hover:bg-gray-100"
+//             >
+//               {displayStatus === "ready" ? "Zamknij" : "Anuluj"}
+//             </button>
+//           </div>
+//         </div>
+//       )}
+
+//       {/* Przycisk przerwania uploadu (pokazuje się tylko podczas uploadu) */}
+//       {uploading && !uploadCancelled && (
+//         <div className="mt-4 pt-4 border-t">
+//           <button
+//             onClick={handleCancelUpload}
+//             className="px-4 py-2 text-sm w-full border border-red-300 bg-red-50 text-red-600 rounded hover:bg-red-100 flex items-center justify-center space-x-2"
+//           >
+//             <span>⏹️</span>
+//             <span>Przerwij upload</span>
+//           </button>
+//           <p className="text-xs text-gray-500 text-center mt-1">
+//             Upload w toku...
+//           </p>
+//         </div>
+//       )}
+
+//       {/* Status message (na dole) */}
+//       <div className="mt-3">
+//         <div
+//           className={`text-sm p-3 rounded-lg ${
+//             status.includes("✅")
+//               ? "bg-green-100 text-green-700 border border-green-200"
+//               : status.includes("❌")
+//                 ? "bg-red-100 text-red-700 border border-red-200"
+//                 : status.includes("⏹️")
+//                   ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
+//                   : status.includes("🔄") || status.includes("📤")
+//                     ? "bg-blue-100 text-blue-700 border border-blue-200"
+//                     : "bg-gray-100 text-gray-700 border border-gray-200"
+//           }`}
+//         >
+//           <div className="flex items-center">
+//             {status.includes("🔄") && (
+//               <span className="animate-spin mr-2">⟳</span>
+//             )}
+//             <span>{status}</span>
+//           </div>
+//         </div>
+//       </div>
 //     </div>
 //   );
 // }

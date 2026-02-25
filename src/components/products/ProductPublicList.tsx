@@ -9,7 +9,6 @@ import type { AppDispatch, RootState } from "../../store";
 import { useNavigate } from "react-router-dom";
 import AddToCartButton from "../orders/AddToCartButton";
 import SearchPublicContainer from "./SearchContainerPublic";
-import Navbar from "../elements/Navbar";
 import { useTranslation } from "react-i18next";
 
 const ProductList: React.FC = () => {
@@ -37,7 +36,7 @@ const ProductList: React.FC = () => {
   //console.log("📦 Filtered products:", filteredProducts);
   return (
     <div>
-      <Navbar />
+      {/* <Navbar /> */}
       <br></br>
       <SearchPublicContainer>
         {/* {products.map((product) => { */}
