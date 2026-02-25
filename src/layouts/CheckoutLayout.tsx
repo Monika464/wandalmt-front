@@ -1,13 +1,21 @@
-import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
-import Navbar from "./components/elements/Navbar";
-import Footer from "./components/elements/Footer";
+// layouts/CheckoutLayout.tsx
+import { Outlet } from "react-router-dom";
+import CartCheckoutPage from "../pages/CartCheckoutPage";
 
-export const RootLayout = () => (
-  <>
-    <Navbar />
-    <main className="container mx-auto px-4">
-      <Outlet />
-    </main>
-    <Footer />
-  </>
-);
+const CheckoutLayout = () => {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow-sm py-4">
+        <div className="container mx-auto px-4">
+          <h1 className="text-2xl font-bold text-gray-800">Checkout</h1>
+        </div>
+      </header>
+      <main className="container mx-auto px-4 py-8">
+        <CartCheckoutPage />
+        <Outlet />
+      </main>
+    </div>
+  );
+};
+
+export default CheckoutLayout;

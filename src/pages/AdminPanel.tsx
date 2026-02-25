@@ -3,10 +3,7 @@ import { useAuth } from "../hooks/useAuth";
 import AdminOrdersSummary from "../components/orders/AdminOrdersSummary";
 import AdminFinancials from "../components/orders/AdminFinancials";
 import Navbar from "../components/elements/Navbar";
-import VideoUploader from "../components/video/VideoUploader";
-import WatchVideoPage from "./WatchVideoPage";
-import VideoList from "../components/video/VideoList";
-import VideoTitle from "../components/video/VideoTitle";
+
 import DiscountManager from "../components/orders/DiscountManager";
 
 const AdminPanel = () => {
@@ -29,8 +26,7 @@ const AdminPanel = () => {
 
   return (
     <div className="p-6">
-      <Navbar />
-      <h1 className="text-2xl font-bold mb-4">Panel Administratora</h1>
+      {/* <h1 className="text-2xl font-bold mb-4">Panel Administratora</h1>
 
       <nav className="flex flex-col gap-2 mb-4">
         <Link
@@ -54,19 +50,16 @@ const AdminPanel = () => {
           Użytkownicy
         </Link>
       </nav>
-      <br></br>
-      {/* LogoutButton pokazujemy tylko jeśli user jest zalogowany */}
-      {/* {user && <LogoutButton />} */}
+      <br></br> */}
 
       <AdminOrdersSummary />
       <AdminFinancials />
       <br></br>
       <br></br>
-      <VideoUploader />
+      {/* <VideoUploader /> */}
       <br></br>
-      {/* <WatchVideoPage /> */}
       <br></br>
-      <DiscountManager />
+      {/* <DiscountManager /> */}
     </div>
   );
 };
