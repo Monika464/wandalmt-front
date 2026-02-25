@@ -13,9 +13,9 @@ const SearchContainer = ({ children }: Props) => {
   const dispatch = useDispatch<AppDispatch>();
   const [search, setSearch] = useState("");
 
-  const handleSearch = () => {
-    dispatch(fetchProducts({ search }));
-  };
+  // const handleSearch = () => {
+  //   dispatch(fetchProducts({ search }));
+  // };
 
   useEffect(() => {
     const delay = setTimeout(() => {
@@ -35,7 +35,7 @@ const SearchContainer = ({ children }: Props) => {
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Szukaj produktu..."
         />
-        <button onClick={handleSearch}>Wyczyść szukanie</button>
+        {/* <button onClick={handleSearch}>Wyczyść szukanie</button> */}
       </div>
       {children}
     </div>
