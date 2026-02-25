@@ -46,6 +46,11 @@ const Navbar = () => {
 
   const isHomePage = window.location.pathname === "/";
 
+  // 👇 Określenie czy użytkownik jest administratorem
+  const isAdmin = user?.role === "admin";
+  // 👇 Określenie czy użytkownik jest zwykłym użytkownikiem
+  const isRegularUser = user && !isAdmin;
+
   return (
     <nav className="bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-4">
@@ -69,7 +74,7 @@ const Navbar = () => {
             </span>
           </NavLink>
 
-          {/* Desktop Menu - środkowa część (bez zmian) */}
+          {/* Desktop Menu - środkowa część */}
           {!isHomePage && (
             <div className="hidden md:flex items-center space-x-2">
               <NavLink
@@ -81,7 +86,8 @@ const Navbar = () => {
                 {t("nav.shop")}
               </NavLink>
 
-              {user && (
+              {/* 👇 TYLKO zwykły użytkownik widzi panel użytkownika */}
+              {isRegularUser && (
                 <NavLink
                   to="/userpanel"
                   className={({ isActive }) =>
@@ -93,7 +99,8 @@ const Navbar = () => {
                 </NavLink>
               )}
 
-              {user?.role === "admin" && (
+              {/* 👇 TYLKO admin widzi panel admina */}
+              {isAdmin && (
                 <NavLink
                   to="/adminpanel"
                   className={({ isActive }) =>
@@ -105,7 +112,8 @@ const Navbar = () => {
                 </NavLink>
               )}
 
-              {(!user || user?.role === "admin") && (
+              {/* 👇 Register - pokazuj tylko dla niezalogowanych */}
+              {!user && (
                 <NavLink
                   to="/register"
                   className={({ isActive }) =>
@@ -116,6 +124,7 @@ const Navbar = () => {
                 </NavLink>
               )}
 
+              {/* 👇 Login - pokazuj tylko dla niezalogowanych */}
               {!user && (
                 <NavLink
                   to="/login"
@@ -129,7 +138,7 @@ const Navbar = () => {
             </div>
           )}
 
-          {/* Prawa strona - akcje użytkownika i język (bez zmian) */}
+          {/* Prawa strona - akcje użytkownika i język */}
           <div className="flex items-center space-x-2 sm:space-x-4">
             {/* Koszyk - zawsze widoczny */}
             <NavLink
@@ -148,7 +157,7 @@ const Navbar = () => {
               )}
             </NavLink>
 
-            {/* Wylogowanie - desktop */}
+            {/* Wylogowanie - desktop (tylko dla zalogowanych) */}
             {user && (
               <button
                 onClick={handleLogout}
@@ -199,7 +208,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile menu - rozwijane (bez zmian) */}
+        {/* Mobile menu - rozwijane */}
         {!isHomePage && isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-700 animate-fadeIn">
             <div className="flex flex-col space-y-2">
@@ -213,7 +222,8 @@ const Navbar = () => {
                 {t("nav.shop")}
               </NavLink>
 
-              {user && (
+              {/* 👇 TYLKO zwykły użytkownik widzi panel użytkownika w mobile */}
+              {isRegularUser && (
                 <NavLink
                   to="/userpanel"
                   onClick={closeMobileMenu}
@@ -226,7 +236,8 @@ const Navbar = () => {
                 </NavLink>
               )}
 
-              {user?.role === "admin" && (
+              {/* 👇 TYLKO admin widzi panel admina w mobile */}
+              {isAdmin && (
                 <NavLink
                   to="/adminpanel"
                   onClick={closeMobileMenu}
@@ -239,7 +250,8 @@ const Navbar = () => {
                 </NavLink>
               )}
 
-              {(!user || user?.role === "admin") && (
+              {/* 👇 Register - tylko dla niezalogowanych w mobile */}
+              {!user && (
                 <NavLink
                   to="/register"
                   onClick={closeMobileMenu}
@@ -251,6 +263,7 @@ const Navbar = () => {
                 </NavLink>
               )}
 
+              {/* 👇 Login - tylko dla niezalogowanych w mobile */}
               {!user && (
                 <NavLink
                   to="/login"
@@ -263,7 +276,7 @@ const Navbar = () => {
                 </NavLink>
               )}
 
-              {/* Wylogowanie - mobile */}
+              {/* Wylogowanie - mobile (tylko dla zalogowanych) */}
               {user && (
                 <button
                   onClick={handleLogout}
@@ -312,7 +325,7 @@ export default Navbar;
 
 //   const changeLanguage = (lng: string) => {
 //     i18n.changeLanguage(lng);
-//     setIsMobileMenuOpen(false); // Zamknij menu po zmianie języka
+//     setIsMobileMenuOpen(false);
 //   };
 
 //   const handleLogout = () => {
@@ -329,34 +342,32 @@ export default Navbar;
 //     setIsMobileMenuOpen(false);
 //   };
 
-//   // Sprawdź czy jesteśmy na stronie głównej
 //   const isHomePage = window.location.pathname === "/";
 
 //   return (
 //     <nav className="bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-lg sticky top-0 z-50">
 //       <div className="container mx-auto px-4">
 //         <div className="flex justify-between items-center h-16">
-//           {/* Lewa strona - Logo */}
+//           {/* 🔥 LEWA STRONA - Logo i tekst obok siebie */}
 //           <NavLink
 //             to="/"
 //             onClick={closeMobileMenu}
-//             className={({ isActive }) =>
-//               `text-xl font-bold ${isActive ? "text-blue-400" : "text-white hover:text-blue-300"} transition-colors`
-//             }
+//             className="flex items-center gap-2 group"
 //           >
+//             {/* Logo - po lewej */}
 //             <img
 //               src={logo}
 //               alt="Wandal Muaythai"
-//               className="h-8 w-auto object-contain" // h-8 = 32px, dopasowane do tekstu
+//               className="h-8 w-auto object-contain"
 //             />
 
-//             {/* Nazwa - trochę mniejsza na mobile */}
+//             {/* Tekst - po prawej stronie logo */}
 //             <span className="text-lg sm:text-xl font-bold text-white group-hover:text-blue-300 transition-colors">
 //               Wandal Muaythai
 //             </span>
 //           </NavLink>
 
-//           {/* Desktop Menu - środkowa część */}
+//           {/* Desktop Menu - środkowa część (bez zmian) */}
 //           {!isHomePage && (
 //             <div className="hidden md:flex items-center space-x-2">
 //               <NavLink
@@ -416,7 +427,7 @@ export default Navbar;
 //             </div>
 //           )}
 
-//           {/* Prawa strona - akcje użytkownika i język */}
+//           {/* Prawa strona - akcje użytkownika i język (bez zmian) */}
 //           <div className="flex items-center space-x-2 sm:space-x-4">
 //             {/* Koszyk - zawsze widoczny */}
 //             <NavLink
@@ -486,7 +497,7 @@ export default Navbar;
 //           </div>
 //         </div>
 
-//         {/* Mobile menu - rozwijane */}
+//         {/* Mobile menu - rozwijane (bez zmian) */}
 //         {!isHomePage && isMobileMenuOpen && (
 //           <div className="md:hidden py-4 border-t border-gray-700 animate-fadeIn">
 //             <div className="flex flex-col space-y-2">
