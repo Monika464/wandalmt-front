@@ -64,6 +64,40 @@
     "forgotPassword": "Forgot password?",
     "alreadyLoggedIn": "You are already logged in. Redirecting..."
   },
+  "search": {
+    "placeholder": "Search product...",
+    "clear": "Clear search",
+    "results": "Products found: {{count}}",
+    "noResults": "No search results",
+    "searching": "Searching...",
+    "filter": "Filter"
+  },
+
+  "product": {
+    "loading": "Loading products...",
+    "error": "An error occurred",
+    "showDetail": "Show details",
+    "addToCart": "Add to cart",
+    "price": "Price",
+    "currency": "PLN",
+    "noProducts": "No products in selected language",
+    "filteredByLanguage": "Products in English"
+  },
+  "cart": {
+    "addToCart": "Add to cart",
+    "goToCart": "Go to cart",
+    "added": "Added to cart",
+    "remove": "Remove",
+    "quantity": "Quantity",
+    "total": "Total",
+    "empty": "Your cart is empty",
+    "checkout": "Checkout",
+    "continueShopping": "Continue shopping",
+    "summary": "Summary",
+    "price": "Price",
+    "items": "Items",
+    "item": "Item"
+  },
   "errors": {
     "required": "Field is required",
     "nameRequired": "First name is required",

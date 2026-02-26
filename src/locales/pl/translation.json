@@ -30,6 +30,14 @@
     "email": "kontakt@wandalmt.pl",
     "phone": "+48 123 456 789"
   },
+  "search": {
+    "placeholder": "Szukaj produktu...",
+    "clear": "Wyczyść szukanie",
+    "results": "Znaleziono produktów: {{count}}",
+    "noResults": "Brak wyników wyszukiwania",
+    "searching": "Szukanie...",
+    "filter": "Filtruj"
+  },
   "register": {
     "title": "Rejestracja",
     "nameLabel": "Imię",
@@ -63,6 +71,32 @@
     "register": "Zarejestruj się",
     "forgotPassword": "Zapomniałeś hasła?",
     "alreadyLoggedIn": "Jesteś już zalogowany. Przekierowuję..."
+  },
+
+  "product": {
+    "loading": "Ładowanie produktów...",
+    "error": "Wystąpił błąd",
+    "showDetail": "Pokaż szczegóły",
+    "addToCart": "Dodaj do koszyka",
+    "price": "Cena",
+    "currency": "zł",
+    "noProducts": "Brak produktów w wybranym języku",
+    "filteredByLanguage": "Produkty w języku polskim"
+  },
+  "cart": {
+    "addToCart": "Dodaj do koszyka",
+    "goToCart": "Przejdź do koszyka",
+    "added": "Dodano do koszyka",
+    "remove": "Usuń",
+    "quantity": "Ilość",
+    "total": "Razem",
+    "empty": "Twój koszyk jest pusty",
+    "checkout": "Przejdź do kasy",
+    "continueShopping": "Kontynuuj zakupy",
+    "summary": "Podsumowanie",
+    "price": "Cena",
+    "items": "Produkty",
+    "item": "Produkt"
   },
 
   "errors": {
