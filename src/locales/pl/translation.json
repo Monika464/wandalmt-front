@@ -97,7 +97,17 @@
     "delete": "Usuń produkt",
     "confirmDelete": "Na pewno chcesz usunąć ten produkt?",
     "description": "Opis",
-    "image": "Zdjęcie"
+    "image": "Zdjęcie",
+    "notFound": "Nie znaleziono produktu",
+    "backToList": "Powrót do listy produktów",
+    "productTitle": "Produkt",
+    "courseContent": "Zawartość kursu",
+    "inPreparation": "Produkt w przygotowaniu",
+    "showChapters": "Pokaż rozdziały",
+    "hideChapters": "Ukryj rozdziały",
+    "chapters": "rozdziałów",
+    "noContent": "Brak zawartości dla tego produktu",
+    "languageMismatch": "Produkt nie jest dostępny w wybranym języku"
   },
   "cart": {
     "addToCart": "Dodaj do koszyka",
@@ -120,7 +130,7 @@
   },
   "resource": {
     "title": "Zasób",
-    "name": "Nazwa",
+    "name": "Tytuł",
     "description": "Opis",
     "language": "Język zasobu",
     "edit": "Edytuj zasób",

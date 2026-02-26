@@ -98,7 +98,17 @@
     "delete": "Delete product",
     "confirmDelete": "Are you sure you want to delete this product?",
     "description": "Description",
-    "image": "Image"
+    "image": "Image",
+    "notFound": "Product not found",
+    "backToList": "Back to products list",
+    "productTitle": "Product",
+    "courseContent": "Course content",
+    "inPreparation": "Product in preparation",
+    "showChapters": "Show chapters",
+    "hideChapters": "Hide chapters",
+    "chapters": "chapters",
+    "noContent": "No content available for this product",
+    "languageMismatch": "Product is not available in the selected language"
   },
   "cart": {
     "addToCart": "Add to cart",
@@ -125,7 +135,7 @@
   },
   "resource": {
     "title": "Resource",
-    "name": "Name",
+    "name": "Title",
     "description": "Description",
     "language": "Resource language",
     "edit": "Edit resource",
