@@ -8,7 +8,6 @@ import {
 } from "../../store/slices/authSlice";
 import type { AppDispatch, RootState } from "../../store";
 import { useLocation, useNavigate } from "react-router-dom";
-import Navbar from "../elements/Navbar";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useTranslation } from "react-i18next";
 

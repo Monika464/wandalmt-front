@@ -16,7 +16,8 @@
     "tryAgain": "Spróbuj ponownie",
     "goHome": "Wróć na stronę główną",
     "refresh": "Odśwież",
-    "signIn": "Zaloguj się"
+    "signIn": "Zaloguj się",
+    "close": "Zamknij"
   },
   "nav": {
     "home": "Strona główna",
@@ -276,6 +277,37 @@
     "purchasedProducts": "Zakupione produkty",
     "totalChapters": "Łącznie rozdziałów",
     "totalOrders": "Złożone zamówienia"
+  },
+  "profile": {
+    "loading": "Ładowanie profilu...",
+    "error": "Błąd",
+    "noData": "Brak danych użytkownika",
+    "title": "Profil użytkownika",
+    "edit": "Edytuj profil",
+    "email": "Email",
+    "fullName": "Imię i nazwisko",
+    "role": "Rola",
+    "admin": "Administrator",
+    "user": "Użytkownik"
+  },
+  "email": {
+    "title": "Zmiana adresu email",
+    "newEmailLabel": "Nowy adres email",
+    "newEmailPlaceholder": "np. nowy@email.com",
+    "changeButton": "Zmień adres email",
+    "changing": "Zmienianie...",
+    "processing": "Przetwarzanie zmiany emaila...",
+    "error": "Wystąpił błąd",
+    "success": "Sukces!",
+    "confirmationSent": "Na nowy adres email została wysłana wiadomość z potwierdzeniem.",
+    "info": "Informacje o zmianie emaila:",
+    "info1": "Po zmianie emaila otrzymasz wiadomość z linkiem potwierdzającym",
+    "info2": "Twój stary adres email przestanie działać do momentu potwierdzenia nowego",
+    "info3": "Zmiana emaila nie wpływa na Twoje zamówienia i historię zakupów",
+    "validation": {
+      "empty": "Email nie może być pusty",
+      "invalid": "Podaj poprawny adres email"
+    }
   },
   "financial": {
     "loading": "Ładowanie danych finansowych...",

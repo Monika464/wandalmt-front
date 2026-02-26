@@ -17,7 +17,8 @@
     "tryAgain": "Try again",
     "goHome": "Go to home page",
     "refresh": "Refresh",
-    "signIn": "Sign In"
+    "signIn": "Sign In",
+    "close": "Close"
   },
   "nav": {
     "home": "Home",
@@ -259,6 +260,7 @@
       "profile": "My Profile"
     }
   },
+
   "userProducts": {
     "loginRequired": "Login required",
     "loginMessage": "Please log in to view your purchased products",
@@ -277,6 +279,37 @@
     "purchasedProducts": "Purchased products",
     "totalChapters": "Total chapters",
     "totalOrders": "Total orders"
+  },
+  "profile": {
+    "loading": "Loading profile...",
+    "error": "Error",
+    "noData": "No user data",
+    "title": "User Profile",
+    "edit": "Edit Profile",
+    "email": "Email",
+    "fullName": "Full Name",
+    "role": "Role",
+    "admin": "Administrator",
+    "user": "User"
+  },
+  "email": {
+    "title": "Change Email Address",
+    "newEmailLabel": "New email address",
+    "newEmailPlaceholder": "e.g., new@email.com",
+    "changeButton": "Change Email",
+    "changing": "Changing...",
+    "processing": "Processing email change...",
+    "error": "An error occurred",
+    "success": "Success!",
+    "confirmationSent": "A confirmation message has been sent to your new email address.",
+    "info": "Information about changing email:",
+    "info1": "After changing your email, you will receive a confirmation link",
+    "info2": "Your old email will stop working until you confirm the new one",
+    "info3": "Changing email does not affect your orders and purchase history",
+    "validation": {
+      "empty": "Email cannot be empty",
+      "invalid": "Please enter a valid email address"
+    }
   },
   "financial": {
     "loading": "Loading financial data...",
