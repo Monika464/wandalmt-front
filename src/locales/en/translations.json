@@ -62,7 +62,15 @@
     "submittingButton": "Registering...",
     "successUser": "Registration successful! You will be redirected to login.",
     "successAdmin": "Admin has been successfully registered!",
-    "captchaLabel": "Confirm you're not a robot"
+    "captchaLabel": "Confirm you're not a robot",
+    "name": "First Name",
+    "surname": "Last Name",
+    "email": "Email",
+    "password": "Password",
+    "user": "User",
+    "admin": "Admin",
+    "registering": "Registering...",
+    "submit": "Register"
   },
   "login": {
     "title": "Login",

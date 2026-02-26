@@ -68,7 +68,15 @@
     "submittingButton": "Rejestrowanie...",
     "successUser": "Rejestracja zakończona pomyślnie! Za chwilę zostaniesz przekierowany do logowania.",
     "successAdmin": "Administrator został pomyślnie zarejestrowany!",
-    "captchaLabel": "Potwierdź, że nie jesteś robotem"
+    "captchaLabel": "Potwierdź, że nie jesteś robotem",
+    "name": "Imię",
+    "surname": "Nazwisko",
+    "email": "Email",
+    "password": "Hasło",
+    "user": "Użytkownik",
+    "admin": "Administrator",
+    "registering": "Rejestrowanie...",
+    "submit": "Zarejestruj"
   },
 
   "login": {
