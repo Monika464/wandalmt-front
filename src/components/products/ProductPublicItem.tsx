@@ -2,7 +2,7 @@ import type { ProductPublicItemProps } from "../../types/types";
 
 import { formatCurrency } from "../../utils/formatcurremcy";
 
-const ProductItem: React.FC<ProductPublicItemProps> = ({
+const ProductPublicItem: React.FC<ProductPublicItemProps> = ({
   title,
   description,
   price,
@@ -22,4 +22,4 @@ const ProductItem: React.FC<ProductPublicItemProps> = ({
   );
 };
 
-export default ProductItem;
+export default ProductPublicItem;

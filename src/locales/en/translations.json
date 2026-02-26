@@ -81,7 +81,12 @@
     "price": "Price",
     "currency": "PLN",
     "noProducts": "No products in selected language",
-    "filteredByLanguage": "Products in English"
+    "filteredByLanguage": "Products in English",
+    "edit": "Edit product",
+    "delete": "Delete product",
+    "confirmDelete": "Are you sure you want to delete this product?",
+    "description": "Description",
+    "image": "Image"
   },
   "cart": {
     "addToCart": "Add to cart",
@@ -97,6 +102,33 @@
     "price": "Price",
     "items": "Items",
     "item": "Item"
+  },
+  "languages": {
+    "pl": "Polish",
+    "en": "English"
+  },
+  "form": {
+    "editProduct": "Edit product",
+    "productLanguage": "Product language",
+    "titlePlaceholder": "Product title",
+    "descriptionPlaceholder": "Product description",
+    "pricePlaceholder": "Price",
+    "imageUrlPlaceholder": "Image URL",
+    "saveChanges": "Save changes",
+    "cancel": "Cancel",
+    "fillAllFields": "Please fill all fields correctly",
+    "productUpdated": "Product has been updated!",
+    "productUpdateError": "Error while updating product"
+  },
+  "admin": {
+    "productManagement": "Product Management",
+    "productsCount": "{{count}} products in",
+    "productsCount_plural": "{{count}} products in",
+    "addNewProduct": "Add new product",
+    "closeForm": "Close form",
+    "newProduct": "New product",
+    "editResources": "Edit resources",
+    "editProduct": "Edit product"
   },
   "errors": {
     "required": "Field is required",

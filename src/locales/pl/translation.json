@@ -81,7 +81,12 @@
     "price": "Cena",
     "currency": "zł",
     "noProducts": "Brak produktów w wybranym języku",
-    "filteredByLanguage": "Produkty w języku polskim"
+    "filteredByLanguage": "Produkty w języku polskim",
+    "edit": "Edytuj produkt",
+    "delete": "Usuń produkt",
+    "confirmDelete": "Na pewno chcesz usunąć ten produkt?",
+    "description": "Opis",
+    "image": "Zdjęcie"
   },
   "cart": {
     "addToCart": "Dodaj do koszyka",
@@ -97,6 +102,34 @@
     "price": "Cena",
     "items": "Produkty",
     "item": "Produkt"
+  },
+  "languages": {
+    "pl": "polskim",
+    "en": "angielskim"
+  },
+
+  "form": {
+    "editProduct": "Edytuj produkt",
+    "productLanguage": "Język produktu",
+    "titlePlaceholder": "Tytuł produktu",
+    "descriptionPlaceholder": "Opis produktu",
+    "pricePlaceholder": "Cena",
+    "imageUrlPlaceholder": "URL obrazka",
+    "saveChanges": "Zapisz zmiany",
+    "cancel": "Anuluj",
+    "fillAllFields": "Wypełnij wszystkie pola poprawnie",
+    "productUpdated": "Produkt został zaktualizowany!",
+    "productUpdateError": "Błąd podczas edycji produktu"
+  },
+  "admin": {
+    "productManagement": "Zarządzanie produktami",
+    "productsCount": "{{count}} produktów w języku",
+    "productsCount_plural": "{{count}} produktów w języku",
+    "addNewProduct": "Dodaj nowy produkt",
+    "closeForm": "Zamknij formularz",
+    "newProduct": "Nowy produkt",
+    "editResources": "Edytuj zasoby",
+    "editProduct": "Edytuj produkt"
   },
 
   "errors": {
