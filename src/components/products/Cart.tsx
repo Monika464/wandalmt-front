@@ -9,19 +9,21 @@ import {
   clearCart,
   updateQuantity,
 } from "../../store/slices/cartSlice";
+import { useTranslation } from "react-i18next"; // 👈 Dodaj import
 
 const Cart: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const { t } = useTranslation(); // 👈 Inicjalizacja
   const items = useSelector((state: RootState) => state.cart.items);
-  const { user } = useSelector((state: RootState) => state.auth); // 👈 Pobierz użytkownika
+  const { user } = useSelector((state: RootState) => state.auth);
   const {
     userOrders,
     loading: ordersLoading,
     error: ordersError,
   } = useSelector((state: RootState) => state.orders);
 
-  // 👇 Ładuj zamówienia TYLKO jeśli użytkownik jest zalogowany
+  // Ładuj zamówienia TYLKO jeśli użytkownik jest zalogowany
   useEffect(() => {
     if (user) {
       dispatch(fetchUserOrders());
@@ -33,7 +35,7 @@ const Cart: React.FC = () => {
   };
 
   const handleClearCart = () => {
-    if (window.confirm("Czy na pewno chcesz wyczyścić cały koszyk?")) {
+    if (window.confirm(t("cart.clearConfirm"))) {
       dispatch(clearCart());
     }
   };
@@ -45,7 +47,7 @@ const Cart: React.FC = () => {
   };
 
   const handleCheckout = () => {
-    // 👇 Jeśli niezalogowany, przekieruj do logowania z powrotem do koszyka
+    // Jeśli niezalogowany, przekieruj do logowania z powrotem do koszyka
     if (!user) {
       navigate("/login?redirect=/cart");
       return;
@@ -53,7 +55,7 @@ const Cart: React.FC = () => {
     navigate("/cart/checkout");
   };
 
-  // 👇 Sprawdź posiadane produkty TYLKO dla zalogowanych użytkowników
+  // Sprawdź posiadane produkty TYLKO dla zalogowanych użytkowników
   const alreadyOwnedProducts = React.useMemo(() => {
     // Jeśli użytkownik niezalogowany, nie ma sensu sprawdzać
     if (!user || !Array.isArray(userOrders) || !Array.isArray(items)) {
@@ -76,32 +78,32 @@ const Cart: React.FC = () => {
       if (!item || !item._id) return false;
       return orderedProductIds.includes(item._id.toString());
     });
-  }, [userOrders, items, user]); // 👈 Dodaj user do zależności
+  }, [userOrders, items, user]);
 
-  // 🔥 BŁĄD - pokazuj tylko jeśli użytkownik zalogowany i jest błąd
+  // BŁĄD - pokazuj tylko jeśli użytkownik zalogowany i jest błąd
   if (user && ordersError) {
     return (
       <div className="max-w-4xl mx-auto p-4">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
           <div className="text-red-500 text-5xl mb-4">⚠️</div>
           <h2 className="text-2xl font-bold text-red-700 mb-4">
-            Wystąpił błąd
+            {t("common.error")}
           </h2>
           <p className="text-red-600 mb-6">
-            Błąd podczas ładowania zamówień: {ordersError}
+            {t("cart.ordersError")}: {ordersError}
           </p>
           <div className="space-x-4">
             <button
               onClick={() => dispatch(fetchUserOrders())}
               className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
             >
-              Spróbuj ponownie
+              {t("common.tryAgain")}
             </button>
             <button
               onClick={() => navigate("/")}
               className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
             >
-              Wróć na stronę główną
+              {t("common.goHome")}
             </button>
           </div>
         </div>
@@ -109,29 +111,28 @@ const Cart: React.FC = () => {
     );
   }
 
-  // 👇 Ładowanie - tylko dla zalogowanych
+  // Ładowanie - tylko dla zalogowanych
   if (user && ordersLoading) {
     return (
       <div className="max-w-4xl mx-auto p-4">
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">
-            Ładowanie informacji o zamówieniach...
-          </p>
+          <p className="text-gray-600">{t("cart.loadingOrders")}</p>
         </div>
       </div>
     );
   }
 
-  // 👇 Ostrzeżenie o posiadanych produktach - tylko dla zalogowanych
+  // Ostrzeżenie o posiadanych produktach - tylko dla zalogowanych
   if (user && !ordersLoading && alreadyOwnedProducts.length > 0) {
     return (
       <div className="max-w-4xl mx-auto p-4">
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-          <h3 className="font-bold text-yellow-800 mb-2">⚠️ Uwaga</h3>
+          <h3 className="font-bold text-yellow-800 mb-2">
+            ⚠️ {t("cart.warning")}
+          </h3>
           <p className="text-yellow-700">
-            Masz już dostęp do {alreadyOwnedProducts.length} produktów w
-            koszyku:
+            {t("cart.alreadyOwned", { count: alreadyOwnedProducts.length })}
           </p>
           <ul className="list-disc ml-5 mt-2">
             {alreadyOwnedProducts.map((item) => (
@@ -141,14 +142,13 @@ const Cart: React.FC = () => {
             ))}
           </ul>
           <p className="text-sm text-yellow-600 mt-2">
-            Możesz kontynuować, ale zostaną one ponownie dodane do Twojego
-            konta.
+            {t("cart.alreadyOwnedMessage")}
           </p>
           <button
             onClick={() => navigate("/user/orders")}
             className="mt-3 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
           >
-            Zobacz moje zamówienia
+            {t("cart.viewOrders")}
           </button>
         </div>
 
@@ -159,7 +159,7 @@ const Cart: React.FC = () => {
           handleQuantityChange={handleQuantityChange}
           handleCheckout={handleCheckout}
           navigate={navigate}
-          user={user} // 👈 Przekaż użytkownika
+          user={user}
         />
       </div>
     );
@@ -174,7 +174,7 @@ const Cart: React.FC = () => {
       handleQuantityChange={handleQuantityChange}
       handleCheckout={handleCheckout}
       navigate={navigate}
-      user={user} // 👈 Przekaż użytkownika
+      user={user}
     />
   );
 };
@@ -186,7 +186,7 @@ interface CartContentProps {
   handleQuantityChange: (productId: string, newQuantity: number) => void;
   handleCheckout: () => void;
   navigate: (path: string) => void;
-  user: any | null; // 👈 Dodaj user do props
+  user: any | null;
 }
 
 const CartContent: React.FC<CartContentProps> = ({
@@ -196,8 +196,10 @@ const CartContent: React.FC<CartContentProps> = ({
   handleQuantityChange,
   handleCheckout,
   navigate,
-  user, // 👈 Odbierz user
+  user,
 }) => {
+  const { t } = useTranslation(); // 👈 Dodaj useTranslation
+
   const calculateTotal = () => {
     return items.reduce(
       (total, item) => total + item.price * (item.quantity || 1),
@@ -208,13 +210,13 @@ const CartContent: React.FC<CartContentProps> = ({
   if (items.length === 0) {
     return (
       <div className="text-center py-8">
-        <h2 className="text-2xl font-bold mb-4">Twój koszyk</h2>
-        <p className="text-gray-600 mb-4">Twój koszyk jest pusty</p>
+        <h2 className="text-2xl font-bold mb-4">{t("cart.yourCart")}</h2>
+        <p className="text-gray-600 mb-4">{t("cart.empty")}</p>
         <button
           onClick={() => navigate("/products")}
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
-          Przeglądaj produkty
+          {t("cart.browseProducts")}
         </button>
       </div>
     );
@@ -224,7 +226,7 @@ const CartContent: React.FC<CartContentProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-6">Twój koszyk</h2>
+      <h2 className="text-2xl font-bold mb-6">{t("cart.yourCart")}</h2>
 
       {/* Lista produktów */}
       <div className="bg-white rounded-lg shadow p-4 mb-6">
@@ -244,7 +246,9 @@ const CartContent: React.FC<CartContentProps> = ({
                 )}
                 <div>
                   <h3 className="font-semibold">{item.title}</h3>
-                  <p className="text-gray-600">{item.price} PLN</p>
+                  <p className="text-gray-600">
+                    {item.price} {t("cart.currency")}
+                  </p>
                 </div>
               </div>
 
@@ -274,7 +278,7 @@ const CartContent: React.FC<CartContentProps> = ({
                 {/* Suma za produkt */}
                 <div className="text-right min-w-[100px]">
                   <p className="font-semibold">
-                    {item.price * (item.quantity || 1)} PLN
+                    {item.price * (item.quantity || 1)} {t("cart.currency")}
                   </p>
                 </div>
 
@@ -282,7 +286,7 @@ const CartContent: React.FC<CartContentProps> = ({
                 <button
                   onClick={() => handleRemoveItem(item._id)}
                   className="text-red-500 hover:text-red-700 p-2"
-                  title="Usuń produkt"
+                  title={t("cart.remove")}
                 >
                   <svg
                     className="w-5 h-5"
@@ -306,8 +310,10 @@ const CartContent: React.FC<CartContentProps> = ({
         {/* Podsumowanie */}
         <div className="mt-6 pt-4 border-t">
           <div className="flex justify-between text-lg font-bold">
-            <span>Razem:</span>
-            <span>{total.toFixed(2)} PLN</span>
+            <span>{t("cart.total")}:</span>
+            <span>
+              {total.toFixed(2)} {t("cart.currency")}
+            </span>
           </div>
         </div>
       </div>
@@ -319,14 +325,14 @@ const CartContent: React.FC<CartContentProps> = ({
             onClick={() => navigate("/products")}
             className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
           >
-            ← Kontynuuj zakupy
+            ← {t("cart.continueShopping")}
           </button>
 
           <button
             onClick={handleClearCart}
             className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
           >
-            🗑️ Wyczyść koszyk
+            🗑️ {t("cart.clearCart")}
           </button>
         </div>
 
@@ -334,9 +340,7 @@ const CartContent: React.FC<CartContentProps> = ({
           onClick={handleCheckout}
           className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 font-semibold flex items-center justify-center"
         >
-          {user
-            ? "Przejdź do podsumowania zamówienia"
-            : "Zaloguj się i kontynuuj"}
+          {user ? t("cart.checkout") : t("cart.loginAndCheckout")}
           <svg
             className="ml-2 w-5 h-5"
             fill="none"
@@ -353,22 +357,18 @@ const CartContent: React.FC<CartContentProps> = ({
         </button>
       </div>
 
-      {/* Informacje - pokaż inną wiadomość dla niezalogowanych */}
+      {/* Informacje */}
       <div className="mt-8 bg-blue-50 border border-blue-200 rounded p-4">
-        <h3 className="font-semibold text-blue-800 mb-2">Informacje</h3>
+        <h3 className="font-semibold text-blue-800 mb-2">{t("cart.info")}</h3>
         <ul className="text-sm text-blue-700 space-y-1">
-          <li>
-            • Możesz zmieniać ilość produktów korzystając z przycisków +/-
-          </li>
-          <li>• Aby usunąć pojedynczy produkt, użyj ikony kosza</li>
-          <li>• Koszyk jest zapisywany lokalnie - działa bez logowania</li>
+          <li>• {t("cart.info1")}</li>
+          <li>• {t("cart.info2")}</li>
+          <li>• {t("cart.info3")}</li>
           {!user && (
-            <li className="font-semibold text-blue-800">
-              • Aby sfinalizować zakup, musisz się zalogować lub zarejestrować
-            </li>
+            <li className="font-semibold text-blue-800">• {t("cart.info4")}</li>
           )}
-          <li>• Po zalogowaniu koszyk zostanie powiązany z Twoim kontem</li>
-          <li>• Po przejściu do płatności możesz zastosować kupon rabatowy</li>
+          <li>• {t("cart.info5")}</li>
+          <li>• {t("cart.info6")}</li>
         </ul>
       </div>
     </div>
@@ -393,15 +393,19 @@ export default Cart;
 //   const dispatch = useDispatch<AppDispatch>();
 //   const navigate = useNavigate();
 //   const items = useSelector((state: RootState) => state.cart.items);
+//   const { user } = useSelector((state: RootState) => state.auth); // 👈 Pobierz użytkownika
 //   const {
 //     userOrders,
 //     loading: ordersLoading,
 //     error: ordersError,
 //   } = useSelector((state: RootState) => state.orders);
 
+//   // 👇 Ładuj zamówienia TYLKO jeśli użytkownik jest zalogowany
 //   useEffect(() => {
-//     dispatch(fetchUserOrders());
-//   }, [dispatch]);
+//     if (user) {
+//       dispatch(fetchUserOrders());
+//     }
+//   }, [dispatch, user]);
 
 //   const handleRemoveItem = (productId: string) => {
 //     dispatch(removeFromCart(productId));
@@ -420,81 +424,41 @@ export default Cart;
 //   };
 
 //   const handleCheckout = () => {
+//     // 👇 Jeśli niezalogowany, przekieruj do logowania z powrotem do koszyka
+//     if (!user) {
+//       navigate("/login?redirect=/cart");
+//       return;
+//     }
 //     navigate("/cart/checkout");
 //   };
 
-//   //console.log("Items in cart:", items);
-//   //console.log("User orders:", userOrders);
-
-//   // Poprawione: Użyj item._id zamiast item.product._id
+//   // 👇 Sprawdź posiadane produkty TYLKO dla zalogowanych użytkowników
 //   const alreadyOwnedProducts = React.useMemo(() => {
-//     // console.log("🔍 Checking already owned products...");
-//     // console.log(
-//     //   "Items in cart:",
-//     //   items.map((i) => ({ id: i._id, title: i.title })),
-//     // );
-
-//     if (!Array.isArray(userOrders) || !Array.isArray(items)) {
+//     // Jeśli użytkownik niezalogowany, nie ma sensu sprawdzać
+//     if (!user || !Array.isArray(userOrders) || !Array.isArray(items)) {
 //       return [];
 //     }
 
-//     // Filtruj tylko opłacone zamówienia
 //     const paidOrders = userOrders.filter(
 //       (order) =>
 //         order.status === "paid" || order.status === "partially_refunded",
 //     );
 
-//     // Zbierz wszystkie ID produktów z zamówień (płaska struktura)
 //     const orderedProductIds = paidOrders.flatMap((order) =>
 //       order.products
-//         .filter((p) => (p.refundQuantity || 0) < p.quantity) // tylko niezwrócone
+//         .filter((p) => (p.refundQuantity || 0) < p.quantity)
 //         .map((p) => p.productId?.toString())
 //         .filter((id) => id != null),
 //     );
 
-//     //console.log("📦 Ordered product IDs:", orderedProductIds);
-
-//     const result = items.filter((item) => {
+//     return items.filter((item) => {
 //       if (!item || !item._id) return false;
-
-//       const found = orderedProductIds.includes(item._id.toString());
-//       //if (found) console.log(`✅ Found: ${item.title} is already owned`);
-//       return found;
+//       return orderedProductIds.includes(item._id.toString());
 //     });
+//   }, [userOrders, items, user]); // 👈 Dodaj user do zależności
 
-//     //console.log("📦 Already owned products:", result);
-//     return result;
-//   }, [userOrders, items]);
-
-//   // const alreadyOwnedProducts = React.useMemo(() => {
-//   //   if (!Array.isArray(userOrders) || !Array.isArray(items)) {
-//   //     return [];
-//   //   }
-
-//   //   return items.filter((item) => {
-//   //     if (!item || !item._id) {
-//   //       console.warn("Item missing _id:", item);
-//   //       return false;
-//   //     }
-
-//   //     return userOrders.some((order) => {
-//   //       if (!order || !order.products) return false;
-
-//   //       return order.products.some((p) => {
-//   //         if (!p) return false;
-
-//   //         // Sprawdź różne możliwe struktury produktów w zamówieniach
-//   //         const productIdInOrder = p.product?._id.toString();
-//   //         return productIdInOrder === item._id.toString();
-//   //       });
-//   //     });
-//   //   });
-//   // }, [userOrders, items]);
-
-//   //console.log("Already owned products in cart:", alreadyOwnedProducts);
-
-//   // 🔥 WYŚWIETLANIE BŁĘDU - na samej górze
-//   if (ordersError) {
+//   // 🔥 BŁĄD - pokazuj tylko jeśli użytkownik zalogowany i jest błąd
+//   if (user && ordersError) {
 //     return (
 //       <div className="max-w-4xl mx-auto p-4">
 //         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
@@ -524,8 +488,8 @@ export default Cart;
 //     );
 //   }
 
-//   // Jeśli ładujemy zamówienia
-//   if (ordersLoading) {
+//   // 👇 Ładowanie - tylko dla zalogowanych
+//   if (user && ordersLoading) {
 //     return (
 //       <div className="max-w-4xl mx-auto p-4">
 //         <div className="text-center py-8">
@@ -538,8 +502,8 @@ export default Cart;
 //     );
 //   }
 
-//   // Pokaż ostrzeżenie tylko jeśli nie ładujemy i są duplikaty
-//   if (!ordersLoading && alreadyOwnedProducts.length > 0) {
+//   // 👇 Ostrzeżenie o posiadanych produktach - tylko dla zalogowanych
+//   if (user && !ordersLoading && alreadyOwnedProducts.length > 0) {
 //     return (
 //       <div className="max-w-4xl mx-auto p-4">
 //         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
@@ -567,7 +531,6 @@ export default Cart;
 //           </button>
 //         </div>
 
-//         {/* Wyświetl resztę koszyka */}
 //         <CartContent
 //           items={items}
 //           handleRemoveItem={handleRemoveItem}
@@ -575,12 +538,13 @@ export default Cart;
 //           handleQuantityChange={handleQuantityChange}
 //           handleCheckout={handleCheckout}
 //           navigate={navigate}
+//           user={user} // 👈 Przekaż użytkownika
 //         />
 //       </div>
 //     );
 //   }
 
-//   // Jeśli nie ma duplikatów, pokaż normalny koszyk
+//   // Normalny koszyk - działa dla wszystkich
 //   return (
 //     <CartContent
 //       items={items}
@@ -589,11 +553,11 @@ export default Cart;
 //       handleQuantityChange={handleQuantityChange}
 //       handleCheckout={handleCheckout}
 //       navigate={navigate}
+//       user={user} // 👈 Przekaż użytkownika
 //     />
 //   );
 // };
 
-// // Wydzielona komponent do wyświetlania zawartości koszyka
 // interface CartContentProps {
 //   items: any[];
 //   handleRemoveItem: (productId: string) => void;
@@ -601,6 +565,7 @@ export default Cart;
 //   handleQuantityChange: (productId: string, newQuantity: number) => void;
 //   handleCheckout: () => void;
 //   navigate: (path: string) => void;
+//   user: any | null; // 👈 Dodaj user do props
 // }
 
 // const CartContent: React.FC<CartContentProps> = ({
@@ -610,8 +575,8 @@ export default Cart;
 //   handleQuantityChange,
 //   handleCheckout,
 //   navigate,
+//   user, // 👈 Odbierz user
 // }) => {
-//   // Oblicz sumę koszyka
 //   const calculateTotal = () => {
 //     return items.reduce(
 //       (total, item) => total + item.price * (item.quantity || 1),
@@ -748,7 +713,9 @@ export default Cart;
 //           onClick={handleCheckout}
 //           className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 font-semibold flex items-center justify-center"
 //         >
-//           Przejdź do podsumowania zamówienia
+//           {user
+//             ? "Przejdź do podsumowania zamówienia"
+//             : "Zaloguj się i kontynuuj"}
 //           <svg
 //             className="ml-2 w-5 h-5"
 //             fill="none"
@@ -765,7 +732,7 @@ export default Cart;
 //         </button>
 //       </div>
 
-//       {/* Informacje */}
+//       {/* Informacje - pokaż inną wiadomość dla niezalogowanych */}
 //       <div className="mt-8 bg-blue-50 border border-blue-200 rounded p-4">
 //         <h3 className="font-semibold text-blue-800 mb-2">Informacje</h3>
 //         <ul className="text-sm text-blue-700 space-y-1">
@@ -773,7 +740,13 @@ export default Cart;
 //             • Możesz zmieniać ilość produktów korzystając z przycisków +/-
 //           </li>
 //           <li>• Aby usunąć pojedynczy produkt, użyj ikony kosza</li>
-//           <li>• Koszyk jest zapisywany automatycznie</li>
+//           <li>• Koszyk jest zapisywany lokalnie - działa bez logowania</li>
+//           {!user && (
+//             <li className="font-semibold text-blue-800">
+//               • Aby sfinalizować zakup, musisz się zalogować lub zarejestrować
+//             </li>
+//           )}
+//           <li>• Po zalogowaniu koszyk zostanie powiązany z Twoim kontem</li>
 //           <li>• Po przejściu do płatności możesz zastosować kupon rabatowy</li>
 //         </ul>
 //       </div>
