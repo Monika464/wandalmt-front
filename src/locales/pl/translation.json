@@ -19,6 +19,17 @@
     "shop": "Sklep",
     "cart": "Koszyk"
   },
+  "footer": {
+    "copyright": "Wszystkie prawa zastrzeżone",
+    "about": "O nas",
+    "contact": "Kontakt",
+    "terms": "Regulamin",
+    "privacy": "Polityka prywatności",
+    "companyName": "Wandal Muaythai",
+    "address": "ul. Przykładowa 123, 00-001 Warszawa",
+    "email": "kontakt@wandalmt.pl",
+    "phone": "+48 123 456 789"
+  },
   "register": {
     "title": "Rejestracja",
     "nameLabel": "Imię",
