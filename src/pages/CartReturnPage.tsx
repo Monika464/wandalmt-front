@@ -5,12 +5,12 @@ import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../store";
 import axios from "axios";
 import { clearCart } from "../store/slices/cartSlice";
-import { useTranslation } from "react-i18next"; // 👈 Dodaj import
+import { useTranslation } from "react-i18next";
 
 const CartReturnPage: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { t } = useTranslation(); // 👈 Inicjalizacja
+  const { t, i18n } = useTranslation();
   const [searchParams] = useSearchParams();
   const { token } = useSelector((state: RootState) => state.auth);
   const [status, setStatus] = useState<
@@ -80,7 +80,10 @@ const CartReturnPage: React.FC = () => {
         const response = await axios.get(
           `http://localhost:3000/api/cart-session-status?session_id=${sessionId}`,
           {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Accept-Language": i18n.language,
+            },
           },
         );
 
@@ -120,7 +123,16 @@ const CartReturnPage: React.FC = () => {
 
     checkPaymentStatus();
   }, [searchParams, token, dispatch, t]);
+  ////
 
+  const [refreshSite, setRefreshSite] = useState<number | null>(null);
+
+  setTimeout(() => {
+    setRefreshSite(null);
+  }, 20000);
+
+  console.log("Refresh timer set:", refreshSite);
+  ////
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">

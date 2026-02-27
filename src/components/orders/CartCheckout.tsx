@@ -5,7 +5,6 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import axios from "axios";
 import { useTranslation } from "react-i18next"; // 👈 Dodaj import
-import i18n from "../../utils/i18n";
 
 interface Coupon {
   id: string;
@@ -224,6 +223,7 @@ const CartCheckout: React.FC = () => {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
+            "Accept-Language": i18n.language,
           },
         },
       );
