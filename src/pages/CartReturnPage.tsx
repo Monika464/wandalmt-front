@@ -20,42 +20,6 @@ const CartReturnPage: React.FC = () => {
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
   const [discountAmount, setDiscountAmount] = useState<number | null>(null);
-  const [refreshTimer, setRefreshTimer] = useState<number | null>(null);
-  const [timeLeft, setTimeLeft] = useState<number>(4);
-
-  // Timer do automatycznego odświeżenia
-  useEffect(() => {
-    if (status === "success" && !invoiceUrl && refreshTimer === null) {
-      const timer = window.setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            window.location.reload();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      setRefreshTimer(timer);
-
-      return () => {
-        if (timer) clearInterval(timer);
-      };
-    }
-
-    if (invoiceUrl && refreshTimer) {
-      clearInterval(refreshTimer);
-      setRefreshTimer(null);
-    }
-  }, [status, invoiceUrl, refreshTimer]);
-
-  useEffect(() => {
-    return () => {
-      if (refreshTimer) {
-        clearInterval(refreshTimer);
-      }
-    };
-  }, [refreshTimer]);
 
   useEffect(() => {
     const checkPaymentStatus = async () => {
@@ -122,13 +86,13 @@ const CartReturnPage: React.FC = () => {
     };
 
     checkPaymentStatus();
-  }, [searchParams, token, dispatch, t]);
+  }, [searchParams, token, dispatch, t, i18n.language]);
   ////
 
-  const [refreshSite, setRefreshSite] = useState<number | null>(null);
+  const [refreshSite, setRefreshSite] = useState(false);
 
   setTimeout(() => {
-    setRefreshSite(null);
+    setRefreshSite(!refreshSite);
   }, 20000);
 
   console.log("Refresh timer set:", refreshSite);
