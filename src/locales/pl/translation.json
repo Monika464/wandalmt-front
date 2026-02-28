@@ -151,7 +151,20 @@
     "info3": "Koszyk jest zapisywany lokalnie - działa bez logowania",
     "info4": "Aby sfinalizować zakup, musisz się zalogować lub zarejestrować",
     "info5": "Po zalogowaniu koszyk zostanie powiązany z Twoim kontem",
-    "info6": "Po przejściu do płatności możesz zastosować kupon rabatowy"
+    "info6": "Po przejściu do płatności możesz zastosować kupon rabatowy",
+    "currencyWarning": {
+      "title": "Płatność w PLN - różnice kursowe",
+      "message": "Wybrałeś wyświetlanie cen w {{currency}}, ale płatność zostanie zrealizowana w PLN.",
+      "amountIn": "Kwota w {{currency}}",
+      "exchangeRate": "Kurs {{currency}}/PLN",
+      "toPay": "Do zapłaty (PLN)",
+      "disclaimer": "Ostateczna kwota w PLN może się nieznacznie różnić w zależności od aktualnego kursu w momencie realizacji płatności.",
+      "understand": "Rozumiem, kontynuuj",
+      "showInPLN": "Pokaż ceny w PLN"
+    },
+    "confirmWarningFirst": "Najpierw potwierdź ostrzeżenie ↑",
+    "currencyInfo1": "Możesz przeglądać ceny w PLN lub USD",
+    "currencyInfo2": "Wszystkie płatności są realizowane w PLN"
   },
 
   "checkout": {

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import logo from "/assets/images/logomt.png";
+import CurrencySelector from "./CurrencySelector";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -192,6 +193,7 @@ const Navbar = () => {
                 >
                   EN
                 </button>
+                <CurrencySelector />
               </div>
             </div>
 

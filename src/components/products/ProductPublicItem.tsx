@@ -1,6 +1,7 @@
 import type { ProductPublicItemProps } from "../../types/types";
 
-import { formatCurrency } from "../../utils/formatcurremcy";
+//import { formatCurrency } from "../../utils/formatcurremcy";
+import { useCurrency } from "../../hooks/useCurrency";
 
 const ProductPublicItem: React.FC<ProductPublicItemProps> = ({
   title,
@@ -8,6 +9,7 @@ const ProductPublicItem: React.FC<ProductPublicItemProps> = ({
   price,
   imageUrl,
 }) => {
+  const { formatPrice } = useCurrency();
   return (
     <div className="p-4 border rounded-lg shadow-sm bg-white">
       <h2 className="text-lg font-bold">{title}</h2>
@@ -17,7 +19,7 @@ const ProductPublicItem: React.FC<ProductPublicItemProps> = ({
         className="h-40 object-cover rounded-md"
       />
       <p className="text-sm text-gray-600">{description}</p>
-      <p className="font-bold">{formatCurrency(price)}</p>
+      <p className="font-bold">{formatPrice(price)}</p>
     </div>
   );
 };

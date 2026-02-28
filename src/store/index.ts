@@ -11,6 +11,7 @@ import emailReducer from "./slices/emailSlice";
 import userprofileSlice from "./slices/userprofileSlice";
 import videoReducer from "./slices/videoSlice";
 import progressReducer from "./slices/progressSlice";
+import currencySlice from "./slices/currencySlice";
 
 export const store = configureStore({
   reducer: {
@@ -26,6 +27,7 @@ export const store = configureStore({
     userprofile: userprofileSlice,
     video: videoReducer,
     progress: progressReducer,
+    currency: currencySlice,
   },
   devTools: true,
   // devTools: {

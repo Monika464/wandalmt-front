@@ -152,7 +152,20 @@
     "info3": "Cart is saved locally - works without login",
     "info4": "To complete your purchase, you need to login or register",
     "info5": "After login, cart will be linked to your account",
-    "info6": "You can apply discount coupons at checkout"
+    "info6": "You can apply discount coupons at checkout",
+    "currencyWarning": {
+      "title": "Payment in PLN - Exchange Rate Differences",
+      "message": "You have chosen to view prices in {{currency}}, but payment will be processed in PLN.",
+      "amountIn": "Amount in {{currency}}",
+      "exchangeRate": "{{currency}}/PLN Rate",
+      "toPay": "To pay (PLN)",
+      "disclaimer": "The final amount in PLN may vary slightly depending on the current exchange rate at the time of payment.",
+      "understand": "I understand, continue",
+      "showInPLN": "Show prices in PLN"
+    },
+    "confirmWarningFirst": "Please confirm the warning above ↑",
+    "currencyInfo1": "You can browse prices in PLN or USD",
+    "currencyInfo2": "All payments are processed in PLN"
   },
   "checkout": {
     "couponValidationError": "Coupon validation error",
