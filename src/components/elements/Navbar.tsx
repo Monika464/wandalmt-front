@@ -4,7 +4,8 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../store";
 import { logoutAdmin, logoutUser } from "../../store/slices/authSlice";
-import { useTranslation } from "react-i18next";
+//import { useTranslation } from "react-i18next";
+import { useAppTranslation } from "../../hooks/useAppTranslation";
 import {
   ShoppingCart,
   User,
@@ -24,7 +25,8 @@ const Navbar = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
-  const { t, i18n } = useTranslation();
+  //const { t, i18n } = useTranslation();
+  const { t, i18n } = useAppTranslation();
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);

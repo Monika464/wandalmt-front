@@ -1,10 +1,8 @@
-// src/i18n.ts
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-ignore
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
-
-// Importuj typy - ścieżka względem pliku i18n.ts
-import "../types/i18n.d.ts";
 
 // Załaduj swoje pliki z tłumaczeniami
 import translationPL from "../locales/pl/translation.json";

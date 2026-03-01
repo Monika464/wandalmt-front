@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import AddToCartButton from "../orders/AddToCartButton";
 import SearchPublicContainer from "./SearchContainerPublic";
 import { useTranslation } from "react-i18next";
+
 import { Eye } from "lucide-react";
 
 const ProductList: React.FC = () => {

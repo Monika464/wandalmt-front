@@ -18,10 +18,11 @@ const initialState: EmailState = {
 // -----------------------------------------------------
 export const requestPasswordReset = createAsyncThunk(
   "email/requestPasswordReset",
-  async (email: string, { rejectWithValue }) => {
+  async (email: string, { rejectWithValue, getState }) => {
     try {
-      //const res = await api.post("/email/request-reset", { email });
-      const res = await api.post("/auth/forgot-password", { email });
+      const state = getState() as any;
+      const lang = state.i18n?.language || "pl";
+      const res = await api.post("/auth/forgot-password", { email, lang });
       return res.data.message;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.error || "Błąd resetu hasła");
@@ -36,10 +37,12 @@ export const resetPassword = createAsyncThunk(
   "email/resetPassword",
   async (
     payload: { token: string; newPassword: string },
-    { rejectWithValue },
+    { rejectWithValue, getState },
   ) => {
     try {
-      const res = await api.post("/auth/reset-password", payload);
+      const state = getState() as any;
+      const lang = state.i18n?.language || "pl"; // Pobierz język z i18n
+      const res = await api.post("/auth/reset-password", { ...payload, lang });
 
       return res.data.message;
     } catch (err: any) {
