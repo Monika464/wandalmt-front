@@ -577,7 +577,7 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
                   {videoStatus.thumbnailUrl && (
                     <Thumbnail
                       url={videoStatus.thumbnailUrl}
-                      bunnyGuid={videoStatus.bunnyGuid}
+                      // bunnyGuid={videoStatus.bunnyGuid}
                     />
                   )}
                   <div className="flex-1">

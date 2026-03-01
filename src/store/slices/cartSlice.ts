@@ -95,9 +95,9 @@ const cartSlice = createSlice({
     // Nowa akcja: wymuś czyszczenie z dodatkowymi opcjami
     forceClearCart: (
       state,
-      action: PayloadAction<{ reason?: string }> = { payload: {} },
+      action: PayloadAction<{ reason?: string } | undefined>,
     ) => {
-      const { reason = "manual" } = action.payload;
+      const reason = action.payload?.reason ?? "manual";
       console.log(`🔄 CartSlice: Force clearing cart (reason: ${reason})`);
 
       state.items = [];

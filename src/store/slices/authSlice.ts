@@ -68,11 +68,11 @@ const setupTokenRefresh = (expiresAt: number) => {
   tokenRefreshService.setupTokenRefresh(expiresAt, async () => {
     try {
       console.log("Automatyczne odświeżanie tokena...");
-      const result = await refreshToken();
+      const result = refreshToken();
       if (refreshToken.fulfilled.match(result)) {
         console.log("Token automatycznie odświeżony");
       } else {
-        console.error("Błąd automatycznego odświeżania:", result.payload);
+        console.error("Błąd automatycznego odświeżania:", result);
         // W przypadku błędu, czyścimy timer
         tokenRefreshService.clearRefreshTimer();
       }

@@ -1,7 +1,10 @@
 // src/types/i18n.d.ts
-// src/types/i18n.d.ts
+import "i18next";
+
 declare module "i18next" {
   interface CustomTypeOptions {
+    returnNull: false;
+    returnEmptyString: false;
     resources: {
       translation: {
         nav: {

@@ -50,7 +50,7 @@ export const useChapterProgress = () => {
 
   const uncompleteChapter = useCallback(
     (productId: string, chapterId: string) => {
-      if (!productId || !chapterId || !user?.id) return;
+      if (!productId || !chapterId || !user?._id) return;
       dispatch(markChapterAsIncomplete({ productId, chapterId }));
     },
     [dispatch, user?._id],
