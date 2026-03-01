@@ -1,10 +1,7 @@
-import { Link, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import AdminOrdersSummary from "../components/orders/AdminOrdersSummary";
 import AdminFinancials from "../components/orders/AdminFinancials";
-import Navbar from "../components/elements/Navbar";
-
-import DiscountManager from "../components/orders/DiscountManager";
 
 const AdminPanel = () => {
   //const { user } = useSelector((state: RootState) => state.auth);

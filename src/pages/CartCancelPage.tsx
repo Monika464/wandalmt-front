@@ -5,13 +5,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearCart } from "../store/slices/cartSlice";
 import type { RootState } from "../store";
 import axios from "axios";
-import { useTranslation } from "react-i18next"; // 👈 Dodaj import
+import { useTranslation } from "react-i18next";
 
 const CartCancelPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
-  const { t } = useTranslation(); // 👈 Inicjalizacja
+  const { t } = useTranslation();
   const { token } = useSelector((state: RootState) => state.auth);
 
   const [loading, setLoading] = useState(false);
@@ -19,8 +19,8 @@ const CartCancelPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const orderId = searchParams.get("orderId");
-  const canceled = searchParams.get("canceled");
-  const sessionId = searchParams.get("session_id");
+  //const canceled = searchParams.get("canceled");
+  //const sessionId = searchParams.get("session_id");
 
   useEffect(() => {
     const fetchOrderDetails = async () => {

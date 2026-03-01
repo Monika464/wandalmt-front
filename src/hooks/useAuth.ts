@@ -12,7 +12,7 @@ import { tokenRefreshService } from "../services/tokenRefreshService";
 export const useAuth = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { expiresAt, user, token, status } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
   const isCheckingRef = useRef(false);
 
@@ -47,7 +47,7 @@ export const useAuth = () => {
         if (user && token) {
           dispatch(refreshToken())
             .unwrap()
-            .then((newTokenData) => {
+            .then(() => {
               console.log("Token odświeżony automatycznie");
             })
             .catch((error) => {

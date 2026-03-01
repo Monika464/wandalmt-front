@@ -10,7 +10,7 @@ import type { RootState, AppDispatch } from "../store";
 import { formatCurrency } from "../utils/formatcurremcy";
 import ViewPublicResource from "../components/resources/ViewPublicResource";
 import AddToCartButton from "../components/orders/AddToCartButton";
-import { ArrowLeft, BookOpen, Calendar, Clock } from "lucide-react";
+import { ArrowLeft, BookOpen, Calendar } from "lucide-react";
 
 export default function ProductResourcePage() {
   const { productId } = useParams<{ productId: string }>();

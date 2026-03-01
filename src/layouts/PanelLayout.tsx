@@ -1,5 +1,5 @@
 // layouts/PanelLayout.tsx
-import React from "react";
+
 import { Outlet, NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store";
@@ -11,8 +11,6 @@ import {
   Users,
   FileText,
   ShoppingBag,
-  Heart,
-  Settings,
   HandCoins,
   PiggyBank,
 } from "lucide-react";

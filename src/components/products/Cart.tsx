@@ -10,16 +10,16 @@ import {
   updateQuantity,
 } from "../../store/slices/cartSlice";
 import { useTranslation } from "react-i18next";
-import { useCurrency } from "../../hooks/useCurrency"; // 👈 Dodaj import
+import { useCurrency } from "../../hooks/useCurrency";
 
 const Cart: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { selectedCurrency, getFormattedPrice } = useCurrency(); // 👈 Dodaj useCurrency
-  const [showCurrencyWarning, setShowCurrencyWarning] = useState(false); // 👈 Stan dla ostrzeżenia
+  const { selectedCurrency, getFormattedPrice } = useCurrency();
+  const [showCurrencyWarning, setShowCurrencyWarning] = useState(false);
   const [currencyWarningConfirmed, setCurrencyWarningConfirmed] =
-    useState(false); // 👈 Stan potwierdzenia
+    useState(false);
 
   const items = useSelector((state: RootState) => state.cart.items);
   const { user } = useSelector((state: RootState) => state.auth);
@@ -265,9 +265,10 @@ const CartContent: React.FC<CartContentProps> = ({
   };
 
   // Znajdź aktualną walutę
-  const currentCurrency = availableCurrencies.find(
-    (c) => c.code === selectedCurrency,
-  );
+  // const currentCurrency = availableCurrencies.find(
+  //   (c) => c.code === selectedCurrency,
+  // );
+
   const usdCurrency = availableCurrencies.find((c) => c.code === "USD");
 
   if (items.length === 0) {

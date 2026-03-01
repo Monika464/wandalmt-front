@@ -26,9 +26,9 @@ const isAxiosError = (error: unknown): error is AxiosError => {
 };
 
 // 🔥 Helper do sprawdzania czy błąd ma response.data
-const hasResponseData = (error: any): error is { response: { data: any } } => {
-  return error?.response?.data !== undefined;
-};
+// const hasResponseData = (error: any): error is { response: { data: any } } => {
+//   return error?.response?.data !== undefined;
+// };
 
 export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
   const [file, setFile] = useState<File | null>(null);
@@ -37,7 +37,7 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
   const [createdVideoId, setCreatedVideoId] = useState<string | null>(
     existingVideoId || null,
   );
-  // 🔥 Usunięto createdBunnyGuid - nieużywane
+
   const [videoStatus, setVideoStatus] = useState<VideoStatus | null>(null);
   const [abortController, setAbortController] =
     useState<AbortController | null>(null);
@@ -181,7 +181,7 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
   };
 
   const uploadToBackend = async (
-    _videoId: string, // 🔥 Prefix z _ oznacza że jest celowo nieużywane
+    _videoId: string,
     bunnyGuid: string,
     f: File,
   ) => {
@@ -346,10 +346,10 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
   // Wyświetlanie miniaturki
   const Thumbnail = ({
     url,
-    bunnyGuid,
+    //bunnyGuid,
   }: {
     url?: string;
-    bunnyGuid: string;
+    //bunnyGuid: string;
   }) => {
     const [imgError, setImgError] = useState(false);
 

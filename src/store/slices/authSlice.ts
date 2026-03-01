@@ -5,18 +5,18 @@ import { tokenRefreshService } from "../../services/tokenRefreshService";
 
 type Role = "user" | "admin";
 
-interface RegisterData {
-  name: string;
-  surname: string;
-  email: string;
-  password: string;
-  captchaToken?: string;
-}
+// interface RegisterData {
+//   name: string;
+//   surname: string;
+//   email: string;
+//   password: string;
+//   captchaToken?: string;
+// }
 
-interface LoginData {
-  email: string;
-  password: string;
-}
+// interface LoginData {
+//   email: string;
+//   password: string;
+// }
 
 interface User {
   _id: string;
