@@ -21,8 +21,23 @@ export const requestPasswordReset = createAsyncThunk(
   async (email: string, { rejectWithValue, getState }) => {
     try {
       const state = getState() as any;
-      const lang = state.i18n?.language || "pl";
-      const res = await api.post("/auth/forgot-password", { email, lang });
+
+      console.log("🔍 State i18n:", state.i18n);
+      console.log("🔍 State auth:", state.auth);
+      console.log("🔍 State language from i18n:", state.i18n?.language);
+      console.log("🔍 State language from auth:", state.auth?.language);
+
+      const lang = state.i18n?.language || state.auth?.language || "pl";
+      console.log("Sending reset request with lang:", lang); // Debug
+      const res = await api.post(
+        "/auth/forgot-password",
+        { email },
+        {
+          headers: {
+            "Accept-Language": lang, // Dodaj nagłówek języka
+          },
+        },
+      );
       return res.data.message;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.error || "Błąd resetu hasła");
@@ -61,17 +76,27 @@ export const changeEmail = createAsyncThunk(
     try {
       const state = getState() as any;
       const token = state.auth.token;
+
+      if (!token) {
+        return rejectWithValue("Brak tokena autoryzacji");
+      }
+
+      // Pobierz język z i18n
+      const lang = state.i18n?.language || "pl";
+
       const res = await api.patch(
-        "/email/change-email",
-        { newEmail },
+        "/auth/change-email",
+        { newEmail }, // Dodaj lang do body
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Accept-Language": lang,
           },
         },
       );
       return res.data.message;
     } catch (err: any) {
+      console.error("Change email error:", err.response?.data || err.message);
       return rejectWithValue(
         err.response?.data?.error || "Błąd zmiany e-maila",
       );

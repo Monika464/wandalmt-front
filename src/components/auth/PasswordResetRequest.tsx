@@ -10,7 +10,7 @@ import { Mail, Send, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 
 const PasswordResetRequest: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { loading, error, success } = useSelector(
     (state: RootState) => state.email,
   );
@@ -38,8 +38,13 @@ const PasswordResetRequest: React.FC = () => {
     if (emailError) validateEmail(value);
   };
 
+  console.log("🔍 Current i18n language:", i18n.language);
+  console.log("🔍 Current i18n resolvedLanguage:", i18n.resolvedLanguage);
+
   const handleRequestReset = () => {
     if (!validateEmail(email)) return;
+    console.log("🔍 Sending reset request with email:", email);
+    console.log("🔍 Current language from i18n:", i18n.language);
     dispatch(requestPasswordReset(email));
   };
 

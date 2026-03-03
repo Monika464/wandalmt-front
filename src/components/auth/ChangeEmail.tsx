@@ -42,8 +42,9 @@ export const ChangeEmail: React.FC<ChangeEmailProps> = ({
     setValidationError("");
 
     const result = await dispatch(changeEmail(newEmail));
+    console.log("Change email result:", result); // Debug
     if (changeEmail.fulfilled.match(result) && onSuccess) {
-      onSuccess(); // 👈 Wywołaj onSuccess po pomyślnej zmianie
+      onSuccess();
     }
   };
 
