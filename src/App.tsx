@@ -37,9 +37,11 @@ import PanelLayout from "./layouts/PanelLayout";
 import AuthLayout from "./layouts/AuthLayout";
 import AdminOrdersSummary from "./components/orders/AdminOrdersSummary";
 import UserProfile from "./components/orders/UserProfile";
+import { useLanguageSync } from "./hooks/useLanguageSync";
 
 const App = () => {
   useAutoRefresh();
+  useLanguageSync();
 
   return (
     <BrowserRouter>

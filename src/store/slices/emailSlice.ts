@@ -34,7 +34,7 @@ export const requestPasswordReset = createAsyncThunk(
         { email },
         {
           headers: {
-            "Accept-Language": lang, // Dodaj nagłówek języka
+            "Accept-Language": lang,
           },
         },
       );

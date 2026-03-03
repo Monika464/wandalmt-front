@@ -12,6 +12,7 @@ import userprofileSlice from "./slices/userprofileSlice";
 import videoReducer from "./slices/videoSlice";
 import progressReducer from "./slices/progressSlice";
 import currencySlice from "./slices/currencySlice";
+import i18nReducer from "./slices/i18nSlice";
 
 export const store = configureStore({
   reducer: {
@@ -28,6 +29,7 @@ export const store = configureStore({
     video: videoReducer,
     progress: progressReducer,
     currency: currencySlice,
+    i18n: i18nReducer,
   },
   devTools: true,
   // devTools: {
