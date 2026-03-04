@@ -25,7 +25,7 @@ const Navbar = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
-  //const { t, i18n } = useTranslation();
+
   const { t, i18n } = useAppTranslation();
 
   const changeLanguage = (lng: string) => {
@@ -116,7 +116,7 @@ const Navbar = () => {
               )}
 
               {/* 👇 Register - pokazuj tylko dla niezalogowanych */}
-              {!user && (
+              {(!user || isAdmin) && (
                 <NavLink
                   to="/register"
                   className={({ isActive }) =>
@@ -255,7 +255,7 @@ const Navbar = () => {
               )}
 
               {/* 👇 Register - tylko dla niezalogowanych w mobile */}
-              {!user && (
+              {(!user || isAdmin) && (
                 <NavLink
                   to="/register"
                   onClick={closeMobileMenu}

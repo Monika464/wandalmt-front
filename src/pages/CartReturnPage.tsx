@@ -1,5 +1,5 @@
 // pages/CartReturnPage.tsx
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../store";
@@ -21,100 +21,89 @@ const CartReturnPage: React.FC = () => {
   const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
   const [discountAmount, setDiscountAmount] = useState<number | null>(null);
 
-  // Ref do śledzenia czy już wysłaliśmy zapytanie
-  const hasFetchedRef = useRef(false);
-  // Ref do timera
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasCheckedRef = useRef(false);
 
-  //useEffect(() => {
-  const checkPaymentStatus = useCallback(async () => {
-    // Zapobiegamy wielokrotnemu wywołaniu
-    if (hasFetchedRef.current) return;
-    const sessionId = searchParams.get("session_id");
-    const success = searchParams.get("success");
-    const canceled = searchParams.get("canceled");
-    const orderId = searchParams.get("orderId");
+  useEffect(() => {
+    if (hasCheckedRef.current) return;
+    hasCheckedRef.current = true;
 
-    if (canceled === "true") {
-      setStatus("error");
-      setMessage(t("return.paymentCancelled"));
-      return;
-    }
+    const checkPaymentStatus = async () => {
+      const sessionId = searchParams.get("session_id");
+      const success = searchParams.get("success");
+      const canceled = searchParams.get("canceled");
+      const orderId = searchParams.get("orderId");
 
-    if (success !== "true" || !sessionId || !token) {
-      setStatus("error");
-      setMessage(t("return.noSession"));
-      return;
-    }
+      console.log("Payment params:", { sessionId, success, canceled, orderId }); // Debug
 
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/api/cart-session-status?session_id=${sessionId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Accept-Language": i18n.language,
-          },
-        },
-      );
-
-      if (response.data.status === "complete") {
-        setStatus("success");
-        setMessage(response.data.message || t("return.paymentSuccess"));
-        setOrderDetails(response.data);
-
-        if (response.data.invoiceUrl) {
-          setInvoiceUrl(response.data.invoiceUrl);
-        }
-
-        if (response.data.discountApplied) {
-          setDiscountAmount(response.data.discountAmount);
-        }
-
-        localStorage.removeItem("cartCheckoutData");
-        dispatch(clearCart());
-      } else if (response.data.status === "pending") {
-        setStatus("pending");
-        setMessage(response.data.message || t("return.paymentPending"));
-      } else {
+      if (canceled === "true") {
         setStatus("error");
-        setMessage(response.data.message || t("return.paymentFailed"));
+        setMessage(t("return.paymentCancelled"));
+        return;
       }
-    } catch (err: any) {
-      console.error("Payment status error:", err);
-      setStatus("error");
-      setMessage(err.response?.data?.error || t("return.checkError"));
 
-      if (orderId) {
-        dispatch(clearCart());
-        localStorage.removeItem("cart");
+      if (success !== "true" || !sessionId || !token) {
+        setStatus("error");
+        setMessage(t("return.noSession"));
+        return;
       }
-    }
-  }, [searchParams, token, dispatch, t, i18n.language]);
-  ////
-  useEffect(() => {
-    checkPaymentStatus();
-  }, [checkPaymentStatus]);
 
-  // Timer do odświeżania - tylko raz
-  useEffect(() => {
-    // Ustawiamy timer tylko jeśli status jest "pending"
-    if (status === "pending") {
-      timerRef.current = setTimeout(() => {
-        // Resetujemy ref żeby można było ponownie sprawdzić status
-        hasFetchedRef.current = false;
-        checkPaymentStatus();
-      }, 20000);
-    }
+      try {
+        console.log("Calling API with session_id:", sessionId); // Debug
 
-    // Cleanup - ważne żeby nie było wycieków pamięci
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
+        const response = await axios.get(
+          `http://localhost:3000/api/cart-session-status?session_id=${sessionId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Accept-Language": i18n.language,
+            },
+          },
+        );
+
+        console.log("API Response:", response.data); // Debug - sprawdź czy invoiceUrl jest w odpowiedzi
+
+        if (response.data.status === "complete") {
+          setStatus("success");
+          setMessage(response.data.message || t("return.paymentSuccess"));
+          setOrderDetails(response.data);
+
+          // Sprawdź czy invoiceUrl istnieje w odpowiedzi
+          if (response.data.invoiceUrl) {
+            console.log("Invoice URL found:", response.data.invoiceUrl); // Debug
+            setInvoiceUrl(response.data.invoiceUrl);
+          } else {
+            console.log("No invoiceUrl in response"); // Debug
+          }
+
+          if (response.data.discountApplied) {
+            setDiscountAmount(response.data.discountAmount);
+          }
+
+          localStorage.removeItem("cartCheckoutData");
+          dispatch(clearCart());
+        } else if (response.data.status === "pending") {
+          setStatus("pending");
+          setMessage(response.data.message || t("return.paymentPending"));
+        } else {
+          setStatus("error");
+          setMessage(response.data.message || t("return.paymentFailed"));
+        }
+      } catch (err: any) {
+        console.error("Payment status error:", err);
+        setStatus("error");
+        setMessage(err.response?.data?.error || t("return.checkError"));
+
+        if (orderId) {
+          dispatch(clearCart());
+          localStorage.removeItem("cart");
+        }
       }
     };
-  }, [status, checkPaymentStatus]); // Zależność od statusu
-  ////
+
+    checkPaymentStatus();
+  }, [searchParams, token, dispatch, t, i18n.language]);
+
+  // Reszta JSX bez zmian...
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
@@ -261,8 +250,8 @@ const CartReturnPage: React.FC = () => {
 
 export default CartReturnPage;
 
-// // pages/CartReturnPage.tsx
-// import React, { useEffect, useState } from "react";
+// pages/CartReturnPage.tsx
+// import React, { useCallback, useEffect, useRef, useState } from "react";
 // import { useNavigate, useSearchParams } from "react-router-dom";
 // import { useDispatch, useSelector } from "react-redux";
 // import type { RootState } from "../store";
@@ -284,73 +273,75 @@ export default CartReturnPage;
 //   const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
 //   const [discountAmount, setDiscountAmount] = useState<number | null>(null);
 
-//   useEffect(() => {
-//     const checkPaymentStatus = async () => {
-//       const sessionId = searchParams.get("session_id");
-//       const success = searchParams.get("success");
-//       const canceled = searchParams.get("canceled");
-//       const orderId = searchParams.get("orderId");
+//   //useEffect(() => {
+//   const checkPaymentStatus = useCallback(async () => {
+//     // Zapobiegamy wielokrotnemu wywołaniu
 
-//       if (canceled === "true") {
-//         setStatus("error");
-//         setMessage(t("return.paymentCancelled"));
-//         return;
-//       }
+//     const sessionId = searchParams.get("session_id");
+//     const success = searchParams.get("success");
+//     const canceled = searchParams.get("canceled");
+//     const orderId = searchParams.get("orderId");
 
-//       if (success !== "true" || !sessionId || !token) {
-//         setStatus("error");
-//         setMessage(t("return.noSession"));
-//         return;
-//       }
+//     if (canceled === "true") {
+//       setStatus("error");
+//       setMessage(t("return.paymentCancelled"));
+//       return;
+//     }
 
-//       try {
-//         const response = await axios.get(
-//           `http://localhost:3000/api/cart-session-status?session_id=${sessionId}`,
-//           {
-//             headers: {
-//               Authorization: `Bearer ${token}`,
-//               "Accept-Language": i18n.language,
-//             },
+//     if (success !== "true" || !sessionId || !token) {
+//       setStatus("error");
+//       setMessage(t("return.noSession"));
+//       return;
+//     }
+
+//     try {
+//       const response = await axios.get(
+//         `http://localhost:3000/api/cart-session-status?session_id=${sessionId}`,
+//         {
+//           headers: {
+//             Authorization: `Bearer ${token}`,
+//             "Accept-Language": i18n.language,
 //           },
-//         );
+//         },
+//       );
 
-//         if (response.data.status === "complete") {
-//           setStatus("success");
-//           setMessage(response.data.message || t("return.paymentSuccess"));
-//           setOrderDetails(response.data);
+//       if (response.data.status === "complete") {
+//         setStatus("success");
+//         setMessage(response.data.message || t("return.paymentSuccess"));
+//         setOrderDetails(response.data);
 
-//           if (response.data.invoiceUrl) {
-//             setInvoiceUrl(response.data.invoiceUrl);
-//           }
-
-//           if (response.data.discountApplied) {
-//             setDiscountAmount(response.data.discountAmount);
-//           }
-
-//           localStorage.removeItem("cartCheckoutData");
-//           dispatch(clearCart());
-//         } else if (response.data.status === "pending") {
-//           setStatus("pending");
-//           setMessage(response.data.message || t("return.paymentPending"));
-//         } else {
-//           setStatus("error");
-//           setMessage(response.data.message || t("return.paymentFailed"));
+//         if (response.data.invoiceUrl) {
+//           setInvoiceUrl(response.data.invoiceUrl);
 //         }
-//       } catch (err: any) {
-//         console.error("Payment status error:", err);
+
+//         if (response.data.discountApplied) {
+//           setDiscountAmount(response.data.discountAmount);
+//         }
+
+//         localStorage.removeItem("cartCheckoutData");
+//         dispatch(clearCart());
+//       } else if (response.data.status === "pending") {
+//         setStatus("pending");
+//         setMessage(response.data.message || t("return.paymentPending"));
+//       } else {
 //         setStatus("error");
-//         setMessage(err.response?.data?.error || t("return.checkError"));
-
-//         if (orderId) {
-//           dispatch(clearCart());
-//           localStorage.removeItem("cart");
-//         }
+//         setMessage(response.data.message || t("return.paymentFailed"));
 //       }
-//     };
+//     } catch (err: any) {
+//       console.error("Payment status error:", err);
+//       setStatus("error");
+//       setMessage(err.response?.data?.error || t("return.checkError"));
 
-//     checkPaymentStatus();
+//       if (orderId) {
+//         dispatch(clearCart());
+//         localStorage.removeItem("cart");
+//       }
+//     }
 //   }, [searchParams, token, dispatch, t, i18n.language]);
 //   ////
+//   useEffect(() => {
+//     checkPaymentStatus();
+//   }, [checkPaymentStatus]);
 
 //   return (
 //     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -497,6 +488,8 @@ export default CartReturnPage;
 // };
 
 // export default CartReturnPage;
+
+/////////////////////////////////////////
 // // // pages/CartReturnPage.tsx
 // // import React, { useEffect, useState } from "react";
 // // import { useNavigate, useSearchParams } from "react-router-dom";

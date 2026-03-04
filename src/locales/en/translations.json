@@ -208,7 +208,9 @@
   },
   "languages": {
     "pl": "Polish",
-    "en": "English"
+    "en": "English",
+    "polish": "Polish",
+    "english": "English"
   },
   "pagination": {
     "previous": "Previous",

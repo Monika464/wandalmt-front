@@ -277,7 +277,9 @@
   },
   "languages": {
     "pl": "polskim",
-    "en": "angielskim"
+    "en": "angielskim",
+    "polish": "polski",
+    "english": "angielski"
   },
 
   "form": {
