@@ -8,8 +8,10 @@ export function setStore(store: any) {
   storeInstance = store;
 }
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 const api = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: API_URL,
   withCredentials: true,
 });
 
@@ -27,7 +29,7 @@ api.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 console.log("API baseURL:", api.defaults.baseURL);

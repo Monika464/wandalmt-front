@@ -10,6 +10,7 @@
     "searchPlaceholder": "Szukaj...",
     "actions": "Akcje",
     "confirm": "Potwierdź",
+    "noData": "Brak danych",
     "error": "Błąd",
     "locale": "pl",
     "login": "Zaloguj się",

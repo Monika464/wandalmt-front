@@ -87,7 +87,7 @@ const CreateProductForm: React.FC = () => {
       />
       <input
         type="text"
-        placeholder={t("form.imageUrlPlaceholder")} // 👈 Tłumaczenie
+        placeholder={t("form.imageUrlPlaceholder")}
         value={imageUrl}
         onChange={(e) => setImageUrl(e.target.value)}
         className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"

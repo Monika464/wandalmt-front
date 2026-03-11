@@ -35,8 +35,10 @@ const ProductList: React.FC = () => {
     .filter((product) => product.language === i18n.language)
     .filter(
       (product) =>
-        product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description?.toLowerCase().includes(searchTerm.toLowerCase()),
+        (product.title &&
+          product.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (product.description &&
+          product.description.toLowerCase().includes(searchTerm.toLowerCase())),
     );
 
   if (loading) {

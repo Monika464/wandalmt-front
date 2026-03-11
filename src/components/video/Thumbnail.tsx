@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-// 🔥 Dodaj interfejs dla props
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 interface ThumbnailProps {
   bunnyVideoId: string;
   width?: number;
@@ -29,7 +30,7 @@ function Thumbnail({
     const fetchThumbnail = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/api/stream/proxy-thumbnail/${bunnyVideoId}?width=${width}&height=${height}`,
+          `${API_BASE_URL}/api/stream/proxy-thumbnail/${bunnyVideoId}?width=${width}&height=${height}`,
           { responseType: "blob" },
         );
 

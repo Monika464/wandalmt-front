@@ -12,7 +12,7 @@ import { Eye } from "lucide-react";
 
 const ProductList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const [searchTerm, setSearchTerm] = useState(""); // 👈 Dodaj stan dla wyszukiwania
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { products, loading, error } = useSelector(
     (state: RootState) => state.productsPublic,
@@ -25,13 +25,14 @@ const ProductList: React.FC = () => {
     dispatch(fetchProducts({}));
   }, [dispatch]);
 
-  // Filtrowanie po języku i wyszukiwaniu
   const filteredProducts = products
     .filter((product) => product.language === i18n.language)
     .filter(
       (product) =>
-        product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description?.toLowerCase().includes(searchTerm.toLowerCase()),
+        (product.title &&
+          product.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (product.description &&
+          product.description.toLowerCase().includes(searchTerm.toLowerCase())),
     );
 
   if (loading) return <p>{t("product.loading")}</p>;
