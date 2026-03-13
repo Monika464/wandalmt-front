@@ -69,7 +69,7 @@ const UserProductsDashboard: React.FC = () => {
     navigate(`/user/products/${productId}`);
   };
 
-  // 1. Sprawdź czy użytkownik jest zalogowany
+  // 1. Check if the user is logged in
   if (!user) {
     return (
       <div className="max-w-6xl mx-auto p-4">
@@ -89,7 +89,7 @@ const UserProductsDashboard: React.FC = () => {
     );
   }
 
-  // 2. Stan ładowania
+  // 2. Loading state
   if (ordersLoading) {
     return (
       <div className="max-w-6xl mx-auto p-4">
@@ -104,7 +104,7 @@ const UserProductsDashboard: React.FC = () => {
     );
   }
 
-  // 3. Błąd
+  // 3. Error
   if (ordersError) {
     return (
       <div className="max-w-6xl mx-auto p-4">
@@ -133,7 +133,7 @@ const UserProductsDashboard: React.FC = () => {
     );
   }
 
-  // 4. Brak produktów
+  // 4. No products
   if (purchasedProducts.length === 0) {
     return (
       <div className="max-w-6xl mx-auto p-4">
@@ -156,10 +156,9 @@ const UserProductsDashboard: React.FC = () => {
     );
   }
 
-  // 5. Główny widok z produktami
+  // 5. Main view with products
   return (
     <div className="max-w-6xl mx-auto p-4">
-      {/* Nagłówek z przyciskiem odświeżania */}
       <header className="mb-8 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">
@@ -188,7 +187,7 @@ const UserProductsDashboard: React.FC = () => {
         </button>
       </header>
 
-      {/* Grid produktów */}
+      {/* Grid of products */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {purchasedProducts.map((product) => (
           <div

@@ -7,13 +7,18 @@ interface BunnyPlayerProps {
   onEnded?: () => void;
 }
 
-//export default function BunnyPlayer({ guid, libraryId }: Props) {
 const BunnyPlayer: React.FC<BunnyPlayerProps> = ({
   guid,
   libraryId,
   className = "",
   onEnded,
 }) => {
+  // console.log(
+  //   "Initializing BunnyPlayer with guid:",
+  //   guid,
+  //   "and libraryId:",
+  //   libraryId,
+  // );
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
@@ -27,10 +32,8 @@ const BunnyPlayer: React.FC<BunnyPlayerProps> = ({
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      // Sprawdź czy wiadomość pochodzi z Bunny.net
       if (event.origin !== "https://player.mediadelivery.net") return;
 
-      // Sprawdź typ wiadomości
       if (event.data?.event === "ended" && onEnded) {
         console.log("🎬 Video ended, calling onEnded");
         onEnded();
@@ -64,8 +67,6 @@ const BunnyPlayer: React.FC<BunnyPlayerProps> = ({
           }
           break;
         case "timeupdate":
-          // Możesz śledzić postęp
-          // console.log("Current time:", data.currentTime);
           break;
         default:
           break;

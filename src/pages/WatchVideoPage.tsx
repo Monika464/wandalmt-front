@@ -13,7 +13,6 @@ export default function WatchPage() {
 
   useEffect(() => {
     if (videoId) dispatch(fetchVideoUrl(videoId));
-    //console.log("Video ID from params watchcompo:", videoId);
   }, [dispatch, videoId]);
 
   if (loading) return <p>Ładowanie wideo...</p>;
@@ -28,28 +27,3 @@ export default function WatchPage() {
     />
   );
 }
-
-// import React, { useEffect } from "react";
-// import { useDispatch, useSelector } from "react-redux";
-// import { fetchVideoUrl } from "../store/slices/videoSlice";
-// import VideoPlayer from "../components/video/VideoPlayer";
-
-// export default function WatchVideo() {
-//   const dispatch = useDispatch<any>();
-//   const url = useSelector((state: any) => state.video.url);
-//   const loading = useSelector((state: any) => state.video.loading);
-
-//   useEffect(() => {
-//     dispatch(fetchVideoUrl("VIDEO_GUID_TUTAJ"));
-//   }, []);
-
-//   if (loading) return <p>Ładuję video...</p>;
-//   if (!url) return <p>Brak video</p>;
-
-//   return (
-//     <div>
-//       <h2>Odtwarzacz</h2>
-//       <VideoPlayer src={url} />
-//     </div>
-//   );
-// }

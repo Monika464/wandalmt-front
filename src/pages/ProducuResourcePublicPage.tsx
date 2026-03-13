@@ -61,7 +61,7 @@ export default function ProductResourcePage() {
     );
   }
 
-  // Sprawdzenie zgodności języka
+  // Language compatibility check
   const languageMismatch =
     product.language && product.language !== i18n.language;
 
@@ -79,7 +79,7 @@ export default function ProductResourcePage() {
         <span>{t("product.backToList")}</span>
       </button>
 
-      {/* Ostrzeżenie o niezgodności języka */}
+      {/* Language compatibility warning */}
       {languageMismatch && (
         <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg mb-6">
           <p className="text-sm">
@@ -93,10 +93,10 @@ export default function ProductResourcePage() {
         </div>
       )}
 
-      {/* Główna karta produktu */}
+      {/* Main product card */}
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
         <div className="md:flex">
-          {/* Zdjęcie produktu */}
+          {/* Product image */}
           <div className="md:w-1/3">
             <img
               src={product.imageUrl}
@@ -105,7 +105,7 @@ export default function ProductResourcePage() {
             />
           </div>
 
-          {/* Informacje o produkcie */}
+          {/* Product information */}
           <div className="p-6 md:w-2/3">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3">
               {product.title}
@@ -113,7 +113,7 @@ export default function ProductResourcePage() {
 
             <p className="text-gray-600 mb-4">{product.description}</p>
 
-            {/* Metadane produktu */}
+            {/* Product metadata */}
             <div className="flex flex-wrap gap-4 mb-4">
               <div className="flex items-center gap-2 text-gray-500">
                 <BookOpen size={18} />
@@ -132,12 +132,12 @@ export default function ProductResourcePage() {
               )}
             </div>
 
-            {/* Cena */}
+            {/* Price */}
             <div className="text-3xl font-bold text-blue-600 mb-6">
               {formatCurrency(product.price)}
             </div>
 
-            {/* Przyciski akcji */}
+            {/* Action buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
               <button
                 onClick={() => setShowResource(!showResource)}
@@ -156,7 +156,7 @@ export default function ProductResourcePage() {
         </div>
       </div>
 
-      {/* Sekcja zasobów */}
+      {/* Resources section */}
       {showResource && (
         <div className="mt-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">
@@ -175,131 +175,3 @@ export default function ProductResourcePage() {
     </div>
   );
 }
-
-// import { useParams, useNavigate } from "react-router-dom"; // 👈 Dodaj useNavigate
-// import { useSelector, useDispatch } from "react-redux";
-// import { useEffect, useState } from "react";
-// import { fetchProductById } from "../store/slices/productPublicSlice";
-// import { fetchResourceByProductId } from "../store/slices/resourcePublicSlice";
-
-// import type { Product, IResource } from "../types/types";
-// import type { RootState, AppDispatch } from "../store";
-// import { formatCurrency } from "../utils/formatcurremcy";
-// import ViewPublicResource from "../components/resources/ViewPublicResource";
-// import AddToCartButton from "../components/orders/AddToCartButton";
-
-// export default function ProductResourcePage() {
-//   const { productId } = useParams<{ productId: string }>();
-//   const navigate = useNavigate(); // 👈 Hook do nawigacji
-//   const [showResource, setShowResource] = useState(false);
-
-//   const dispatch = useDispatch<AppDispatch>();
-
-//   const product: Product | undefined = useSelector((state: RootState) =>
-//     productId ? state.productsPublic.byId[productId] : undefined,
-//   );
-
-//   const resource: IResource | undefined = useSelector((state: RootState) =>
-//     productId
-//       ? state.resourcesPublic.resourcesByProductId[productId]
-//       : undefined,
-//   );
-
-//   useEffect(() => {
-//     if (!productId) return;
-
-//     const fetchData = async () => {
-//       try {
-//         await Promise.all([
-//           dispatch(fetchProductById(productId)),
-//           dispatch(fetchResourceByProductId(productId)),
-//         ]);
-//       } catch (error) {
-//         console.error("❌ Error in initial fetch:", error);
-//       }
-//     };
-
-//     fetchData();
-//   }, [productId, dispatch]);
-
-//   if (!product) {
-//     return <p>Nie znaleziono produktu</p>;
-//   }
-
-//   return (
-//     <>
-//       <div className="p-4">
-//         {/* 👇 Strzałka powrotu do listy produktów */}
-//         <button
-//           onClick={() => navigate("/products")}
-//           className="flex items-center gap-2 text-blue-500 hover:text-blue-700 mb-4 transition-colors"
-//         >
-//           <svg
-//             className="w-5 h-5"
-//             fill="none"
-//             stroke="currentColor"
-//             viewBox="0 0 24 24"
-//           >
-//             <path
-//               strokeLinecap="round"
-//               strokeLinejoin="round"
-//               strokeWidth={2}
-//               d="M10 19l-7-7m0 0l7-7m-7 7h18"
-//             />
-//           </svg>
-//           <span>Powrót do listy produktów</span>
-//         </button>
-
-//         <h1 className="text-xl font-bold">Produkt: {product.title}</h1>
-//         <img
-//           src={product.imageUrl}
-//           alt={product.title}
-//           className="h-40 object-cover rounded-md"
-//         />
-//         <p className="text-sm text-gray-600">{product.description}</p>
-//         <p className="font-bold">{formatCurrency(product.price)}</p>
-
-//         <div className="mt-4">
-//           <h2 className="text-lg">Zawartość kursu:</h2>
-//           {resource ? (
-//             <div>
-//               <p>
-//                 <strong>Tytuł:</strong> {resource.title}
-//               </p>
-//               <p>
-//                 <strong>Opis:</strong> {resource.content}
-//               </p>
-//             </div>
-//           ) : (
-//             <div>
-//               <p className="text-yellow-600">Produkt w przygotowaniu</p>
-//             </div>
-//           )}
-
-//           {/* 👇 Flex container z przyciskami - Pokaż zawartość po lewej, Add to Cart po prawej */}
-//           <div className="mt-4 flex justify-between items-center gap-4">
-//             <button
-//               onClick={() => setShowResource(!showResource)}
-//               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-//             >
-//               {showResource ? "Ukryj rozdziały" : "Pokaż rozdziały"}
-//             </button>
-
-//             <AddToCartButton product={product} />
-//           </div>
-
-//           {/* 👇 Warunkowe wyświetlanie zasobu */}
-//           {showResource && (
-//             <div className="mt-4 p-4 border rounded-lg bg-gray-100">
-//               {resource ? (
-//                 <ViewPublicResource resource={resource} />
-//               ) : (
-//                 "loading.."
-//               )}
-//             </div>
-//           )}
-//         </div>
-//       </div>
-//     </>
-//   );
-// }

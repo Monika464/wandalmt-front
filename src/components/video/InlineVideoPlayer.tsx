@@ -69,7 +69,7 @@ const InlineVideoPlayer: React.FC<InlineVideoPlayerProps> = ({
         isFullscreen ? "fixed inset-0 z-50 rounded-none" : ""
       }`}
     >
-      {/* Odtwarzacz video */}
+      {/* Video player */}
       <div className="relative pt-[56.25%] bg-black">
         <div className="absolute inset-0">
           <BunnyPlayer
@@ -81,7 +81,7 @@ const InlineVideoPlayer: React.FC<InlineVideoPlayerProps> = ({
         </div>
       </div>
 
-      {/* Tytuł i podstawowe kontrolki */}
+      {/* Title and basic controls */}
       {(title || showControls) && (
         <div className="bg-gray-900 text-white p-4">
           {title && (

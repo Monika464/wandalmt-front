@@ -44,6 +44,16 @@
     "email": "contact@boxingonline.eu",
     "phone": "+48 602 372 784"
   },
+  "contact": {
+    "backButton": "Back",
+    "title": "Contact Support",
+    "description": "Having payment issues or questions about your order? Contact us:",
+    "email": "Email",
+    "hours": "Working hours",
+    "workingHours": "Mon-Fri: 9:00 AM - 5:00 PM",
+    "paymentHelp": "Payment assistance",
+    "orderNumber": "Have your order number ready:"
+  },
   "register": {
     "title": "Register",
     "nameLabel": "First Name",
