@@ -117,7 +117,8 @@
     "hideChapters": "Hide chapters",
     "chapters": "chapters",
     "noContent": "No content available for this product",
-    "languageMismatch": "Product is not available in the selected language"
+    "languageMismatch": "Product is not available in the selected language",
+    "language": "Product language"
   },
   "cart": {
     "addToCart": "Add to cart",

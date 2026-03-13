@@ -134,7 +134,7 @@ export default function ProductResourcePage() {
 
             {/* Cena */}
             <div className="text-3xl font-bold text-blue-600 mb-6">
-              {formatCurrency(product.price)} {t("product.currency")}
+              {formatCurrency(product.price)}
             </div>
 
             {/* Przyciski akcji */}

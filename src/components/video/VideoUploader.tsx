@@ -47,7 +47,8 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
   const [videoTitle, setVideoTitle] = useState<string>("");
 
   const pollingIntervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
+  // Dodaj ref do liczenia błędów (na górze komponentu, obok innych useRef)
+  const errorCountRef = useRef(0);
   const handleCancelUpload = () => {
     if (abortController) {
       abortController.abort();
@@ -58,23 +59,31 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
     }
   };
 
-  // Funkcja do sprawdzania statusu
   const checkStatus = async (videoId: string) => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/vbp/stream/webhook/bunny/${videoId}`,
+        `${API_BASE_URL}/api/stream/direct-status/${videoId}`,
+        // `${API_BASE_URL}/vbp/stream/webhook/bunny/${videoId}`,
         { timeout: 10000 },
       );
 
       if (response.data.success && response.data.video) {
         const newStatus = response.data.video;
+        console.log("🔍 Raw response data:", response.data);
+        console.log("🔍 New status from backend:", newStatus);
         setVideoStatus(newStatus);
         console.log("Polled video status:", newStatus);
 
-        // FIX: Jeśli progress 100%, ustaw status "ready"
+        // 🔥 NOWA LOGIKA ZATRZYMANIA
+        const shouldStop =
+          newStatus.status === "ready" ||
+          newStatus.status === "error" ||
+          (newStatus.status === "processing" &&
+            newStatus.processingProgress >= 100);
+
+        // Ustal status wyświetlany
         const displayStatus =
-          newStatus.status === "processing" &&
-          newStatus.processingProgress >= 100
+          shouldStop && newStatus.processingProgress >= 100
             ? "ready"
             : newStatus.status;
 
@@ -89,55 +98,142 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
           case "ready":
             setStatus("✅ Video gotowe do odtwarzania");
             stopPolling();
-
-            // Powiadom parent component
             if (onUploaded && newStatus.bunnyGuid && newStatus._id) {
               onUploaded(newStatus._id, newStatus.bunnyGuid);
             }
             break;
           case "error":
             setStatus(`❌ Błąd: ${newStatus.errorMessage || "Nieznany błąd"}`);
-            stopPolling();
+            if (shouldStop) stopPolling();
             break;
         }
       }
     } catch (error) {
       console.error("Error checking status:", error);
+      // 🔥 W razie błędu – zatrzymaj polling po 3 błędach
+      if (errorCountRef.current >= 3) {
+        stopPolling();
+        setStatus("❌ Błąd połączenia – zatrzymano sprawdzanie");
+      }
+      errorCountRef.current++;
     }
   };
 
-  // Rozpocznij polling statusu
+  // Rozpocznij polling statusu (POPRAWIONY)
   const startStatusPolling = (videoId: string) => {
     stopPolling();
-    checkStatus(videoId);
+    errorCountRef.current = 0; // reset licznika błędów
 
-    pollingIntervalRef.current = setInterval(() => {
-      checkStatus(videoId);
-    }, 3000);
+    let attempts = 0;
+    const MAX_ATTEMPTS = 120;
+
+    const pollWithLimit = async () => {
+      attempts++;
+      if (attempts > MAX_ATTEMPTS) {
+        console.log("⏱️ Limit prób osiągnięty – zatrzymuję polling");
+        stopPolling();
+        setStatus("❌ Przekroczono czas oczekiwania na przetworzenie");
+        return;
+      }
+      await checkStatus(videoId);
+    };
+
+    // Uruchom pierwsze sprawdzenie
+    pollWithLimit();
+
+    // Ustaw interwał
+    pollingIntervalRef.current = setInterval(pollWithLimit, 3000);
   };
 
-  // Zatrzymaj polling
+  // Zatrzymaj polling (POPRAWIONY – dodaj reset licznika)
   const stopPolling = () => {
     if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current);
       pollingIntervalRef.current = null;
     }
+    errorCountRef.current = 0; // reset licznika błędów
   };
 
-  // Cleanup przy unmount
-  useEffect(() => {
-    return () => {
-      stopPolling();
-    };
-  }, []);
+  // Funkcja do sprawdzania statusu
+  // const checkStatus = async (videoId: string) => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${API_BASE_URL}/vbp/stream/webhook/bunny/${videoId}`,
+  //       { timeout: 10000 },
+  //     );
+
+  //     if (response.data.success && response.data.video) {
+  //       const newStatus = response.data.video;
+  //       setVideoStatus(newStatus);
+  //       console.log("Polled video status:", newStatus);
+
+  //       // FIX: Jeśli progress 100%, ustaw status "ready"
+  //       const displayStatus =
+  //         newStatus.status === "processing" &&
+  //         newStatus.processingProgress >= 100
+  //           ? "ready"
+  //           : newStatus.status;
+
+  //       // Aktualizuj status w UI
+  //       switch (displayStatus) {
+  //         case "uploading":
+  //           setStatus(`📤 Wysyłanie: ${newStatus.processingProgress}%`);
+  //           break;
+  //         case "processing":
+  //           setStatus(`🔄 Przetwarzanie: ${newStatus.processingProgress}%`);
+  //           break;
+  //         case "ready":
+  //           setStatus("✅ Video gotowe do odtwarzania");
+  //           stopPolling();
+
+  //           // Powiadom parent component
+  //           if (onUploaded && newStatus.bunnyGuid && newStatus._id) {
+  //             onUploaded(newStatus._id, newStatus.bunnyGuid);
+  //           }
+  //           break;
+  //         case "error":
+  //           setStatus(`❌ Błąd: ${newStatus.errorMessage || "Nieznany błąd"}`);
+  //           stopPolling();
+  //           break;
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error("Error checking status:", error);
+  //   }
+  // };
+
+  // // Rozpocznij polling statusu
+  // const startStatusPolling = (videoId: string) => {
+  //   stopPolling();
+  //   checkStatus(videoId);
+
+  //   pollingIntervalRef.current = setInterval(() => {
+  //     checkStatus(videoId);
+  //   }, 3000);
+  // };
+
+  // // Zatrzymaj polling
+  // const stopPolling = () => {
+  //   if (pollingIntervalRef.current) {
+  //     clearInterval(pollingIntervalRef.current);
+  //     pollingIntervalRef.current = null;
+  //   }
+  // };
+
+  // // Cleanup przy unmount
+  // useEffect(() => {
+  //   return () => {
+  //     stopPolling();
+  //   };
+  // }, []);
 
   // Jeśli mamy existingVideoId, rozpocznij polling
-  useEffect(() => {
-    if (existingVideoId && !createdVideoId) {
-      setCreatedVideoId(existingVideoId);
-      startStatusPolling(existingVideoId);
-    }
-  }, [existingVideoId, createdVideoId]);
+  // useEffect(() => {
+  //   if (existingVideoId && !createdVideoId) {
+  //     setCreatedVideoId(existingVideoId);
+  //     startStatusPolling(existingVideoId);
+  //   }
+  // }, [existingVideoId, createdVideoId]);
 
   const createVideo = async (title?: string) => {
     setStatus("Tworzenie obiektu wideo...");
@@ -308,7 +404,7 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
 
       setCreatedVideoId(videoId);
       startStatusPolling(videoId);
-
+      errorCountRef.current = 0;
       // 2. Wyślij plik
       await uploadWithRetry(videoId, bunnyGuid, file, 2);
 

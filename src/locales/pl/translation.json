@@ -117,7 +117,8 @@
     "hideChapters": "Ukryj rozdziały",
     "chapters": "rozdziałów",
     "noContent": "Brak zawartości dla tego produktu",
-    "languageMismatch": "Produkt nie jest dostępny w wybranym języku"
+    "languageMismatch": "Produkt nie jest dostępny w wybranym języku",
+    "language": "Język produktu"
   },
   "cart": {
     "addToCart": "Dodaj do koszyka",

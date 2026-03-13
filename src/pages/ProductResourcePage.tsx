@@ -58,7 +58,7 @@ export default function ProductResourcePage() {
   }, [productId, dispatch, refreshView, i18n.language]);
 
   if (!product) {
-    return <p>{t("product.notFound")}</p>; // 👈 Tłumaczenie
+    return <p>{t("product.notFound")}</p>;
   }
 
   // Sprawdź czy język produktu zgadza się z aktualnym językiem
@@ -96,7 +96,7 @@ export default function ProductResourcePage() {
 
       {/* Cena produktu */}
       <p className="font-bold text-lg text-blue-600 mb-2">
-        {formatCurrency(product.price)} {t("product.currency")}
+        {formatCurrency(product.price)}
       </p>
 
       {/* Informacja o języku produktu */}
