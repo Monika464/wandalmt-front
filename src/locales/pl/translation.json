@@ -280,8 +280,8 @@
   "languages": {
     "pl": "polskim",
     "en": "angielskim",
-    "polish": "polski",
-    "english": "angielski"
+    "polish": "PL",
+    "english": "EN"
   },
 
   "form": {

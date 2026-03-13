@@ -210,8 +210,8 @@
   "languages": {
     "pl": "Polish",
     "en": "English",
-    "polish": "Polish",
-    "english": "English"
+    "polish": "PL",
+    "english": "EN"
   },
   "pagination": {
     "previous": "Previous",
