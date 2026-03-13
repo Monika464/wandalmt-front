@@ -4,7 +4,7 @@ import type { CartItem } from "../../types/types";
 
 interface CartState {
   items: CartItem[];
-  lastCleared: string | null; // Dodajemy timestamp ostatniego czyszczenia
+  lastCleared: string | null;
 }
 
 const loadCartFromStorage = (): CartItem[] => {
@@ -176,6 +176,13 @@ const cartSlice = createSlice({
 
       console.log("🔄 CartSlice: Cart fully reset");
     },
+
+    // 🔥 NOWA AKCJA – usuwa produkt całkowicie, niezależnie od ilości
+    removeItemCompletely: (state, action: PayloadAction<string>) => {
+      state.items = state.items.filter((i) => i._id !== action.payload);
+      saveCartToStorage(state.items);
+      console.log(`🗑️ Product ${action.payload} completely removed from cart`);
+    },
   },
 });
 
@@ -203,6 +210,7 @@ export const {
   updateQuantity,
   restoreCart,
   resetCart,
+  removeItemCompletely,
 } = cartSlice.actions;
 
 export default cartSlice.reducer;
