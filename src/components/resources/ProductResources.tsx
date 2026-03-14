@@ -30,6 +30,8 @@ const ProductResources: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { t } = useTranslation();
 
+  console.log("InlineVideoPlayer render - productId:", productId);
+
   // Stany
   const [currentChapter, setCurrentChapter] = useState<Chapter | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
@@ -125,17 +127,16 @@ const ProductResources: React.FC = () => {
     waitForProgress();
   }, [resource, productId, user?._id, isChapterCompleted]);
 
-  // Funkcje obsługi
-  const handleVideoEnded = () => {
-    if (!currentChapter || !productId || !user?._id) return;
+  //// Funkcje obsługi
+  // const handleVideoEnded = () => {
+  //   if (!currentChapter || !productId || !user?._id) return;
 
-    completeChapter(productId, currentChapter._id);
-    toast.success(
-      t("resources.chapterCompleted", { title: currentChapter.title }),
-    );
-  };
+  //   completeChapter(productId, currentChapter._id);
+  //   toast.success(
+  //     t("resources.chapterCompleted", { title: currentChapter.title }),
+  //   );
+  // };
 
-  // Funkcje nawigacji
   const handleNextChapter = () => {
     if (!currentChapter || chapters.length === 0) return;
 
@@ -168,8 +169,125 @@ const ProductResources: React.FC = () => {
     }
   };
 
+  const handleVideoEnded = async () => {
+    console.log("🎯 handleVideoEnded CALLED!", {
+      currentChapter: currentChapter?._id,
+      productId,
+      userId: user?._id,
+    });
+
+    //if (!currentChapter || !productId || !user?._id) return;
+    if (!currentChapter || !productId || !user?._id) {
+      console.log("❌ Brakuje danych:", { currentChapter, productId, user });
+      return;
+    }
+
+    // Sprawdź czy już nie jest ukończony
+    const alreadyCompleted = isChapterCompleted(productId, currentChapter._id);
+    console.log("📊 Czy już ukończony?", alreadyCompleted);
+
+    if (alreadyCompleted) {
+      console.log("⚠️ Rozdział już ukończony, pomijam");
+      return;
+    }
+
+    console.log("✅ Oznaczam rozdział jako ukończony");
+    completeChapter(productId, currentChapter._id);
+
+    console.log("🔄 Przeładowuję postęp");
+    await loadProgress(productId);
+
+    console.log("✅ Toast");
+    toast.success(
+      t("resources.chapterCompleted", { title: currentChapter.title }),
+    );
+
+    // Przejdź do następnego
+    const currentIndex = chapters.findIndex(
+      (ch) => ch._id === currentChapter._id,
+    );
+    console.log("📊 Current index:", currentIndex, "z", chapters.length);
+
+    if (currentIndex < chapters.length - 1) {
+      console.log("⏭️ Przechodzę do następnego za 500ms");
+      setTimeout(() => {
+        handleNextChapter();
+      }, 500);
+    } else {
+      console.log("🏁 To był ostatni rozdział");
+    }
+  };
+
+  //completeChapter(productId, currentChapter._id);
+  // 🔥 Zabezpieczenie przed wielokrotnym wywołaniem
+  //   if (isChapterCompleted(productId, currentChapter._id)) {
+  //     console.log("Chapter already completed, skipping");
+  //     return;
+  //   }
+
+  //   await loadProgress(productId);
+  //   toast.success(
+  //     t("resources.chapterCompleted", { title: currentChapter.title }),
+  //   );
+
+  //   // 🔥 Automatycznie przejdź do następnego rozdziału po zakończeniu
+  //   const currentIndex = chapters.findIndex(
+  //     (ch) => ch._id === currentChapter._id,
+  //   );
+  //   if (currentIndex < chapters.length - 1) {
+  //     // Małe opóźnienie, żeby nie przerywać animacji
+  //     setTimeout(() => {
+  //       handleNextChapter();
+  //     }, 500);
+  //   }
+  // };
+
+  // 🔥 Oblicz indeksy dla przycisków
+  const currentIndex = currentChapter
+    ? chapters.findIndex((ch) => ch._id === currentChapter._id)
+    : -1;
+
+  const isFirstChapter = currentIndex === 0;
+  const isLastChapter = currentIndex === chapters.length - 1;
+
+  // // Funkcje nawigacji
+  // const handleNextChapter = () => {
+  //   if (!currentChapter || chapters.length === 0) return;
+
+  //   const currentIndex = chapters.findIndex(
+  //     (ch) => ch._id === currentChapter._id,
+  //   );
+  //   if (currentIndex < chapters.length - 1) {
+  //     const nextChapter = chapters[currentIndex + 1];
+  //     setCurrentChapter(nextChapter);
+
+  //     // Automatycznie oznacz obecny rozdział jako ukończony
+  //     if (
+  //       user?._id &&
+  //       !isChapterCompleted(productId || "", currentChapter._id)
+  //     ) {
+  //       completeChapter(productId || "", currentChapter._id);
+  //     }
+  //   }
+  // };
+
+  // const handlePrevChapter = () => {
+  //   if (!currentChapter || chapters.length === 0) return;
+
+  //   const currentIndex = chapters.findIndex(
+  //     (ch) => ch._id === currentChapter._id,
+  //   );
+  //   if (currentIndex > 0) {
+  //     const prevChapter = chapters[currentIndex - 1];
+  //     setCurrentChapter(prevChapter);
+  //   }
+  // };
+
   const handleChapterClick = (chapter: Chapter) => {
     setCurrentChapter(chapter);
+    if (productId && user?._id) {
+      loadProgress(productId);
+    }
   };
 
   // Calculate overall progress
@@ -260,6 +378,8 @@ const ProductResources: React.FC = () => {
                 onNext={handleNextChapter}
                 onPrev={handlePrevChapter}
                 onEnded={handleVideoEnded}
+                isFirstVideo={isFirstChapter}
+                isLastVideo={isLastChapter}
                 className="w-full"
               />
             ) : (
@@ -417,13 +537,13 @@ const ProductResources: React.FC = () => {
                           )}
                         </div>
 
-                        {/* Linia łącząca */}
+                        {/* Line */}
                         {index < chapters.length - 1 && (
                           <div className="absolute left-1/2 top-full h-4 w-0.5 bg-gray-200 -translate-x-1/2"></div>
                         )}
                       </div>
 
-                      {/* Treść rozdziału */}
+                      {/* Chapter content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start mb-1">
                           <h4
