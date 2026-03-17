@@ -8,6 +8,7 @@
     "dev-force": "node ./node_modules/.bin/vite --force",
     "dev-work": "/home/monia/.nvm/versions/node/v24.14.0/bin/node ./node_modules/.bin/vite --force",
     "build": "tsc -b && vite build",
+    "build-prod": "npx -p node@20.20.0 -c \"node node_modules/.bin/vite build\"",
     "lint": "eslint .",
     "preview": "vite preview",
     "start": "vite --host",

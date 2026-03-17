@@ -1,6 +1,6 @@
 // components/video/VideoUploader.tsx
 import axios, { AxiosError } from "axios";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 

@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import api from "../../utils/api";
 
 interface Discount {
   _id: string;
@@ -34,6 +35,11 @@ interface Pagination {
 const DiscountManager: React.FC = () => {
   const { token } = useSelector((state: RootState) => state.auth);
   const { t } = useTranslation();
+
+  const API_BASE_URL =
+    window.location.hostname === "localhost"
+      ? "http://localhost:3000"
+      : "https://api.club.boxingonline.eu";
 
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,10 +83,17 @@ const DiscountManager: React.FC = () => {
         ...(search && { search }),
         ...(isActiveFilter !== "all" && { isActive: isActiveFilter }),
       });
+      const response = await axios.get(
+        `${API_BASE_URL}/admin/discounts?${params}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
-      const response = await axios.get(`/admin/discounts?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      //const response = await api.get(`/admin/discounts?${params}`);
+      // const response = await axios.get(`/admin/discounts?${params}`, {
+      //   headers: { Authorization: `Bearer ${token}` },
+      // });
 
       setDiscounts(response.data.discounts);
       setPagination(response.data.pagination);
@@ -131,7 +144,10 @@ const DiscountManager: React.FC = () => {
       //   },
       // );
 
-      await axios.post("/admin/discounts", payload, {
+      // await axios.post("/admin/discounts", payload, {
+      //   headers: { Authorization: `Bearer ${token}` },
+      // });
+      await axios.post(`${API_BASE_URL}/admin/discounts`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -183,9 +199,16 @@ const DiscountManager: React.FC = () => {
         validUntil: formData.validUntil || null,
       };
 
-      await axios.put(`/admin/discounts/${editingDiscount._id}`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.put(
+        `${API_BASE_URL}/admin/discounts/${editingDiscount._id}`,
+        payload,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      // await axios.put(`/admin/discounts/${editingDiscount._id}`, payload, {
+      //   headers: { Authorization: `Bearer ${token}` },
+      // });
 
       toast.success(t("discount.updateSuccess"));
       setShowEditForm(false);
@@ -202,9 +225,12 @@ const DiscountManager: React.FC = () => {
     if (!window.confirm(t("discount.confirmDelete"))) return;
 
     try {
-      await axios.delete(`/admin/discounts/${id}`, {
+      await axios.delete(`${API_BASE_URL}/admin/discounts/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      // await axios.delete(`/admin/discounts/${id}`, {
+      //   headers: { Authorization: `Bearer ${token}` },
+      // });
 
       toast.success(t("discount.deleteSuccess"));
       fetchDiscounts();
@@ -217,10 +243,15 @@ const DiscountManager: React.FC = () => {
   const toggleStatus = async (discount: Discount) => {
     try {
       await axios.put(
-        `/admin/discounts/${discount._id}`,
+        `${API_BASE_URL}/admin/discounts/${discount._id}`,
         { isActive: !discount.isActive },
         { headers: { Authorization: `Bearer ${token}` } },
       );
+      // await axios.put(
+      //   `/admin/discounts/${discount._id}`,
+      //   { isActive: !discount.isActive },
+      //   { headers: { Authorization: `Bearer ${token}` } },
+      // );
 
       toast.success(
         t(`discount.${!discount.isActive ? "activated" : "deactivated"}`),
