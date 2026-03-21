@@ -19,7 +19,7 @@ const PanelLayout = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const { t } = useTranslation(); // 👈 Inicjalizacja
 
-  // Menu dla admina
+  // Admin menu
   const adminMenu = [
     {
       path: "/adminpanel",
@@ -59,7 +59,7 @@ const PanelLayout = () => {
     },
   ];
 
-  // Menu dla użytkownika
+  // User menu
   const userMenu = [
     {
       path: "/userpanel",
@@ -71,12 +71,7 @@ const PanelLayout = () => {
       icon: ShoppingBag,
       label: t("panel.user.orders"),
     },
-    // { path: "/user/products", icon: Heart, label: t("panel.user.myProducts") },
-    // {
-    //   path: "/userpanel/settings",
-    //   icon: Settings,
-    //   label: t("panel.user.settings"),
-    // },
+
     { path: "/userprofile", icon: Users, label: t("panel.user.profile") },
   ];
 

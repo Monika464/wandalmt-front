@@ -69,12 +69,11 @@ const CartReturnPage: React.FC = () => {
           setMessage(response.data.message || t("return.paymentSuccess"));
           setOrderDetails(response.data);
 
-          // Sprawdź czy invoiceUrl istnieje w odpowiedzi
           if (response.data.invoiceUrl) {
-            console.log("Invoice URL found:", response.data.invoiceUrl); // Debug
+            //console.log("Invoice URL found:", response.data.invoiceUrl); // Debug
             setInvoiceUrl(response.data.invoiceUrl);
           } else {
-            console.log("No invoiceUrl in response"); // Debug
+            console.log("No invoiceUrl in response");
           }
 
           if (response.data.discountApplied) {
@@ -105,7 +104,6 @@ const CartReturnPage: React.FC = () => {
     checkPaymentStatus();
   }, [searchParams, token, dispatch, t, i18n.language]);
 
-  // Reszta JSX bez zmian...
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
@@ -125,7 +123,6 @@ const CartReturnPage: React.FC = () => {
             </h2>
             <p className="text-gray-700 mb-6">{message}</p>
 
-            {/* Szczegóły zamówienia */}
             {orderDetails && (
               <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
                 <h3 className="font-semibold mb-2">

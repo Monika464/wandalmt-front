@@ -17,19 +17,19 @@ export const useAuth = () => {
   const isCheckingRef = useRef(false);
 
   useEffect(() => {
-    // Zapobiegaj wielokrotnemu uruchamianiu
+    // Prevent multiple restarts
     if (isCheckingRef.current) return;
     isCheckingRef.current = true;
 
-    // Sprawdź czy użytkownik jest zalogowany
+    // Check if user is logged in
     if (!user || !token) {
       isCheckingRef.current = false;
       return;
     }
 
-    // Sprawdź czy token wygasł
+    // Check if token has expired
     if (expiresAt && Date.now() > expiresAt) {
-      console.log("Token wygasł - automatyczne wylogowanie");
+      console.log("Token has expired - automatic logout");
       if (user.role === "admin") {
         dispatch(logoutAdmin());
       } else {
@@ -39,19 +39,19 @@ export const useAuth = () => {
       return;
     }
 
-    // Jeśli token jest ważny, ustaw timer odświeżania
+    // If the token is valid, set a refresh timer
     if (expiresAt && expiresAt > Date.now()) {
-      // Ustaw timer na odświeżenie tokena
+      // Set timer for token refresh
       tokenRefreshService.setupTokenRefresh(expiresAt, () => {
-        // Callback wywoływany gdy token ma być odświeżony
+        // Callback called when token needs to be refreshed
         if (user && token) {
           dispatch(refreshToken())
             .unwrap()
             .then(() => {
-              console.log("Token odświeżony automatycznie");
+              console.log("Token refreshed automatically");
             })
             .catch((error) => {
-              console.error("Nie udało się odświeżyć tokena:", error);
+              console.error("Failed to refresh token:", error);
             });
         }
       });
@@ -65,7 +65,7 @@ export const useAuth = () => {
     };
   }, [dispatch, expiresAt, user, token, status]);
 
-  // Dodatkowe funkcje zwracane przez hook
+  // Additional functions returned by hook
   const isTokenValid = expiresAt ? Date.now() < expiresAt : false;
   const timeUntilExpiry = expiresAt ? Math.max(0, expiresAt - Date.now()) : 0;
 

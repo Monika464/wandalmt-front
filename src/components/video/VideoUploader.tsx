@@ -229,48 +229,6 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
       throw error;
     }
   };
-  // const createVideo = async (title?: string) => {
-  //   setStatus(t("videoUploader.creatingVideo"));
-  //   const videoTitle = title || file?.name || "untitled";
-
-  //   try {
-  //     const response = await axios.post(
-  //       `${API_BASE_URL}/api/stream/create-video`,
-  //       {
-  //         title: videoTitle,
-  //         description: t("videoUploader.uploadDescription", {
-  //           date: new Date().toLocaleString(),
-  //         }),
-  //         fileName: file?.name,
-  //       },
-  //       { timeout: 300000 },
-  //     );
-
-  //     if (response.data?.video) {
-  //       response.data.video.title = response.data.video.title || videoTitle;
-  //     }
-
-  //     return response.data;
-  //   } catch (error) {
-  //     // Improved error handling with type guard
-  //     if (isAxiosError(error)) {
-  //       console.error("Server error:", error.response?.data);
-
-  //       if (error.response?.status === 429) {
-  //         throw new Error(t("videoUploader.tooManyRequests"));
-  //       }
-  //       if (error.code === "ECONNABORTED") {
-  //         throw new Error(t("videoUploader.requestTimeout"));
-  //       }
-  //     }
-
-  //     if (axios.isCancel(error)) {
-  //       throw new Error(t("videoUploader.requestCancelled"));
-  //     }
-
-  //     throw error;
-  //   }
-  // };
 
   const uploadToBackend = async (
     _videoId: string,
@@ -293,18 +251,8 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
     const fd = new FormData();
     fd.append("file", f);
 
-    // Log what we're sending
-    // console.log("FormData contents:");
-    // for (let pair of fd.entries()) {
-    //   console.log(pair[0], pair[1]);
-    // }
-
     // Get token from localStorage
     const token = localStorage.getItem("token");
-    // console.log("Token present:", !!token);
-
-    // console.log("Uploading to Bunny with GUID:", bunnyGuid);
-    // console.log("File:", f.name, f.size, f.type);
 
     try {
       const response = await axios.post(
@@ -368,70 +316,6 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
       throw error;
     }
   };
-  // const uploadToBackend = async (
-  //   _videoId: string,
-  //   bunnyGuid: string,
-  //   f: File,
-  // ) => {
-  //   setStatus(t("videoUploader.sendingFile"));
-  //   const controller = new AbortController();
-  //   setAbortController(controller);
-
-  //   const fd = new FormData();
-  //   fd.append("file", f);
-
-  //   // Get token from localStorage
-  //   const token = localStorage.getItem("token");
-
-  //   try {
-  //     const response = await axios.post(
-  //       `${API_BASE_URL}/api/stream/upload/${bunnyGuid}`,
-  //       fd,
-  //       {
-  //         timeout: 600000,
-  //         signal: controller.signal,
-  //         headers: {
-  //           "Content-Type": "multipart/form-data",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         onUploadProgress: (progressEvent) => {
-  //           if (progressEvent.total) {
-  //             const percent = Math.round(
-  //               (progressEvent.loaded * 100) / progressEvent.total,
-  //             );
-  //             setStatus(t("videoUploader.uploadingPercent", { percent }));
-  //           }
-  //         },
-  //       },
-  //     );
-
-  //     setAbortController(null);
-  //     return response.data;
-  //   } catch (error) {
-  //     setAbortController(null);
-
-  //     // Better error logging
-  //     if (axios.isAxiosError(error)) {
-  //       console.error("Upload error details:", {
-  //         status: error.response?.status,
-  //         data: error.response?.data,
-  //         headers: error.response?.headers,
-  //       });
-
-  //       // Show specific error message from server
-  //       const serverMessage =
-  //         error.response?.data?.message ||
-  //         error.response?.data?.error ||
-  //         error.message;
-  //       throw new Error(`${t("videoUploader.uploadFailed")}: ${serverMessage}`);
-  //     }
-
-  //     if (axios.isCancel(error)) {
-  //       throw new Error(t("videoUploader.uploadCancelled"));
-  //     }
-  //     throw error;
-  //   }
-  // };
 
   const extractVideoData = (created: any) => {
     if (!created) return { videoId: null, bunnyGuid: null };

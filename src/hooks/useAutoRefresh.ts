@@ -15,7 +15,7 @@ export const useAutoRefresh = () => {
       dispatch(clearAutoRefresh());
     }
 
-    // Cleanup przy odmontowaniu komponentu
+    // when unmounting a component
     return () => {
       dispatch(clearAutoRefresh());
     };

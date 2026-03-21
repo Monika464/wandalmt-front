@@ -5,7 +5,7 @@ const AuthLayout = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="w-full max-w-md">
-        {/* Logo z linkiem do strony głównej */}
+        {/* Logo with link to home page */}
         <div className="text-center mb-8">
           <Link
             to="/"
@@ -19,7 +19,7 @@ const AuthLayout = () => {
           </Link>
         </div>
 
-        {/* Kontener na formularz (login/register) */}
+        {/* Container for the form (login/register) */}
         <Outlet />
       </div>
     </div>

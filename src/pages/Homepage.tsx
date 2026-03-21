@@ -6,10 +6,6 @@ const Homepage = () => {
       <div>
         <ProductListPublicComponent />
       </div>
-      {/* <div>
-        <ProductList />
-      </div>
-      <LogoutButton /> */}
     </div>
   );
 };

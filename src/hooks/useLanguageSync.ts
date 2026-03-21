@@ -10,9 +10,9 @@ export const useLanguageSync = () => {
   const dispatch = useDispatch();
   const reduxLanguage = useSelector((state: RootState) => state.i18n?.language);
 
-  // Synchronizuj i18n -> Redux
+  // Sync i18n -> Redux
   useEffect(() => {
-    // Inicjalna synchronizacja
+    // Initial synchronization
     if (i18n.language && (!reduxLanguage || i18n.language !== reduxLanguage)) {
       console.log(
         "🔄 Initial language sync from i18n to Redux:",
@@ -21,7 +21,7 @@ export const useLanguageSync = () => {
       dispatch(setLanguage(i18n.language));
     }
 
-    // Nasłuchuj zmian w i18n
+    // Listen for changes in i18n
     const handleLanguageChange = (lng: string) => {
       console.log("🔄 Language changed in i18n, updating Redux:", lng);
       dispatch(setLanguage(lng));
@@ -34,7 +34,7 @@ export const useLanguageSync = () => {
     };
   }, [i18n, dispatch, reduxLanguage]);
 
-  // Synchronizuj Redux -> i18n
+  // Sync Redux -> i18n
   useEffect(() => {
     if (reduxLanguage && reduxLanguage !== i18n.language) {
       console.log("🔄 Redux language changed, updating i18n:", reduxLanguage);

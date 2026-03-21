@@ -4,45 +4,45 @@ import axios from "axios";
 export interface ExchangeRate {
   currency: string;
   code: string;
-  mid: number; // kurs średni
+  mid: number; // average course
 }
 
 export const currencyService = {
-  // Pobierz kursy z NBP
+  // Get exchange rates from NBP
   async getRatesFromNBP(): Promise<ExchangeRate[]> {
     try {
       const response = await axios.get(
         "https://api.nbp.pl/api/exchangerates/tables/A?format=json",
       );
 
-      // console.log("Pobrane kursy z NBP:", response.data[0].rates);
+      // console.log("exchange rates NBP:", response.data[0].rates);
       return response.data[0].rates;
     } catch (error) {
-      console.error("Błąd pobierania kursów z NBP:", error);
+      console.error("Error fetching exchange rates from NBP:", error);
       throw error;
     }
   },
 
-  // Przelicz cenę z PLN na wybraną walutę
+  // Convert the price from PLN to the selected currency
   convertPrice(
     priceInPLN: number,
     rate: number,
     targetCurrency: string,
   ): number {
     // console.log(
-    //   `Przeliczanie ceny: ${priceInPLN} PLN na ${targetCurrency} przy kursie ${rate}`,
+    // `Price conversion: ${priceInPLN} PLN to ${targetCurrency} at the exchange rate ${rate}`,
     // );
-    // Dla PLN zwracamy oryginalną cenę
+    // For PLN, we return the original price
     if (targetCurrency === "PLN") {
       return priceInPLN;
     }
 
-    // Dla innych walut dzielimy przez kurs (bo kurs NBP to ile PLN za 1 jednostkę waluty)
-    // Np. kurs USD = 4.0 oznacza, że 1$ = 4zł, więc 100zł = 100/4 = 25$
+    // For other currencies, divide by the exchange rate (because the NBP exchange rate is how much PLN per 1 currency unit).
+    // For example, the USD exchange rate = 4.0 means that 1 $ = 4 PLN, so 100 PLN = 100/4 = 25 $
     return priceInPLN / rate;
   },
 
-  // Dodatkowa funkcja do formatowania ceny z symbolem
+  // Additional function for formatting the price with a symbol
   formatPrice(price: number, currencySymbol: string): string {
     return `${price.toFixed(2)} ${currencySymbol}`;
   },

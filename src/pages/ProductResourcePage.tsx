@@ -61,7 +61,7 @@ export default function ProductResourcePage() {
     return <p>{t("product.notFound")}</p>;
   }
 
-  // Sprawdź czy język produktu zgadza się z aktualnym językiem
+  // Check if the product language matches the current language
   if (product.language && product.language !== i18n.language) {
     return (
       <div className="p-4">
@@ -79,27 +79,27 @@ export default function ProductResourcePage() {
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
-      {/* Nagłówek z tytułem produktu */}
+      {/* Header with product title */}
       <h1 className="text-2xl font-bold mb-4">
         {t("resource.productTitle")}: {product.title}
       </h1>
 
-      {/* Obrazek produktu */}
+      {/* Product Image */}
       <img
         src={product.imageUrl}
         alt={product.title}
         className="w-full max-w-md h-64 object-cover rounded-md mb-4"
       />
 
-      {/* Opis produktu */}
+      {/* Product Description */}
       <p className="text-gray-600 mb-2">{product.description}</p>
 
-      {/* Cena produktu */}
+      {/* Product Price */}
       <p className="font-bold text-lg text-blue-600 mb-2">
         {formatCurrency(product.price)}
       </p>
 
-      {/* Informacja o języku produktu */}
+      {/* Information about product language */}
       <div className="mt-2 text-sm bg-gray-50 p-2 rounded inline-block">
         <span className="text-gray-500">{t("product.language")}: </span>
         <span className="font-medium">
@@ -109,7 +109,7 @@ export default function ProductResourcePage() {
         </span>
       </div>
 
-      {/* Sekcja zasobów */}
+      {/* Section for resources */}
       <div className="mt-6">
         <h2 className="text-xl font-semibold mb-3">{t("resource.title")}:</h2>
 
@@ -124,7 +124,7 @@ export default function ProductResourcePage() {
               {resource.description}
             </p>
 
-            {/* Informacja o języku zasobu */}
+            {/* Information about resource language */}
             <div className="mt-2 text-sm bg-gray-50 p-2 rounded inline-block">
               <span className="text-gray-500">{t("resource.language")}: </span>
               <span className="font-medium">
@@ -134,7 +134,7 @@ export default function ProductResourcePage() {
               </span>
             </div>
 
-            {/* Przyciski akcji dla zasobu */}
+            {/* Action buttons for the resource */}
             <div className="mt-4">
               {!editingResource && !viewingResource && (
                 <div className="flex gap-2">
@@ -174,7 +174,7 @@ export default function ProductResourcePage() {
           </div>
         )}
 
-        {/* Formularz tworzenia zasobu */}
+        {/* Resource creation form */}
         {creatingResourceProduct?._id === product._id && (
           <div className="mt-4 p-4 border rounded-lg bg-gray-50">
             <CreateResourceForm
@@ -188,7 +188,7 @@ export default function ProductResourcePage() {
           </div>
         )}
 
-        {/* Formularz edycji zasobu */}
+        {/* Resource editing form */}
         {editingResource && editingResource.productId === product._id && (
           <div className="mt-4 p-4 border rounded-lg bg-gray-50">
             <EditResourceForm
@@ -201,7 +201,7 @@ export default function ProductResourcePage() {
           </div>
         )}
 
-        {/* Podgląd zasobu */}
+        {/* Resource preview */}
         {viewingResource && viewingResource.productId === product._id && (
           <div className="mt-4 p-4 border rounded-lg bg-gray-100">
             <ViewResource
@@ -214,204 +214,3 @@ export default function ProductResourcePage() {
     </div>
   );
 }
-
-// import { useParams } from "react-router-dom";
-// import { useSelector, useDispatch } from "react-redux";
-// import { useEffect, useState } from "react";
-// import { fetchProductById } from "../store/slices/productSlice";
-// import { fetchResourceByProductId } from "../store/slices/resourceSlice";
-// import { useTranslation } from "react-i18next";
-// import type { Product, IResource } from "../types/types";
-// import type { RootState, AppDispatch } from "../store";
-// import { formatCurrency } from "../utils/formatcurremcy";
-// import ViewResource from "../components/resources/ViewResource";
-// import EditResourceForm from "../components/resources/EditResourceForm";
-// import CreateResourceForm from "../components/resources/CreateResourceForm";
-
-// export default function ProductResourcePage() {
-//   const { productId } = useParams<{ productId: string }>();
-//   const { i18n,t } = useTranslation();
-
-//   const dispatch = useDispatch<AppDispatch>();
-
-//   const product: Product | undefined = useSelector((state: RootState) =>
-//     productId ? state.products.byId[productId] : undefined,
-//   );
-
-//   const resource: IResource | undefined = useSelector((state: RootState) =>
-//     productId ? state.resources.resourcesByProductId[productId] : undefined,
-//   );
-
-//   //console.log("resurce from state:", resource);
-
-//   const [creatingResourceProduct, setCreatingResourceProduct] =
-//     useState<Product | null>(null);
-//   const [editingResource, setEditingResource] = useState<IResource | null>(
-//     null,
-//   );
-//   const [viewingResource, setViewingResource] = useState<IResource | null>(
-//     null,
-//   );
-//   const [refreshView, setRefreshView] = useState(false);
-
-//   useEffect(() => {
-//     if (!productId) return;
-
-//     const fetchData = async () => {
-//       try {
-//         await Promise.all([
-//           dispatch(fetchProductById(productId)),
-
-//           dispatch(
-//             fetchResourceByProductId({
-//               productId,
-//               language: i18n.language as "pl" | "en",
-//             }),
-//           ),
-//           // .unwrap()
-//           // .then(() => console.log("✅ thunk resolved"))
-//           // .catch((e) => console.error("❌ thunk rejected", e)),
-
-//           //dispatch(fetchResources(productId)),
-//         ]);
-//         //console.log("✅ Initial data fetch completed");
-//       } catch (error) {
-//         console.error("❌ Error in initial fetch:", error);
-//       }
-//     };
-
-//     fetchData();
-//   }, [productId, dispatch, refreshView, i18n.language]);
-
-//   if (!product) {
-//     //console.log("❌ NO PRODUCT FOUND");
-//     return <p>Nie znaleziono produktu</p>;
-//   }
-
-//   // 🔥 Sprawdź czy język produktu zgadza się z aktualnym językiem
-//   if (product.language && product.language !== i18n.language) {
-//     return (
-//       <div className="p-4">
-//         <p className="text-yellow-600">
-//           Ten produkt jest dostępny tylko w języku{" "}
-//           {product.language === "pl" ? "polskim" : "angielskim"}. Zmień język w
-//           nawigacji, aby go zobaczyć.
-//         </p>
-//       </div>
-//     );
-//   }
-
-//   //console.log("📦 Product:", product);
-//   console.log("📦 Resource:", resource);
-//   return (
-//     <div className="p-4">
-//       <h1 className="text-xl font-bold">Produkt: {product.title}</h1>
-//       <img
-//         src={product.imageUrl}
-//         alt={product.title}
-//         className="h-40 object-cover rounded-md"
-//       />
-//       <p className="text-sm text-gray-600">{product.description}</p>
-//       <p className="font-bold">{formatCurrency(product.price)}</p>
-
-//       {/* 🔥 Informacja o języku produktu */}
-//       <div className="mt-2 text-sm">
-//         <span className="text-gray-500">Język produktu: </span>
-//         <span className="font-medium">
-//           {product.language === "pl" ? "🇵🇱 Polski" : "🇬🇧 English"}
-//         </span>
-//       </div>
-
-//       <div className="mt-4">
-//         <h2 className="text-lg">Zasób:</h2>
-//         {resource ? (
-//           <div>
-//             <p>
-//               <strong>Tytuł:</strong> {resource.title}
-//             </p>
-//             <p>
-//               <strong>Opis:</strong> {resource.description}
-//             </p>
-
-//             {/* 🔥 Informacja o języku resource */}
-//             <div className="mt-1 text-sm">
-//               <span className="text-gray-500">Język zasobu: </span>
-//               <span className="font-medium">
-//                 {resource.language === "pl" ? "🇵🇱 Polski" : "🇬🇧 English"}
-//               </span>
-//             </div>
-//             <div className="mt-2">
-//               {!editingResource && !viewingResource && (
-//                 <>
-//                   <button
-//                     onClick={() => setEditingResource(resource)}
-//                     className="px-3 py-1 bg-purple-500 text-white rounded mr-2"
-//                   >
-//                     Edytuj zasób
-//                   </button>
-//                   <button
-//                     onClick={() => setViewingResource(resource)}
-//                     className="px-3 py-1 bg-blue-500 text-white rounded"
-//                   >
-//                     Pokaż zasób
-//                   </button>
-//                 </>
-//               )}
-//               {(editingResource || viewingResource) && (
-//                 <p className="text-gray-500 text-sm italic">
-//                   {editingResource
-//                     ? "Tryb edycji aktywny"
-//                     : "Podgląd zasobu aktywny"}
-//                 </p>
-//               )}
-//             </div>
-//           </div>
-//         ) : (
-//           <div>
-//             <p className="text-yellow-600">Brak zasobu dla tego produktu</p>
-//             <button
-//               onClick={() => setCreatingResourceProduct(product)}
-//               className="px-3 py-1 bg-green-500 text-white rounded mt-2"
-//             >
-//               Dodaj zasób
-//             </button>
-//           </div>
-//         )}
-
-//         {creatingResourceProduct?._id === product._id && (
-//           <div className="mt-4 p-4 border rounded-lg bg-gray-50">
-//             <CreateResourceForm
-//               productId={creatingResourceProduct._id}
-//               onClose={() => setCreatingResourceProduct(null)}
-//               onSuccess={async () => {
-//                 setCreatingResourceProduct(null);
-//                 setRefreshView((prev) => !prev);
-//               }}
-//             />
-//           </div>
-//         )}
-
-//         {editingResource && editingResource.productId === product._id && (
-//           <div className="mt-4 p-4 border rounded-lg bg-gray-50">
-//             <EditResourceForm
-//               resource={editingResource}
-//               onClose={() => {
-//                 setEditingResource(null);
-//                 setRefreshView((prev) => !prev);
-//               }}
-//             />
-//           </div>
-//         )}
-
-//         {viewingResource && viewingResource.productId === product._id && (
-//           <div className="mt-4 p-4 border rounded-lg bg-gray-100">
-//             <ViewResource
-//               resource={viewingResource}
-//               onClose={() => setViewingResource(null)}
-//             />
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }

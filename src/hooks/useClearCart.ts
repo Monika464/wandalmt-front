@@ -9,13 +9,13 @@ export const useClearCart = () => {
   const clearCartAfterPurchase = useCallback(async () => {
     console.log("🛒 useClearCart: Clearing cart after successful purchase");
 
-    // 1. Wyczyść Redux state
+    // 1. Clear Redux state
     dispatch(clearCart());
 
-    // 2. Dodatkowe czyszczenie dla pewności
+    // 2. Extra cleaning to be sure
     setTimeout(() => {
       try {
-        // Usuń wszystkie klucze związane z koszykiem
+        // Delete all keys related to the basket
         const cartRelatedKeys = [];
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
@@ -34,7 +34,7 @@ export const useClearCart = () => {
       }
     }, 100);
 
-    // 3. Zwróć promise dla async operations
+    // 3. Return a promise for async operations
     return Promise.resolve();
   }, [dispatch]);
 

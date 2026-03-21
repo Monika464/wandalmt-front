@@ -6,7 +6,7 @@ import type { AppDispatch } from "../store";
 
 export default function ResourceEditPage() {
   const { resourceId } = useParams<{ resourceId: string }>();
-  //const dispatch = useDispatch();
+
   const useAppDispatch = () => useDispatch<AppDispatch>();
   const dispatch = useAppDispatch();
 
@@ -24,7 +24,7 @@ export default function ResourceEditPage() {
     dispatch(
       editResource({
         id: resource._id,
-        resourceData: { title: "Nowy tytuł", content: resource.content },
+        resourceData: { title: "New title", content: resource.content },
       }),
     );
   };

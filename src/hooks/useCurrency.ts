@@ -33,7 +33,6 @@ export const useCurrency = () => {
     return currencyService.formatPrice(convertedPrice, currency.symbol);
   };
 
-  // DODAJEMY TĘ FUNKCJĘ - to jest to czego szukasz!
   const formatPrice = (priceInPLN: number): string => {
     return getFormattedPrice(priceInPLN);
   };
@@ -45,6 +44,6 @@ export const useCurrency = () => {
     setCurrency: (code: string) => dispatch(setCurrency(code)),
     getConvertedPrice,
     getFormattedPrice,
-    formatPrice, // TERAZ TO DZIAŁA!
+    formatPrice,
   };
 };
