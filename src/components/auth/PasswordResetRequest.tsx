@@ -38,13 +38,9 @@ const PasswordResetRequest: React.FC = () => {
     if (emailError) validateEmail(value);
   };
 
-  console.log("🔍 Current i18n language:", i18n.language);
-  console.log("🔍 Current i18n resolvedLanguage:", i18n.resolvedLanguage);
-
   const handleRequestReset = () => {
     if (!validateEmail(email)) return;
-    console.log("🔍 Sending reset request with email:", email);
-    console.log("🔍 Current language from i18n:", i18n.language);
+
     dispatch(requestPasswordReset(email));
   };
 
@@ -190,59 +186,3 @@ const PasswordResetRequest: React.FC = () => {
 };
 
 export default PasswordResetRequest;
-
-// import { useEffect, useState } from "react";
-// import { useDispatch, useSelector } from "react-redux";
-// import {
-//   clearEmailMessages,
-//   requestPasswordReset,
-// } from "../../store/slices/emailSlice";
-// import type { RootState, AppDispatch } from "../../store";
-
-// const PasswordResetRequest: React.FC = () => {
-//   const dispatch = useDispatch<AppDispatch>();
-//   const { loading, error, success } = useSelector(
-//     (state: RootState) => state.email,
-//   );
-
-//   const [email, setEmail] = useState("");
-
-//   const handleRequestReset = () => {
-//     if (!email) return;
-//     dispatch(requestPasswordReset(email));
-//   };
-
-//   useEffect(() => {
-//     if (success || error) {
-//       setTimeout(() => dispatch(clearEmailMessages()), 3000);
-//     }
-//   }, [success, error, dispatch]);
-
-//   return (
-//     <div>
-//       <h2>Reset hasła</h2>
-
-//       <input
-//         placeholder="Podaj email"
-//         value={email}
-//         onChange={(e) => setEmail(e.target.value)}
-//       />
-
-//       <button onClick={handleRequestReset} disabled={loading}>
-//         Wyślij reset hasła
-//       </button>
-
-//       {loading && <p>Ładowanie...</p>}
-//       {error && (
-//         <p style={{ color: "red" }}>
-//           {error === "User not found"
-//             ? "Nie ma takiego maila w naszej bazie"
-//             : error}
-//         </p>
-//       )}
-//       {success && <p style={{ color: "green" }}>Email został wysłany!</p>}
-//     </div>
-//   );
-// };
-
-// export default PasswordResetRequest;

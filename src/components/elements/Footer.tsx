@@ -10,7 +10,7 @@ const Footer = () => {
     <footer className="bg-gray-800 text-white">
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Kolumna 1 - O nas */}
+          {/* Column 1 - About us */}
           <div>
             <h3 className="text-lg font-bold mb-4">
               {t("footer.companyName")}
@@ -20,7 +20,7 @@ const Footer = () => {
             <p className="text-gray-300 text-sm">{t("footer.phone")}</p>
           </div>
 
-          {/* Kolumna 2 - Linki */}
+          {/* Column 2 - Links */}
           <div>
             <h3 className="text-lg font-bold mb-4">{t("footer.about")}</h3>
             <ul className="space-y-2">
@@ -43,9 +43,11 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Kolumna 3 - Informacje prawne */}
+          {/* Column 3 - Legal Information */}
           <div>
-            <h3 className="text-lg font-bold mb-4">Informacje</h3>
+            <h3 className="text-lg font-bold mb-4">
+              {t("footer.legalInformation")}
+            </h3>
             <ul className="space-y-2">
               <li>
                 <Link
@@ -66,9 +68,11 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Kolumna 4 - Social media (opcjonalnie) */}
+          {/* Column 4 - Social media (optional) */}
           <div>
-            <h3 className="text-lg font-bold mb-4">Social media</h3>
+            <h3 className="text-lg font-bold mb-4">
+              {t("footer.socialMedia")}
+            </h3>
             <div className="flex space-x-4">
               {/* Tutaj możesz dodać ikony social mediów */}
             </div>

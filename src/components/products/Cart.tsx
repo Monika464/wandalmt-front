@@ -30,14 +30,14 @@ const Cart: React.FC = () => {
     error: ordersError,
   } = useSelector((state: RootState) => state.orders);
 
-  // Resetuj potwierdzenie gdy waluta się zmienia
+  //Reset confirmation when currency changes
   useEffect(() => {
     if (selectedCurrency !== "PLN") {
       setCurrencyWarningConfirmed(false);
     }
   }, [selectedCurrency]);
 
-  // Ładuj zamówienia TYLKO jeśli użytkownik jest zalogowany
+  // Load orders ONLY if user is logged in
   useEffect(() => {
     if (user) {
       dispatch(fetchUserOrders());
@@ -65,13 +65,13 @@ const Cart: React.FC = () => {
   };
 
   const handleCheckout = () => {
-    // Jeśli niezalogowany, przekieruj do logowania z powrotem do koszyka
+    // If not logged in, redirect to login back to cart
     if (!user) {
       navigate("/login?redirect=/cart");
       return;
     }
 
-    // Jeśli wybrano USD i nie potwierdzono ostrzeżenia, pokaż ostrzeżenie
+    // If USD is selected and warning is not confirmed, show warning
     if (selectedCurrency !== "PLN" && !currencyWarningConfirmed) {
       setShowCurrencyWarning(true);
       return;
@@ -80,9 +80,9 @@ const Cart: React.FC = () => {
     navigate("/cart/checkout");
   };
 
-  // Sprawdź posiadane produkty TYLKO dla zalogowanych użytkowników
+  // Check your products ONLY for logged in users
   const alreadyOwnedProducts = React.useMemo(() => {
-    // Jeśli użytkownik niezalogowany, nie ma sensu sprawdzać
+    // If user is not logged in, there's no sense in checking
     if (!user || !Array.isArray(userOrders) || !Array.isArray(items)) {
       return [];
     }
@@ -105,7 +105,7 @@ const Cart: React.FC = () => {
     });
   }, [userOrders, items, user]);
 
-  // BŁĄD - pokazuj tylko jeśli użytkownik zalogowany i jest błąd
+  // ERROR - show only if the user is logged in and there is an error
   if (user && ordersError) {
     return (
       <div className="max-w-4xl mx-auto p-4">
@@ -136,7 +136,7 @@ const Cart: React.FC = () => {
     );
   }
 
-  // Ładowanie - tylko dla zalogowanych
+  // Loading - only for logged in users
   if (user && ordersLoading) {
     return (
       <div className="max-w-4xl mx-auto p-4">
@@ -148,7 +148,7 @@ const Cart: React.FC = () => {
     );
   }
 
-  // Ostrzeżenie o posiadanych produktach - tylko dla zalogowanych
+  // Warning about owned products - only for logged in users
   if (user && !ordersLoading && alreadyOwnedProducts.length > 0) {
     return (
       <div className="max-w-4xl mx-auto p-4">
@@ -268,14 +268,7 @@ const CartContent: React.FC<CartContentProps> = ({
   const handleSwitchToPLN = () => {
     setCurrencyWarningConfirmed(false);
     setShowCurrencyWarning(false);
-    // Tutaj możesz dodać logikę zmiany waluty na PLN
-    // jeśli masz taką funkcję dostępną
   };
-
-  // Znajdź aktualną walutę
-  // const currentCurrency = availableCurrencies.find(
-  //   (c) => c.code === selectedCurrency,
-  // );
 
   const usdCurrency = availableCurrencies.find((c) => c.code === "USD");
 
@@ -298,7 +291,7 @@ const CartContent: React.FC<CartContentProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto p-4">
-      {/* Informacje o walucie - zawsze widoczne u góry */}
+      {/* Currency information - always visible at the top */}
       <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4 text-sm text-blue-700">
         <p className="flex items-center">
           <span className="font-semibold mr-2">
@@ -308,7 +301,7 @@ const CartContent: React.FC<CartContentProps> = ({
         </p>
       </div>
 
-      {/* Ostrzeżenie walutowe - tylko gdy wybrano USD i nie potwierdzono */}
+      {/* Currency warning - only when USD is selected and not confirmed */}
       {selectedCurrency !== "PLN" && !currencyWarningConfirmed && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
           <h3 className="font-bold text-yellow-800 mb-3 flex items-center">
@@ -374,7 +367,7 @@ const CartContent: React.FC<CartContentProps> = ({
         </div>
       )}
 
-      {/* Dodatkowe ostrzeżenie jeśli kliknięto checkout bez potwierdzenia */}
+      {/* Additional warning if checkout is clicked without confirming */}
       {showCurrencyWarning &&
         selectedCurrency !== "PLN" &&
         !currencyWarningConfirmed && (
@@ -408,13 +401,12 @@ const CartContent: React.FC<CartContentProps> = ({
                   <h3 className="font-semibold">{item.title}</h3>
                   <p className="text-gray-600">
                     {getFormattedPrice(item.price)}{" "}
-                    {/* 👈 Użyj formatowania walutowego */}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center space-x-4">
-                {/* Zmiana ilości */}
+                {/* Change quantity */}
                 <div className="flex items-center border rounded">
                   <button
                     onClick={() =>
@@ -436,12 +428,12 @@ const CartContent: React.FC<CartContentProps> = ({
                   </button>
                 </div>
 
-                {/* Suma za produkt - wyświetlana w wybranej walucie */}
+                {/* Total for the product - displayed in the selected currency */}
                 <div className="text-right min-w-[100px]">
                   <p className="font-semibold">
                     {getFormattedPrice(item.price * (item.quantity || 1))}
                   </p>
-                  {/* Mała informacja o cenie w PLN dla USD */}
+                  {/* Small information about price in PLN for USD */}
                   {selectedCurrency !== "PLN" && (
                     <p className="text-xs text-gray-400">
                       {(item.price * (item.quantity || 1)).toFixed(2)} PLN
@@ -449,7 +441,7 @@ const CartContent: React.FC<CartContentProps> = ({
                   )}
                 </div>
 
-                {/* Przycisk usuń */}
+                {/* Remove button */}
                 <button
                   // onClick={() => handleRemoveItem(item._id)}
                   onClick={() => handleRemoveItemCompletely(item._id)}
@@ -475,7 +467,7 @@ const CartContent: React.FC<CartContentProps> = ({
           ))}
         </div>
 
-        {/* Podsumowanie */}
+        {/* Summary */}
         <div className="mt-6 pt-4 border-t">
           <div className="flex justify-between text-lg font-bold">
             <span>{t("cart.total")}:</span>
@@ -491,7 +483,7 @@ const CartContent: React.FC<CartContentProps> = ({
         </div>
       </div>
 
-      {/* Przyciski akcji */}
+      {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between">
         <div className="flex gap-4">
           <button
@@ -535,7 +527,7 @@ const CartContent: React.FC<CartContentProps> = ({
         </button>
       </div>
 
-      {/* Informacje */}
+      {/* Information */}
       <div className="mt-8 bg-blue-50 border border-blue-200 rounded p-4">
         <h3 className="font-semibold text-blue-800 mb-2">{t("cart.info")}</h3>
         <ul className="text-sm text-blue-700 space-y-1">

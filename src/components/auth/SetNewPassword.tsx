@@ -33,7 +33,7 @@ const SetNewPassword: React.FC = () => {
   const [showPasswordRepeat, setShowPasswordRepeat] = useState(false);
   const [passwordError, setPasswordError] = useState("");
 
-  // Walidacja hasła
+  // Password validation
   const validatePassword = (pass: string, repeat: string) => {
     if (!pass) {
       setPasswordError(t("passwordReset.passwordRequired"));
@@ -100,7 +100,7 @@ const SetNewPassword: React.FC = () => {
     }
   }, [success, navigate]);
 
-  // Sprawdź czy hasła są takie same
+  // Check if the passwords are the same
   const passwordsMatch =
     password && passwordRepeat && password === passwordRepeat;
   const isPasswordValid = password.length >= 6;
@@ -123,7 +123,7 @@ const SetNewPassword: React.FC = () => {
 
         {/* Form */}
         <div className="space-y-6">
-          {/* Nowe hasło */}
+          {/* New password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               {t("passwordReset.newPassword")}
@@ -179,7 +179,7 @@ const SetNewPassword: React.FC = () => {
             )}
           </div>
 
-          {/* Powtórz hasło */}
+          {/* Confirm password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               {t("passwordReset.confirmPassword")}
@@ -219,7 +219,7 @@ const SetNewPassword: React.FC = () => {
             </div>
           </div>
 
-          {/* Komunikat błędu */}
+          {/* Error message */}
           {passwordError && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3">
               <p className="text-sm text-red-600 flex items-center gap-2">
@@ -229,7 +229,7 @@ const SetNewPassword: React.FC = () => {
             </div>
           )}
 
-          {/* Przycisk zmiany hasła */}
+          {/* Confirm password button */}
           <button
             onClick={handleResetPassword}
             disabled={
@@ -258,7 +258,7 @@ const SetNewPassword: React.FC = () => {
             )}
           </button>
 
-          {/* Komunikaty z API */}
+          {/* Error messages from API */}
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
               <div className="flex items-start gap-3">
@@ -298,7 +298,7 @@ const SetNewPassword: React.FC = () => {
             </div>
           )}
 
-          {/* Link powrotu */}
+          {/* Return link*/}
           <div className="text-center mt-6">
             <a
               href="/login"
@@ -315,86 +315,3 @@ const SetNewPassword: React.FC = () => {
 };
 
 export default SetNewPassword;
-
-// import { useState, useEffect } from "react";
-// import { useDispatch, useSelector } from "react-redux";
-// import {
-//   resetPassword,
-//   clearEmailMessages,
-// } from "../../store/slices/emailSlice";
-// import type { RootState, AppDispatch } from "../../store";
-// import { useNavigate, useParams } from "react-router-dom";
-
-// const SetNewPassword: React.FC = () => {
-//   const dispatch = useDispatch<AppDispatch>();
-//   const navigate = useNavigate();
-//   const { token } = useParams(); // <-- tu pobieramy token z URL
-
-//   const { loading, error, success } = useSelector(
-//     (state: RootState) => state.email,
-//   );
-
-//   const [password, setPassword] = useState("");
-//   const [passwordRepeat, setPasswordRepeat] = useState("");
-
-//   const handleResetPassword = () => {
-//     if (password !== passwordRepeat) {
-//       alert("Hasła muszą się zgadzać!");
-//       return;
-//     }
-
-//     dispatch(resetPassword({ token: token || "", newPassword: password }));
-//   };
-
-//   useEffect(() => {
-//     if (error || success) {
-//       const timer = setTimeout(() => {
-//         dispatch(clearEmailMessages());
-//       }, 3000);
-//       return () => clearTimeout(timer);
-//     }
-//   }, [error, success]);
-
-//   useEffect(() => {
-//     if (success) {
-//       const timer = setTimeout(() => {
-//         navigate("/login");
-//       }, 2000);
-//       return () => clearTimeout(timer);
-//     }
-//   }, [success]);
-
-//   return (
-//     <div>
-//       <h2>Ustaw nowe hasło</h2>
-
-//       <input
-//         type="password"
-//         placeholder="Nowe hasło"
-//         value={password}
-//         onChange={(e) => setPassword(e.target.value)}
-//       />
-
-//       <input
-//         type="password"
-//         placeholder="Powtórz hasło"
-//         value={passwordRepeat}
-//         onChange={(e) => setPasswordRepeat(e.target.value)}
-//       />
-
-//       <button onClick={handleResetPassword} disabled={loading}>
-//         Zmień hasło
-//       </button>
-
-//       {loading && <p>Ładowanie...</p>}
-//       {error && <p style={{ color: "red" }}>{error}</p>}
-//       {success && (
-//         <p style={{ color: "green" }}>
-//           Hasło zostało zmienione! Przekierowuję…
-//         </p>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default SetNewPassword;

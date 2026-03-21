@@ -1,6 +1,5 @@
 import type { ProductPublicItemProps } from "../../types/types";
 
-//import { formatCurrency } from "../../utils/formatcurremcy";
 import { useCurrency } from "../../hooks/useCurrency";
 
 const ProductPublicItem: React.FC<ProductPublicItemProps> = ({

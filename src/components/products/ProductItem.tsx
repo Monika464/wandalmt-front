@@ -25,10 +25,10 @@ const ProductItem: React.FC<ProductItemProps> = ({
 
   return (
     <div className="p-4 border rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow duration-300">
-      {/* Tytuł produktu */}
+      {/* Product Title */}
       <h2 className="text-lg font-bold mb-2 line-clamp-2">{title}</h2>
 
-      {/* Zdjęcie produktu */}
+      {/* Product Photo */}
       {imageUrl && (
         <img
           src={imageUrl}
@@ -37,15 +37,15 @@ const ProductItem: React.FC<ProductItemProps> = ({
         />
       )}
 
-      {/* Opis produktu */}
+      {/* Product Description */}
       <p className="text-sm text-gray-600 mb-2 line-clamp-3">{description}</p>
 
-      {/* Cena produktu */}
+      {/* Product Price */}
       <p className="font-bold text-lg text-blue-600 mb-4">
         {formatCurrency(price)}
       </p>
 
-      {/* Przyciski akcji */}
+      {/* Action Buttons */}
       <div className="mt-2 flex flex-col sm:flex-row gap-2">
         <button
           onClick={onEdit}

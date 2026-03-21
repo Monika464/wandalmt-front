@@ -12,13 +12,13 @@ interface AddToCartButtonProps {
     price: number;
   };
   variant?: "small" | "medium" | "large";
-  color?: "blue" | "green" | "purple"; // 👈 Opcjonalny kolor
+  color?: "blue" | "green" | "purple";
 }
 
 const AddToCartButton: React.FC<AddToCartButtonProps> = ({
   product,
   variant = "medium",
-  color = "green", // Domyślnie zielony
+  color = "green",
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -65,38 +65,3 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
 };
 
 export default AddToCartButton;
-// import { useDispatch } from "react-redux";
-// import { addToCart } from "../../store/slices/cartSlice";
-// import type { AppDispatch } from "../../store";
-// import { useNavigate } from "react-router-dom";
-// import { useTranslation } from "react-i18next";
-
-// interface AddToCartButtonProps {
-//   product: {
-//     _id: string;
-//     title: string;
-//     price: number;
-//   };
-// }
-
-// const AddToCartButton: React.FC<AddToCartButtonProps> = ({ product }) => {
-//   const dispatch = useDispatch<AppDispatch>();
-//   const navigate = useNavigate();
-//   const { t } = useTranslation();
-
-//   const handleAdd = () => {
-//     dispatch(addToCart({ ...product, quantity: 1 }));
-//     navigate("/cart");
-//   };
-
-//   return (
-//     <button
-//       onClick={handleAdd}
-//       className="w-full px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
-//     >
-//       {t("cart.addToCart")} {/* 👈 Tłumaczenie */}
-//     </button>
-//   );
-// };
-
-// export default AddToCartButton;

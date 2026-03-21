@@ -5,7 +5,6 @@ import { fetchVideosUrls } from "../../store/slices/videoSlice";
 import { useNavigate } from "react-router-dom";
 
 export default function VideoList() {
-  //console.log("Rendering VideoList component");
   const dispatch = useDispatch<AppDispatch>();
 
   const navigate = useNavigate();
@@ -17,8 +16,6 @@ export default function VideoList() {
   }, [dispatch]);
 
   if (loading) return <p>Loading...</p>;
-
-  //videos.map((v: any) => console.log("Video in list:", v._id));
 
   return (
     <div>

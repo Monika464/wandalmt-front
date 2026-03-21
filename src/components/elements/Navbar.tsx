@@ -4,7 +4,6 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../store";
 import { logoutAdmin, logoutUser } from "../../store/slices/authSlice";
-//import { useTranslation } from "react-i18next";
 import { useAppTranslation } from "../../hooks/useAppTranslation";
 import {
   ShoppingCart,
@@ -49,35 +48,33 @@ const Navbar = () => {
 
   const isHomePage = window.location.pathname === "/";
 
-  // 👇 Określenie czy użytkownik jest administratorem
   const isAdmin = user?.role === "admin";
-  // 👇 Określenie czy użytkownik jest zwykłym użytkownikiem
   const isRegularUser = user && !isAdmin;
 
   return (
     <nav className="bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          {/* 🔥 LEWA STRONA - Logo i tekst obok siebie */}
+          {/* LEFT SIDE - Logo and text side by side */}
           <NavLink
             to="/"
             onClick={closeMobileMenu}
             className="flex items-center gap-2 group"
           >
-            {/* Logo - po lewej */}
+            {/* Logo - to the left of the text */}
             <img
               src={logo}
               alt="Wandal Muaythai"
               className="h-8 w-auto object-contain"
             />
 
-            {/* Tekst - po prawej stronie logo */}
+            {/* Text - to the right of the logo */}
             <span className="text-lg sm:text-xl font-bold text-white group-hover:text-blue-300 transition-colors">
               Wandal Muaythai
             </span>
           </NavLink>
 
-          {/* Desktop Menu - środkowa część */}
+          {/* Desktop Menu - middle part */}
           {!isHomePage && (
             <div className="hidden md:flex items-center space-x-2">
               <NavLink
@@ -89,7 +86,7 @@ const Navbar = () => {
                 {t("nav.shop")}
               </NavLink>
 
-              {/* 👇 TYLKO zwykły użytkownik widzi panel użytkownika */}
+              {/* ONLY regular users can see the user panel */}
               {isRegularUser && (
                 <NavLink
                   to="/userpanel"
@@ -102,7 +99,7 @@ const Navbar = () => {
                 </NavLink>
               )}
 
-              {/* 👇 TYLKO admin widzi panel admina */}
+              {/* ONLY admin can see the admin panel */}
               {isAdmin && (
                 <NavLink
                   to="/adminpanel"
@@ -115,7 +112,7 @@ const Navbar = () => {
                 </NavLink>
               )}
 
-              {/* 👇 Register - pokazuj tylko dla niezalogowanych */}
+              {/* Register - show only for non-logged in users */}
               {(!user || isAdmin) && (
                 <NavLink
                   to="/register"
@@ -127,7 +124,7 @@ const Navbar = () => {
                 </NavLink>
               )}
 
-              {/* 👇 Login - pokazuj tylko dla niezalogowanych */}
+              {/* Login - show only for non-logged in users */}
               {!user && (
                 <NavLink
                   to="/login"
@@ -141,9 +138,9 @@ const Navbar = () => {
             </div>
           )}
 
-          {/* Prawa strona - akcje użytkownika i język */}
+          {/* Right side - user actions and language */}
           <div className="flex items-center space-x-2 sm:space-x-4">
-            {/* Koszyk - zawsze widoczny */}
+            {/* Cart - always visible */}
             <NavLink
               to="/cart"
               onClick={closeMobileMenu}
@@ -160,7 +157,7 @@ const Navbar = () => {
               )}
             </NavLink>
 
-            {/* Wylogowanie - desktop (tylko dla zalogowanych) */}
+            {/* Logout - desktop (only for logged in users) */}
             {user && (
               <button
                 onClick={handleLogout}
@@ -171,7 +168,7 @@ const Navbar = () => {
               </button>
             )}
 
-            {/* Przyciski języka */}
+            {/* Language buttons */}
             <div className="flex items-center border-l border-gray-600 pl-2 sm:pl-4">
               <Globe size={18} className="text-gray-400 mr-1 sm:mr-2" />
               <div className="flex gap-1">
@@ -199,7 +196,7 @@ const Navbar = () => {
               </div>
             </div>
 
-            {/* Hamburger menu - tylko na mobile */}
+            {/* Hamburger menu - only on mobile */}
             {!isHomePage && (
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -212,7 +209,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile menu - rozwijane */}
+        {/* Mobile menu - drop-down */}
         {!isHomePage && isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-700 animate-fadeIn">
             <div className="flex flex-col space-y-2">
@@ -226,7 +223,7 @@ const Navbar = () => {
                 {t("nav.shop")}
               </NavLink>
 
-              {/* 👇 TYLKO zwykły użytkownik widzi panel użytkownika w mobile */}
+              {/* 👇 ONLY regular users can see the user panel in mobile */}
               {isRegularUser && (
                 <NavLink
                   to="/userpanel"
@@ -240,7 +237,7 @@ const Navbar = () => {
                 </NavLink>
               )}
 
-              {/* 👇 TYLKO admin widzi panel admina w mobile */}
+              {/* ONLY admin can see the admin panel in mobile */}
               {isAdmin && (
                 <NavLink
                   to="/adminpanel"
@@ -254,7 +251,7 @@ const Navbar = () => {
                 </NavLink>
               )}
 
-              {/* 👇 Register - tylko dla niezalogowanych w mobile */}
+              {/* Register - only for those not logged in to mobile */}
               {(!user || isAdmin) && (
                 <NavLink
                   to="/register"
@@ -267,7 +264,7 @@ const Navbar = () => {
                 </NavLink>
               )}
 
-              {/* 👇 Login - tylko dla niezalogowanych w mobile */}
+              {/* Login - only for those not logged in to mobile */}
               {!user && (
                 <NavLink
                   to="/login"
@@ -280,7 +277,7 @@ const Navbar = () => {
                 </NavLink>
               )}
 
-              {/* Wylogowanie - mobile (tylko dla zalogowanych) */}
+              {/* Logout - mobile (only for logged in users) */}
               {user && (
                 <button
                   onClick={handleLogout}

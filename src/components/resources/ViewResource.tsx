@@ -2,7 +2,6 @@ import React from "react";
 import type { IResource } from "../../types/types";
 import Thumbnail from "../video/Thumbnail";
 import VideoTitle from "../video/VideoTitle";
-//import { useNavigate } from "react-router-dom";
 import { useVideoNavigation } from "../../hooks/useVideoNavigation";
 
 interface Props {
@@ -11,8 +10,6 @@ interface Props {
 }
 
 const ViewResource: React.FC<Props> = ({ resource, onClose }) => {
-  //const navigate = useNavigate();
-
   const { handlePlayVideo } = useVideoNavigation();
 
   return (
@@ -57,7 +54,7 @@ const ViewResource: React.FC<Props> = ({ resource, onClose }) => {
           ))}
         </ul>
       ) : (
-        <p className="text-gray-500">Brak rozdziałów</p>
+        <p className="text-gray-500">No chapters available</p>
       )}
 
       <button

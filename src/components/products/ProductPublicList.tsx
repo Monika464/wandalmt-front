@@ -46,10 +46,10 @@ const ProductList: React.FC = () => {
   return (
     <div>
       <br />
-      {/* 👈 Poprawione - SearchContainer jako samodzielny komponent */}
+
       <SearchPublicContainer onSearch={setSearchTerm} />
 
-      {/* Grid produktów */}
+      {/* Product Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {filteredProducts.map((product) => (
           <div
@@ -58,9 +58,9 @@ const ProductList: React.FC = () => {
           >
             <ProductPublicItem {...product} />
 
-            {/* Kontener z przyciskami - oba takie same */}
+            {/* Container with buttons - both the same */}
             <div className="p-4 flex flex-col sm:flex-row gap-2">
-              {/* Lewy przycisk - szczegóły */}
+              {/* Left click - details */}
               <div className="sm:flex-1">
                 <button
                   onClick={() => navigate(`/products/${product._id}`)}
@@ -84,7 +84,7 @@ const ProductList: React.FC = () => {
                 </button>
               </div>
 
-              {/* Prawy przycisk - dodaj do koszyka */}
+              {/* Right click - add to cart */}
               <div className="sm:flex-1">
                 <AddToCartButton
                   product={{

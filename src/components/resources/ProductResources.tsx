@@ -32,7 +32,7 @@ const ProductResources: React.FC = () => {
 
   console.log("InlineVideoPlayer render - productId:", productId);
 
-  // Stany
+  // States
   const [currentChapter, setCurrentChapter] = useState<Chapter | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,27 +55,25 @@ const ProductResources: React.FC = () => {
     error: progressError,
   } = useChapterProgress();
 
-  // Załaduj postęp po zalogowaniu/zmianie produktu
+  // Load progress after logging in/changing product
   useEffect(() => {
     if (productId && user?._id) {
       loadProgress(productId);
     }
   }, [productId, user?._id, loadProgress]);
 
-  // Obsługa błędów
+  // Handle errors
   useEffect(() => {
     if (progressError) {
       toast.error(progressError);
     }
   }, [progressError]);
 
-  // Efekt pobierania resource
   useEffect(() => {
     if (!productId) return;
     dispatch(fetchResourceByProductId(productId));
   }, [productId, dispatch]);
 
-  // Efekt przetwarzania danych
   useEffect(() => {
     if (!resource || !productId) {
       setLoading(false);
@@ -99,10 +97,9 @@ const ProductResources: React.FC = () => {
 
     setChapters(formattedChapters);
 
-    // Poczekaj na załadowanie postępu
     const waitForProgress = async () => {
       if (!user?._id) {
-        // Dla niezalogowanych - po prostu pierwszy rozdział
+        // For those not logged in - only the first chapter
         if (formattedChapters.length > 0) {
           setCurrentChapter(formattedChapters[0]);
         }
@@ -110,10 +107,10 @@ const ProductResources: React.FC = () => {
         return;
       }
 
-      // Daj czas na załadowanie postępu
+      // Time to load progress
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      // Znajdź pierwszy nieukończony rozdział
+      // Find the first incomplete chapter
       if (formattedChapters.length > 0) {
         const firstUncompleted = formattedChapters.find(
           (ch) => !isChapterCompleted(productId, ch._id),
@@ -147,7 +144,7 @@ const ProductResources: React.FC = () => {
       const nextChapter = chapters[currentIndex + 1];
       setCurrentChapter(nextChapter);
 
-      // Automatycznie oznacz obecny rozdział jako ukończony
+      // Automatically mark current chapter as complete
       if (
         user?._id &&
         !isChapterCompleted(productId || "", currentChapter._id)
@@ -202,86 +199,27 @@ const ProductResources: React.FC = () => {
       t("resources.chapterCompleted", { title: currentChapter.title }),
     );
 
-    // Przejdź do następnego
+    //Go to next
     const currentIndex = chapters.findIndex(
       (ch) => ch._id === currentChapter._id,
     );
-    console.log("📊 Current index:", currentIndex, "z", chapters.length);
+    //console.log("📊 Current index:", currentIndex, "z", chapters.length);
 
     if (currentIndex < chapters.length - 1) {
-      console.log("⏭️ Przechodzę do następnego za 500ms");
       setTimeout(() => {
         handleNextChapter();
       }, 500);
     } else {
-      console.log("🏁 To był ostatni rozdział");
+      console.log("🏁 It was the last chapter");
     }
   };
 
-  //completeChapter(productId, currentChapter._id);
-  // 🔥 Zabezpieczenie przed wielokrotnym wywołaniem
-  //   if (isChapterCompleted(productId, currentChapter._id)) {
-  //     console.log("Chapter already completed, skipping");
-  //     return;
-  //   }
-
-  //   await loadProgress(productId);
-  //   toast.success(
-  //     t("resources.chapterCompleted", { title: currentChapter.title }),
-  //   );
-
-  //   // 🔥 Automatycznie przejdź do następnego rozdziału po zakończeniu
-  //   const currentIndex = chapters.findIndex(
-  //     (ch) => ch._id === currentChapter._id,
-  //   );
-  //   if (currentIndex < chapters.length - 1) {
-  //     // Małe opóźnienie, żeby nie przerywać animacji
-  //     setTimeout(() => {
-  //       handleNextChapter();
-  //     }, 500);
-  //   }
-  // };
-
-  // 🔥 Oblicz indeksy dla przycisków
   const currentIndex = currentChapter
     ? chapters.findIndex((ch) => ch._id === currentChapter._id)
     : -1;
 
   const isFirstChapter = currentIndex === 0;
   const isLastChapter = currentIndex === chapters.length - 1;
-
-  // // Funkcje nawigacji
-  // const handleNextChapter = () => {
-  //   if (!currentChapter || chapters.length === 0) return;
-
-  //   const currentIndex = chapters.findIndex(
-  //     (ch) => ch._id === currentChapter._id,
-  //   );
-  //   if (currentIndex < chapters.length - 1) {
-  //     const nextChapter = chapters[currentIndex + 1];
-  //     setCurrentChapter(nextChapter);
-
-  //     // Automatycznie oznacz obecny rozdział jako ukończony
-  //     if (
-  //       user?._id &&
-  //       !isChapterCompleted(productId || "", currentChapter._id)
-  //     ) {
-  //       completeChapter(productId || "", currentChapter._id);
-  //     }
-  //   }
-  // };
-
-  // const handlePrevChapter = () => {
-  //   if (!currentChapter || chapters.length === 0) return;
-
-  //   const currentIndex = chapters.findIndex(
-  //     (ch) => ch._id === currentChapter._id,
-  //   );
-  //   if (currentIndex > 0) {
-  //     const prevChapter = chapters[currentIndex - 1];
-  //     setCurrentChapter(prevChapter);
-  //   }
-  // };
 
   const handleChapterClick = (chapter: Chapter) => {
     setCurrentChapter(chapter);
@@ -578,7 +516,7 @@ const ProductResources: React.FC = () => {
                               </span>
                             ) : (
                               <span className="text-gray-400">
-                                {t("resources.notStarted")}
+                                {t("resources.unfinished")}
                               </span>
                             )}
                           </div>

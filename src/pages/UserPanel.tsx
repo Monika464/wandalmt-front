@@ -2,17 +2,16 @@
 import { useAuth } from "../hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { formatTimeRemaining } from "../utils/authUtils";
-
-//import type { RootState } from "../store";
+import { useTranslation } from "react-i18next";
 
 import UserProductsDashboard from "./UserProductDashboard";
 
 const UserPanel = () => {
-  //const { user } = useSelector((state: RootState) => state.auth);
   const { isAuthenticated, user, isLoading, timeUntilExpiry } = useAuth();
+  const { t } = useTranslation();
 
   if (isLoading) {
-    return <div>Ładowanie...</div>;
+    return <div>{t("userPanel.loading")}</div>;
   }
 
   if (!isAuthenticated) {
@@ -38,10 +37,15 @@ const UserPanel = () => {
             marginBottom: "10px",
           }}
         >
-          ⏰ Sesja wygaśnie za: {formatTimeRemaining(timeUntilExpiry)}
+          ⏰ {t("userPanel.sessionExpiresIn")}:{" "}
+          {formatTimeRemaining(timeUntilExpiry)}
         </div>
       )}
-      <h1>Witaj, {user ? user.name : "Gościu"}!</h1>
+      <h1>
+        {t("userPanel.welcome", {
+          name: user ? user.name : t("userPanel.guest"),
+        })}
+      </h1>
       <UserProductsDashboard />
     </div>
   );

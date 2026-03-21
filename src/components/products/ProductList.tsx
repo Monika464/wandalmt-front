@@ -30,7 +30,7 @@ const ProductList: React.FC = () => {
 
   const handleCloseEditProduct = () => setEditingProductId(null);
 
-  // Filtrowanie po języku i wyszukiwaniu
+  // Filtering by language and search
   const filteredProducts = products
     .filter((product) => product.language === i18n.language)
     .filter(
@@ -70,7 +70,7 @@ const ProductList: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Nagłówek */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
@@ -83,7 +83,7 @@ const ProductList: React.FC = () => {
           </p>
         </div>
 
-        {/* Przycisk dodawania produktu */}
+        {/* Add Product Button */}
         <button
           onClick={() => setShowForm((prev) => !prev)}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
@@ -97,12 +97,12 @@ const ProductList: React.FC = () => {
         </button>
       </div>
 
-      {/* Wyszukiwarka */}
+      {/* Search Container */}
       <div className="mb-8">
         <SearchContainer onSearch={setSearchTerm} />
       </div>
 
-      {/* Formularz dodawania produktu */}
+      {/* Create Product Form */}
       {showForm && (
         <div className="mb-8 bg-white rounded-lg shadow-lg p-6 border border-gray-200">
           <h2 className="text-xl font-bold mb-4 text-gray-800">
@@ -111,8 +111,7 @@ const ProductList: React.FC = () => {
           <CreateProductForm />
         </div>
       )}
-
-      {/* Lista produktów - RESPONSYWNY GRID */}
+      {/* Product List - RESPONSIVE GRID */}
       {filteredProducts.length === 0 ? (
         <div className="text-center py-16 bg-gray-50 rounded-lg">
           <Package size={48} className="mx-auto text-gray-400 mb-4" />
@@ -127,13 +126,13 @@ const ProductList: React.FC = () => {
             .filter((product) => !!product?._id)
             .map((product) => (
               <div key={product._id} className="relative">
-                {/* Karta produktu */}
+                {/* Product Card */}
                 <ProductItem
                   {...product}
                   onEdit={() => setEditingProductId(product._id)}
                 />
 
-                {/* Przycisk edycji zasobów */}
+                {/* Edit Resources Button */}
                 <div className="mt-3">
                   <button
                     onClick={() => navigate(`/admin/products/${product._id}`)}
@@ -143,7 +142,7 @@ const ProductList: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Formularz edycji (rozwijany) */}
+                {/* Edit Product Form (collapsible) */}
                 {editingProductId === product._id && (
                   <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <h3 className="font-medium text-gray-700 mb-3">
@@ -160,7 +159,7 @@ const ProductList: React.FC = () => {
         </div>
       )}
 
-      {/* Przycisk powrotu na górę (dla długich list) */}
+      {/* Back to top button (for long lists) */}
       {filteredProducts.length > 8 && (
         <div className="text-center mt-8">
           <button

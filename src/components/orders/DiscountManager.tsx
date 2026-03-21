@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
-import api from "../../utils/api";
 
 interface Discount {
   _id: string;
@@ -308,7 +307,7 @@ const DiscountManager: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-4">
-      {/* Nagłówek i przyciski */}
+      {/* Header and buttons */}
       <div className="mb-6 flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">
