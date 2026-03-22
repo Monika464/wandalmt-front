@@ -18,7 +18,6 @@ export interface CurrencyState {
 const initialState: CurrencyState = {
   availableCurrencies: [
     { code: "PLN", name: "Polski złoty", rate: 1, symbol: "zł" },
-    // USD doda się po pobraniu kursu
   ],
   selectedCurrency: "PLN",
   baseCurrency: "PLN",
@@ -30,7 +29,7 @@ export const fetchExchangeRates = createAsyncThunk(
   "currency/fetchRates",
   async () => {
     const rates = await currencyService.getRatesFromNBP();
-    // Znajdź kurs USD
+
     const usdRate = rates.find((r) => r.code === "USD");
 
     return [
@@ -38,7 +37,7 @@ export const fetchExchangeRates = createAsyncThunk(
       {
         code: "USD",
         name: "Dolar amerykański",
-        rate: usdRate?.mid || 4.0, // fallback
+        rate: usdRate?.mid || 4.0,
         symbol: "$",
       },
     ];
@@ -51,7 +50,7 @@ const currencySlice = createSlice({
   reducers: {
     setCurrency: (state, action) => {
       state.selectedCurrency = action.payload;
-      // Zapisz wybór w localStorage
+
       localStorage.setItem("preferredCurrency", action.payload);
     },
   },
@@ -63,7 +62,7 @@ const currencySlice = createSlice({
       .addCase(fetchExchangeRates.fulfilled, (state, action) => {
         state.loading = false;
         state.availableCurrencies = action.payload;
-        // Przywróć poprzedni wybór użytkownika
+
         const saved = localStorage.getItem("preferredCurrency");
         if (saved && action.payload.some((c) => c.code === saved)) {
           state.selectedCurrency = saved;

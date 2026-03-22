@@ -37,7 +37,7 @@ const cartSlice = createSlice({
       const existing = state.items.find((i) => i._id === action.payload._id);
       if (existing) {
         existing.quantity += action.payload.quantity || 1;
-        // Aktualizuj też imageUrl jeśli dostarczono
+        // Also update imageUrl if provided
         if (action.payload.imageUrl) {
           existing.imageUrl = action.payload.imageUrl;
         }
@@ -67,32 +67,32 @@ const cartSlice = createSlice({
       state.items = [];
       state.lastCleared = new Date().toISOString();
 
-      // Kompletne czyszczenie wszystkich śladów koszyka
+      // Complete cleaning of all traces of the basket
       try {
-        // 1. Wyczyść główny koszyk
+        // 1. Clear main basket
         localStorage.removeItem("cart");
 
-        // 2. Wyczyść dane płatności
+        // 2. Clear payment details
         localStorage.removeItem("cartCheckoutData");
 
-        // 3. Wyczyść dane sesji Stripe jeśli istnieją
+        // 3. Clear Stripe session data if present
         localStorage.removeItem("stripe_checkout_session");
         localStorage.removeItem("stripe_session_id");
 
-        // 4. Zapisz timestamp czyszczenia
+        // 4. Save cleaning timestamp
         localStorage.setItem("cart_last_cleared", new Date().toISOString());
 
-        // 5. Wyczyść sessionStorage też
+        // 5. Clear sessionStorage too
         sessionStorage.removeItem("cart");
         sessionStorage.removeItem("cart_temp");
 
-        console.log("✅ CartSlice: Cart cleared from all storage");
+        //console.log("✅ CartSlice: Cart cleared from all storage");
       } catch (err) {
         console.error("❌ CartSlice: Error clearing cart storage:", err);
       }
     },
 
-    // Nowa akcja: wymuś czyszczenie z dodatkowymi opcjami
+    // force clean with additional options
     forceClearCart: (
       state,
       action: PayloadAction<{ reason?: string } | undefined>,
@@ -118,14 +118,14 @@ const cartSlice = createSlice({
           localStorage.removeItem(key);
           sessionStorage.removeItem(key);
         } catch (e) {
-          // Ignoruj błędy dla poszczególnych kluczy
+          // Ignore errors for individual keys
         }
       });
 
-      // Zapisz timestamp
+      // Save timestamp
       localStorage.setItem("cart_last_cleared", new Date().toISOString());
 
-      // Dispatch custom event dla innych komponentów
+      // Dispatch custom event for other components
       if (typeof window !== "undefined") {
         window.dispatchEvent(
           new CustomEvent("cart:cleared", {
@@ -152,7 +152,7 @@ const cartSlice = createSlice({
       saveCartToStorage(state.items);
     },
 
-    // Dodaj produkty z powrotem do koszyka (np. po anulowaniu płatności)
+    // Add products back to your cart (e.g. after canceling a payment)
     restoreCart: (state, action: PayloadAction<CartItem[]>) => {
       state.items = action.payload;
       saveCartToStorage(state.items);
@@ -161,7 +161,7 @@ const cartSlice = createSlice({
       );
     },
 
-    // Resetuj cały stan koszyka (dla logout itp.)
+    // Reset all cart status (for logout etc.)
     resetCart: (state) => {
       state.items = [];
       state.lastCleared = null;
@@ -177,7 +177,7 @@ const cartSlice = createSlice({
       console.log("🔄 CartSlice: Cart fully reset");
     },
 
-    // 🔥 NOWA AKCJA – usuwa produkt całkowicie, niezależnie od ilości
+    //  removes the product completely, regardless of the quantity
     removeItemCompletely: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter((i) => i._id !== action.payload);
       saveCartToStorage(state.items);
@@ -186,7 +186,7 @@ const cartSlice = createSlice({
   },
 });
 
-// Dodaj middleware do logowania (opcjonalnie)
+// Add login middleware (optional)
 export const cartMiddleware = (store: any) => (next: any) => (action: any) => {
   if (action.type === "cart/clearCart") {
     console.log("🎯 Cart Middleware: clearCart action detected");

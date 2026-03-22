@@ -1,14 +1,13 @@
 import axios, { type AxiosRequestConfig } from "axios";
-import type { RootState } from "../store"; // lub ścieżka do Twojego store
-// lub ścieżka do Twojego store
+import type { RootState } from "../store";
 import api from "./api";
 
 /**
- * Wspólny helper do wykonywania zapytań z autoryzacją i obsługą anulowania.
+ * Common helper for performing queries with authorization and cancellation support.
  */
 export async function authorizedRequest<T>(
-  thunkApi: any, // przekazujesz { getState, signal, rejectWithValue }
-  config: AxiosRequestConfig
+  thunkApi: any,
+  config: AxiosRequestConfig,
 ): Promise<T> {
   const { getState, signal, rejectWithValue } = thunkApi;
   const state = getState() as RootState;

@@ -25,7 +25,7 @@ const initialState: UserState = {
   error: null,
 };
 
-// 🔹 Pobranie profilu aktualnego usera
+// 🔹 Downloading the current user's profile
 export const fetchUserProfile = createAsyncThunk<
   UserProfile,
   void,
@@ -43,11 +43,11 @@ export const fetchUserProfile = createAsyncThunk<
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    return res.data; // w res.data powinien być obiekt usera
+    return res.data;
   } catch (error: any) {
     console.error("❌ Error in fetchUserProfile:", error);
     return thunkAPI.rejectWithValue(
-      error.response?.data?.message || error.message
+      error.response?.data?.message || error.message,
     );
   }
 });

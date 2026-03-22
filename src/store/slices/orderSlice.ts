@@ -29,14 +29,13 @@ export interface ProductDetails {
   imageUrl: string;
   content: string;
   userId: string;
-  // Dodatkowe opcjonalne pola
   productId?: string;
   thumbnail?: string;
   chapters?: ResourceChapter[];
 }
 
 export interface OrderProduct {
-  productId: string; // <-- zmiana: zamiast product._id
+  productId: string;
   title: string;
   price: number;
   discountedPrice?: number;
@@ -44,8 +43,6 @@ export interface OrderProduct {
   imageUrl?: string;
   content?: string;
   description?: string;
-
-  // Pola do częściowych zwrotów
   refunded?: boolean;
   refundedAt?: string;
   refundId?: string;
@@ -80,7 +77,7 @@ export interface Order {
     description: string;
   };
 
-  // Faktura
+  // Invoice
   requireInvoice?: boolean;
   invoiceData?: {
     companyName: string;
@@ -90,7 +87,7 @@ export interface Order {
   invoiceId?: string;
   invoiceUrl?: string;
 
-  // Dane billingowe
+  //Billing data
   billingDetails?: {
     name: string;
     email: string;
@@ -105,15 +102,15 @@ export interface Order {
     invoiceDate?: string;
   };
 
-  // Zasoby użytkownika
+  // User Resources
   userResources?: Resource[];
 
-  // Zwrot (całkowity)
+  // Refund (total)
   refundedAt?: string;
   refundId?: string | null;
   refundAmount?: number;
 
-  // Częściowe zwroty
+  // Partial refunds
   partialRefunds?: Array<{
     refundId: string;
     amount: number;
@@ -161,7 +158,7 @@ interface Chapter {
 export const selectUserProducts = (state: RootState) => {
   const userOrders = state.orders.userOrders;
 
-  // Filtruj zamówienia aktywne (paid lub partially_refunded)
+  // Filter active orders (paid or partially_refunded)
   const activeOrders = userOrders.filter(
     (order) => order.status === "paid" || order.status === "partially_refunded",
   );
@@ -171,7 +168,7 @@ export const selectUserProducts = (state: RootState) => {
 
   activeOrders.forEach((order) => {
     order.products.forEach((item) => {
-      // Pomiń w pełni zwrócone produkty
+      // Skip fully refunded items
       if ((item.refundQuantity || 0) >= item.quantity) return;
 
       const productId = item.productId?.toString();
@@ -200,7 +197,7 @@ export const selectUserProducts = (state: RootState) => {
 };
 // ==================== ASYNC THUNKS ====================
 
-// 🔹 Zamówienia użytkownika
+// 🔹 User Orders
 export const fetchUserOrders = createAsyncThunk<
   any[],
   void,
@@ -213,7 +210,7 @@ export const fetchUserOrders = createAsyncThunk<
     });
 
     if (res.data.orders) {
-      return res.data.orders; // zwracamy tylko tablicę zamówień
+      return res.data.orders;
     }
 
     return res.data;
@@ -222,7 +219,7 @@ export const fetchUserOrders = createAsyncThunk<
   }
 });
 
-// 🔹 Wszystkie zamówienia (admin)
+// 🔹 All orders (admin)
 export const fetchAllOrders = createAsyncThunk<
   Order[],
   void,
@@ -239,7 +236,7 @@ export const fetchAllOrders = createAsyncThunk<
   }
 });
 
-// 🔹 Pojedyncze zamówienie
+// 🔹 Single order
 export const fetchOrderById = createAsyncThunk<
   Order,
   string,
@@ -256,7 +253,7 @@ export const fetchOrderById = createAsyncThunk<
   }
 });
 
-// 🔹 ZWROT CAŁKOWITY całego zamówienia
+// 🔹 FULL REFUND of your entire order
 export const refundOrder = createAsyncThunk<
   { order: Order; message: string },
   string, // id zamówienia
@@ -277,14 +274,14 @@ export const refundOrder = createAsyncThunk<
   }
 });
 
-// 🔹 ZWROT CZĘŚCIOWY - konkretnych produktów
+// 🔹 PARTIAL RETURN - for specific products
 export const partialRefundOrder = createAsyncThunk<
   { order: Order; message: string },
   {
     orderId: string;
     refundItems: Array<{
       productId: string;
-      quantity: number; // ile sztuk zwrócić
+      quantity: number;
       reason?: string;
     }>;
   },
@@ -311,9 +308,9 @@ const orderSlice = createSlice({
   name: "orders",
   initialState,
   reducers: {
-    // 🔹 Dodaj nowe zamówienie po zakupie
+    // 🔹 Add a new order after purchase
     addNewOrder: (state, action: PayloadAction<Order>) => {
-      // Sprawdź czy już istnieje
+      // Check if it already exists
       const existingIndex = state.userOrders.findIndex(
         (order) => order._id === action.payload._id,
       );
@@ -326,12 +323,12 @@ const orderSlice = createSlice({
       state.currentOrder = action.payload;
     },
 
-    // 🔹 Ustaw aktualne zamówienie
+    // 🔹 Set current order
     setCurrentOrder: (state, action: PayloadAction<Order | null>) => {
       state.currentOrder = action.payload;
     },
 
-    // 🔹 Aktualizuj pojedyncze zamówienie
+    // 🔹 Update single order
     updateOrder: (state, action: PayloadAction<Order>) => {
       const index = state.userOrders.findIndex(
         (o) => o._id === action.payload._id,
@@ -352,12 +349,12 @@ const orderSlice = createSlice({
       }
     },
 
-    // 🔹 Wyczyść błąd
+    // 🔹 Clear error
     clearError: (state) => {
       state.error = null;
     },
 
-    // 🔹 Wyczyść stan (np. przy wylogowaniu)
+    // 🔹 Clear state (e.g. when logging out)
     clearOrders: (state) => {
       state.userOrders = [];
       state.allOrders = [];
@@ -365,7 +362,7 @@ const orderSlice = createSlice({
       state.error = null;
     },
 
-    // 🔹 Ustaw loading dla konkretnego zamówienia (refund)
+    // 🔹Set loading for a specific order (refund)
     setRefundLoading: (
       state,
       action: PayloadAction<{ orderId: string; loading: boolean }>,
@@ -373,7 +370,7 @@ const orderSlice = createSlice({
       state.refundLoading[action.payload.orderId] = action.payload.loading;
     },
 
-    // 🔹 Ustaw loading dla częściowego refundu
+    // 🔹Set loading for partial refund
     setPartialRefundLoading: (
       state,
       action: PayloadAction<{ orderId: string; loading: boolean }>,
@@ -438,7 +435,7 @@ const orderSlice = createSlice({
       .addCase(refundOrder.fulfilled, (state, action) => {
         state.refundLoading[action.meta.arg] = false;
 
-        // Aktualizacja zamówienia
+        // Order update
         const refundedOrder = action.payload.order;
         state.userOrders = state.userOrders.map((order) =>
           order._id === refundedOrder._id ? refundedOrder : order,
@@ -457,7 +454,7 @@ const orderSlice = createSlice({
         state.error =
           (action.payload as RejectValue)?.message ||
           action.error.message ||
-          "Błąd zwrotu";
+          "Return error";
         //state.error = action.payload as string;
       })
 
@@ -469,7 +466,7 @@ const orderSlice = createSlice({
       .addCase(partialRefundOrder.fulfilled, (state, action) => {
         state.partialRefundLoading[action.meta.arg.orderId] = false;
 
-        // Aktualizacja zamówienia
+        // Order update
         const updatedOrder = action.payload.order;
         state.userOrders = state.userOrders.map((order) =>
           order._id === updatedOrder._id ? updatedOrder : order,
@@ -489,7 +486,7 @@ const orderSlice = createSlice({
         state.error =
           (action.payload as RejectValue)?.message ||
           action.error.message ||
-          "Błąd zwrotu";
+          "Return error";
       });
   },
 });
@@ -508,7 +505,7 @@ export const selectPartialRefundLoading =
   (orderId: string) => (state: RootState) =>
     state.orders.partialRefundLoading[orderId] || false;
 
-// Helper do obliczania dostępnych do zwrotu produktów
+// Helper for calculating products available for return
 export const selectRefundableProducts =
   (orderId: string) => (state: RootState) => {
     const order = state.orders.userOrders.find((o) => o._id === orderId);
@@ -516,7 +513,7 @@ export const selectRefundableProducts =
 
     return order.products
       .filter((product) => {
-        // Sprawdź czy produkt nie jest w pełni zwrócony
+        // Check if the product is not fully returned
         const refundedQuantity = product.refundQuantity || 0;
         return product.quantity > refundedQuantity;
       })
@@ -524,7 +521,7 @@ export const selectRefundableProducts =
         ...product,
         availableToRefund: product.quantity - (product.refundQuantity || 0),
         refundAmountPerUnit: product.discountedPrice ?? product.price ?? 0,
-        // Dodatkowe pomocne pola
+        // Additional helpful fields
         productId: product.productId,
         title: product.title,
         quantity: product.quantity,

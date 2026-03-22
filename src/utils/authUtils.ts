@@ -1,11 +1,11 @@
 // utils/authUtils.ts
 export const checkTokenExpiry = (expiresAt: number | null): boolean => {
-  if (!expiresAt) return true; // jeśli brak expiresAt, traktuj jako wygasły
+  if (!expiresAt) return true;
   return Date.now() > expiresAt;
 };
 
 export const getRemainingTokenTime = (
-  expiresAt: number | null
+  expiresAt: number | null,
 ): number | null => {
   if (!expiresAt) return null;
   return Math.max(0, expiresAt - Date.now());
@@ -25,7 +25,7 @@ export const formatTimeRemaining = (ms: number): string => {
 
 export const isTokenExpiringSoon = (
   expiresAt: number | null,
-  minutes = 15
+  minutes = 15,
 ): boolean => {
   if (!expiresAt) return false;
   const timeLeft = expiresAt - Date.now();

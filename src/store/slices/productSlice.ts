@@ -34,7 +34,6 @@ export const fetchProducts = createAsyncThunk<Product[], { search?: string }>(
         ? `?${searchParams.toString()}`
         : "";
 
-      // użycie authorizedRequest
       const data = await authorizedRequest<Product[]>(thunkApi, {
         url: `/admin/products${queryString}`,
         method: "GET",
@@ -49,73 +48,71 @@ export const fetchProducts = createAsyncThunk<Product[], { search?: string }>(
 );
 
 //FETCH SINGLE PRODUCT
-export const fetchProductById = createAsyncThunk<
-  Product, // typ zwracany
-  string // typ argumentu (id produktu)
->("products/fetchById", async (id, thunkApi) => {
-  try {
-    const data = await authorizedRequest<Product>(thunkApi, {
-      url: `/admin/products/${id}`,
-      method: "GET",
-    });
-    return data;
-  } catch (error) {
-    console.error("Error fetching product by ID:", error);
-    return thunkApi.rejectWithValue(error);
-  }
-});
+export const fetchProductById = createAsyncThunk<Product, string>(
+  "products/fetchById",
+  async (id, thunkApi) => {
+    try {
+      const data = await authorizedRequest<Product>(thunkApi, {
+        url: `/admin/products/${id}`,
+        method: "GET",
+      });
+      return data;
+    } catch (error) {
+      console.error("Error fetching product by ID:", error);
+      return thunkApi.rejectWithValue(error);
+    }
+  },
+);
 
-export const createProduct = createAsyncThunk<
-  Product, // typ zwracany przy sukcesie
-  NewProduct // argument thunk
->("products/create", async (productData: NewProduct, thunkApi) => {
-  try {
-    // używamy authorizedRequest, ale wyciągamy product z odpowiedzi
-    const res = await authorizedRequest<{ product: Product }>(thunkApi, {
-      url: `/admin/products`,
-      method: "POST",
-      data: productData,
-    });
+export const createProduct = createAsyncThunk<Product, NewProduct>(
+  "products/create",
+  async (productData: NewProduct, thunkApi) => {
+    try {
+      const res = await authorizedRequest<{ product: Product }>(thunkApi, {
+        url: `/admin/products`,
+        method: "POST",
+        data: productData,
+      });
 
-    return res.product; // <-- tu jest kluczowa różnica
-  } catch (error: any) {
-    return thunkApi.rejectWithValue(error);
-  }
-});
+      return res.product;
+    } catch (error: any) {
+      return thunkApi.rejectWithValue(error);
+    }
+  },
+);
 
 export const editProduct = createAsyncThunk<
-  Product, // typ zwracany przy sukcesie
-  { id: string; productData: Product } // argument thunk
+  Product,
+  { id: string; productData: Product }
 >("products/edit", async ({ id, productData }, thunkApi) => {
   try {
-    // używamy authorizedRequest
     const res = await authorizedRequest<{ product: Product }>(thunkApi, {
       url: `/admin/products/${id}`,
       method: "PUT",
       data: productData,
     });
 
-    return res.product; // wyciągamy sam obiekt produktu
+    return res.product;
   } catch (error: any) {
     return thunkApi.rejectWithValue(error);
   }
 });
 
-export const deleteProduct = createAsyncThunk<
-  string, // zwracamy id usuniętego produktu
-  string // argument thunk – id produktu
->("products/delete", async (id, thunkApi) => {
-  try {
-    await authorizedRequest<void>(thunkApi, {
-      url: `/admin/products/${id}`,
-      method: "DELETE",
-    });
+export const deleteProduct = createAsyncThunk<string, string>(
+  "products/delete",
+  async (id, thunkApi) => {
+    try {
+      await authorizedRequest<void>(thunkApi, {
+        url: `/admin/products/${id}`,
+        method: "DELETE",
+      });
 
-    return id; // zwracamy id, żeby można było od razu usunąć z listy w reducerze
-  } catch (error: any) {
-    return thunkApi.rejectWithValue(error);
-  }
-});
+      return id;
+    } catch (error: any) {
+      return thunkApi.rejectWithValue(error);
+    }
+  },
+);
 
 const productSlice = createSlice({
   name: "products",
@@ -141,8 +138,6 @@ const productSlice = createSlice({
       .addCase(createProduct.fulfilled, (state, action) => {
         state.products.push(action.payload);
       })
-
-      //fetch single product
 
       .addCase(fetchProductById.pending, (state) => {
         state.loading = true;
@@ -185,5 +180,4 @@ const productSlice = createSlice({
   },
 });
 
-//export const { clearSelected } = productSlice.actions;
 export default productSlice.reducer;

@@ -20,7 +20,6 @@ const initialState: VideoState = {
 export const fetchVideoUrl = createAsyncThunk(
   "video/fetchUrl",
   async (videoId: string) => {
-    //console.log("Fetching video URL for ID hello:", videoId);
     const res = await api.get(`/api/stream/${videoId}`);
     console.log("Fetched video URL:", res.data);
     return res.data;
@@ -41,7 +40,7 @@ export const deleteVideo = createAsyncThunk(
   async (videoId: string, { rejectWithValue }) => {
     try {
       await api.delete(`/api/stream/videos/${videoId}`);
-      return videoId; // zwracamy id usuniętego filmu
+      return videoId;
     } catch (err: any) {
       return rejectWithValue(err?.response?.data ?? "delete-video-failed");
     }
@@ -83,10 +82,8 @@ const videoSlice = createSlice({
       .addCase(deleteVideo.fulfilled, (state, action) => {
         state.loading = false;
 
-        // usuń z listy
         state.videos = state.videos.filter((v) => v._id !== action.payload);
 
-        // jeśli aktualnie oglądany film = usunięty
         if (state.video?._id === action.payload) {
           state.video = null;
           state.url = null;

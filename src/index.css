@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
-/* Podstawowe style dla całej aplikacji */
+/* Basic styles for the entire application */
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #f9fafb; /* jasnoszary background */
-  color: #111827; /* prawie czarny tekst */
+  background-color: #f9fafb;
+  color: #111827;
 }
 
 #root {
@@ -15,12 +15,12 @@ body {
   padding: 2rem;
 }
 
-/* Style dla linków (opcjonalnie) */
+/* Link styles (optional) */
 a {
   text-decoration: none;
 }
 
-/* Dla lepszej czytelności */
+/* For better readability */
 h1,
 h2,
 h3,

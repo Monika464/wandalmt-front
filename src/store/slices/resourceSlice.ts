@@ -53,7 +53,6 @@ interface AddChapterPayload {
 }
 
 const transformChapterDataForApi = (chapterData: any): IChapter => {
-  // Jeśli frontend wysyła stare pole videoId, przekonwertuj na bunnyVideoId
   if (chapterData.videoId && !chapterData.bunnyVideoId) {
     return {
       ...chapterData,
@@ -62,7 +61,6 @@ const transformChapterDataForApi = (chapterData: any): IChapter => {
     };
   }
 
-  // Jeśli frontend wysyła bunnyGuid, przekonwertuj na bunnyVideoId
   if (chapterData.bunnyGuid && !chapterData.bunnyVideoId) {
     return {
       ...chapterData,
@@ -74,9 +72,8 @@ const transformChapterDataForApi = (chapterData: any): IChapter => {
   return chapterData;
 };
 
-// 📌 Helper function do transformacji danych z API
+// 📌 Helper function for data transformation from API
 const transformChapterFromApi = (chapter: any): IChapter => {
-  // API zwraca bunnyVideoId, ale frontend może oczekiwać videoId dla kompatybilności
   return {
     _id: chapter._id,
     number: chapter.number,
@@ -127,12 +124,10 @@ export const fetchResourceById = createAsyncThunk<IResource, string>(
         method: "GET",
       });
 
-      // Transformuj chapters
       if (resource.chapters) {
         resource.chapters = resource.chapters.map(transformChapterFromApi);
       }
 
-      //console.log("✅ Fetched resource by ID:", resource._id);
       return resource;
     } catch (error: any) {
       console.error("❌ Error in fetchResourceById:", error);
@@ -193,12 +188,12 @@ export const createResource = createAsyncThunk<
       data: resourceData,
     });
 
-    // Transformuj chapters
+    // Transform chapters
     if (resource.chapters) {
       resource.chapters = resource.chapters.map(transformChapterFromApi);
     }
 
-    console.log("✅ Resource created:", resource._id);
+    // console.log("✅ Resource created:", resource._id);
     return resource;
   } catch (error: any) {
     console.error("❌ Error creating resource:", error);
@@ -251,12 +246,12 @@ export const deleteResource = createAsyncThunk<string, string>(
   },
 );
 
-// 📌 Dodaj chapter do resource - ZAKTUALIZOWANE
+// 📌 Add chapter to resource
 export const addChapter = createAsyncThunk<IResource, AddChapterPayload>(
   "resources/addChapter",
   async ({ resourceId, chapterData }, thunkApi) => {
     try {
-      // Transformuj dane przed wysłaniem
+      //Transform data before sending
       const transformedData = transformChapterDataForApi(chapterData);
 
       const resource = await authorizedRequest<IResource>(thunkApi, {
@@ -265,7 +260,7 @@ export const addChapter = createAsyncThunk<IResource, AddChapterPayload>(
         data: transformedData,
       });
 
-      // Transformuj chapters z odpowiedzi
+      // Transform chapters from answers
       if (resource.chapters) {
         resource.chapters = resource.chapters.map(transformChapterFromApi);
       }
@@ -279,7 +274,7 @@ export const addChapter = createAsyncThunk<IResource, AddChapterPayload>(
   },
 );
 
-// 📌 Usuń chapter z resource (razem z video)
+// 📌 Remove chapter from resource (along with video)
 export const deleteChapter = createAsyncThunk<
   { resourceId: string; chapterId: string },
   { resourceId: string; chapterId: string; videoId: string }

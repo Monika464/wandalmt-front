@@ -49,10 +49,10 @@ export const fetchProgressByProductId = createAsyncThunk<
   }
 });
 
-// Oznacz rozdział jako ukończony
+// Mark chapter as complete
 export const markChapterAsCompleted = createAsyncThunk<
   ChapterProgress,
-  { productId: string; chapterId: string } // argument thunk
+  { productId: string; chapterId: string }
 >("progress/markAsCompleted", async ({ productId, chapterId }, thunkApi) => {
   try {
     const res = await authorizedRequest<{ progress: ChapterProgress }>(
@@ -63,15 +63,15 @@ export const markChapterAsCompleted = createAsyncThunk<
       },
     );
     console.log("Response from markChapterAsCompleted:", res);
-    return res.progress; // wyciągamy sam obiekt postępu
+    return res.progress;
   } catch (error: any) {
     return thunkApi.rejectWithValue(error);
   }
 });
 
-// Oznacz rozdział jako NIEukończony (usuń postęp)
+// Mark chapter as NOT completed (delete progress)
 export const markChapterAsIncomplete = createAsyncThunk<
-  { productId: string; chapterId: string }, // zwracamy id do usunięcia z store
+  { productId: string; chapterId: string }, // we return the id to be removed from the store
   { productId: string; chapterId: string } // argument thunk
 >("progress/markAsIncomplete", async ({ productId, chapterId }, thunkApi) => {
   try {
@@ -80,15 +80,15 @@ export const markChapterAsIncomplete = createAsyncThunk<
       method: "DELETE",
     });
 
-    return { productId, chapterId }; // zwracamy id, żeby usunąć z store
+    return { productId, chapterId }; // we return the id to remove it from the store
   } catch (error: any) {
     return thunkApi.rejectWithValue(error);
   }
 });
 
-// Zresetuj cały postęp kursu
+// Reset all course progress
 export const resetCourseProgress = createAsyncThunk<
-  string, // zwracamy productId
+  string, //we return productId
   string // argument thunk – productId
 >("progress/resetCourseProgress", async (productId, thunkApi) => {
   try {
@@ -97,7 +97,7 @@ export const resetCourseProgress = createAsyncThunk<
       method: "DELETE",
     });
 
-    return productId; // zwracamy productId, żeby wyczyścić store
+    return productId; // we return productId to clear the store
   } catch (error: any) {
     return thunkApi.rejectWithValue(error);
   }
@@ -110,7 +110,7 @@ const progressSlice = createSlice({
     clearProgressError: (state) => {
       state.error = null;
     },
-    // Dodajemy reducer do lokalnego aktualizowania postępu (opcjonalnie)
+    // We add a reducer to update progress locally (optional)
     updateLocalProgress: (
       state,
       action: PayloadAction<{
@@ -129,7 +129,7 @@ const progressSlice = createSlice({
       const now = new Date().toISOString();
 
       const localProgress: ChapterProgress = {
-        userId: "", // puste, bo to tylko lokalne
+        userId: "", // empty because it's only local
         productId,
         chapterId,
         completed: false,
@@ -152,15 +152,15 @@ const progressSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Pobieranie postępu
+      // Downloading progress
       .addCase(fetchProgressByProductId.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchProgressByProductId.fulfilled, (state, action) => {
         state.loading = false;
-        // POPRAWA: Używamy action.meta.arg, ale musimy odpowiednio ztypować action
-        const productId = action.meta.arg; // To działa, bo createAsyncThunk dodaje meta
+
+        const productId = action.meta.arg;
         state.progressByProductId[productId] = action.payload;
       })
       .addCase(fetchProgressByProductId.rejected, (state, action) => {

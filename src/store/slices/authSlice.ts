@@ -5,19 +5,6 @@ import { tokenRefreshService } from "../../services/tokenRefreshService";
 
 type Role = "user" | "admin";
 
-// interface RegisterData {
-//   name: string;
-//   surname: string;
-//   email: string;
-//   password: string;
-//   captchaToken?: string;
-// }
-
-// interface LoginData {
-//   email: string;
-//   password: string;
-// }
-
 interface User {
   _id: string;
   name: string;
@@ -55,56 +42,54 @@ const initialState: AuthState = {
   expiresAt: storedExpiresAt ? parseInt(storedExpiresAt) : null,
 };
 
-// Helper: Uruchamia odświeżanie tokena
+// Helper: Triggers token refresh
 const setupTokenRefresh = (expiresAt: number) => {
   if (!expiresAt || expiresAt <= Date.now()) {
     console.warn("Nieprawidłowy lub wygasły expiresAt:", expiresAt);
     return;
   }
 
-  // Ustaw buffer na 5 minut przed wygaśnięciem
+  // Set buffer to 5 minutes before expiration
   tokenRefreshService.setRefreshBuffer(5 * 60 * 1000);
 
   tokenRefreshService.setupTokenRefresh(expiresAt, async () => {
     try {
-      console.log("Automatyczne odświeżanie tokena...");
       const result = refreshToken();
       if (refreshToken.fulfilled.match(result)) {
-        console.log("Token automatycznie odświeżony");
       } else {
-        console.error("Błąd automatycznego odświeżania:", result);
-        // W przypadku błędu, czyścimy timer
+        console.error("Auto refresh error:", result);
+        // In case of an error, we clear the timer
         tokenRefreshService.clearRefreshTimer();
       }
     } catch (error) {
-      console.error("Wyjątek podczas automatycznego odświeżania:", error);
+      console.error("Auto refresh exception:", error);
     }
   });
 };
 
-// Helper: Czyści timer odświeżania
+// Helper: Clears the refresh timer
 const clearTokenRefresh = () => {
   tokenRefreshService.clearRefreshTimer();
 };
 
-// Helper: Inicjalizuje odświeżanie na podstawie istniejącego tokena
+// Helper:Initiates a refresh based on an existing token
 const initializeTokenRefresh = () => {
   const storedExpiresAt = localStorage.getItem("expiresAt");
   if (storedExpiresAt) {
     const expiresAt = parseInt(storedExpiresAt);
     if (expiresAt > Date.now()) {
-      console.log("Inicjalizacja odświeżania tokena z localStorage");
+      //console.log("Initializing token refresh from localStorage");
       setupTokenRefresh(expiresAt);
     } else {
-      console.log("Token w localStorage już wygasł");
+      console.log("The token in localStorage has already expired");
       clearTokenRefresh();
     }
   }
 };
 
-// Wywołaj inicjalizację przy załadowaniu modułu
+// Call initialization on module load
 if (typeof window !== "undefined") {
-  // Opóźnij inicjalizację, aby uniknąć problemów z cyklicznymi zależnościami
+  // Delay initialization to avoid cyclic dependency issues
   setTimeout(() => {
     initializeTokenRefresh();
   }, 1000);
@@ -121,7 +106,7 @@ export const login = createAsyncThunk(
 
       if (axios.isAxiosError(err)) {
         const axiosError = err as AxiosError<BackendError>;
-        // Pobierz wiadomość z backendu (np. "Niepoprawny email lub hasło")
+        // Get message from backend (e.g. "Incorrect email or password")
         errorMessage =
           axiosError.response?.data?.error ||
           axiosError.response?.data?.message ||
@@ -130,13 +115,13 @@ export const login = createAsyncThunk(
         errorMessage = err.message;
       }
 
-      // Przekaż wiadomość do Reducera
+      // Forward a message to Reducer
       return thunkAPI.rejectWithValue(errorMessage);
     }
   },
 );
 
-// Rejestracja usera
+// User registration
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
   async (
@@ -153,21 +138,17 @@ export const registerUser = createAsyncThunk(
       const res = await api.post("/auth/register", newUser);
       return res.data;
     } catch (error: any) {
-      console.error("Rejestracja - błąd szczegóły:", {
+      console.error("Registration error details:", {
         status: error.response?.status,
         data: error.response?.data,
         message: error.message,
       });
 
-      // KLUCZOWA ZMIANA: Poprawna obsługa błędu
       if (error.response?.data?.error) {
-        // Backend zwraca { error: "wiadomość" }
         return rejectWithValue(error.response.data.error);
       } else if (error.response?.data?.message) {
-        // Lub { message: "wiadomość" }
         return rejectWithValue(error.response.data.message);
       } else if (error.response?.data) {
-        // Lub zwykły string
         return rejectWithValue(error.response.data);
       } else {
         return rejectWithValue(error.message || "Registration failed");
@@ -185,13 +166,11 @@ export const registerAdmin = createAsyncThunk(
     thunkAPI,
   ) => {
     try {
-      //console.log("RegisterAdmin payload:", data);
       const state = thunkAPI.getState() as { auth: AuthState };
       const token = state.auth.token;
 
       if (!token) {
-        //console.error("Brak tokena w stanie Redux");
-        return thunkAPI.rejectWithValue("Brak tokena autoryzacyjnego");
+        return thunkAPI.rejectWithValue("No authorization token");
       }
 
       const response = await api.post("auth/register-admin", data, {
@@ -204,7 +183,7 @@ export const registerAdmin = createAsyncThunk(
 
       return response.data;
     } catch (err) {
-      let errorMessage: string = "Wystąpił błąd";
+      let errorMessage: string = "An error occurred";
       if (axios.isAxiosError(err)) {
         const axiosError = err as AxiosError<BackendError>;
         errorMessage =
@@ -221,7 +200,7 @@ export const registerAdmin = createAsyncThunk(
 );
 
 // Logout thunk
-// Logout user
+
 export const logoutUser = createAsyncThunk(
   "auth/logoutUser",
   async (_, thunkAPI) => {
@@ -240,7 +219,7 @@ export const logoutUser = createAsyncThunk(
       return;
     } catch (error) {
       console.error("Logout user error:", error);
-      return thunkAPI.rejectWithValue("Błąd przy wylogowaniu użytkownika");
+      return thunkAPI.rejectWithValue("Error logging out user");
     }
   },
 );
@@ -264,7 +243,7 @@ export const logoutAdmin = createAsyncThunk(
       return;
     } catch (error) {
       console.error("Logout admin error:", error);
-      return thunkAPI.rejectWithValue("Błąd przy wylogowaniu admina");
+      return thunkAPI.rejectWithValue("Error logging out admin");
     }
   },
 );
@@ -296,7 +275,7 @@ export const refreshToken = createAsyncThunk(
       const token = state.auth.token;
 
       if (!token) {
-        return thunkAPI.rejectWithValue("Brak tokena");
+        return thunkAPI.rejectWithValue("No token");
       }
 
       const response = await api.post(
@@ -311,7 +290,7 @@ export const refreshToken = createAsyncThunk(
     } catch (err) {
       clearTokenRefresh();
 
-      let errorMessage = "Nie udało się odświeżyć tokena";
+      let errorMessage = "Failed to refresh token";
       if (axios.isAxiosError(err)) {
         const axiosError = err as AxiosError<BackendError>;
         errorMessage =
@@ -337,13 +316,13 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    // Nowy reducer do ręcznego ustawienia odświeżania
+    // reducer for manual refresh setting
     setupAutoRefresh(state) {
       if (state.expiresAt && state.expiresAt > Date.now()) {
         setupTokenRefresh(state.expiresAt);
       }
     },
-    // Nowy reducer do wyczyszczenia odświeżania
+    // reducer to clean refresh
     clearAutoRefresh() {
       clearTokenRefresh();
     },
@@ -372,14 +351,14 @@ const authSlice = createSlice({
             "expiresAt",
             action.payload.expiresAt.toString(),
           );
-          // Uruchom automatyczne odświeżanie
+          // Turn on auto refresh
           setupTokenRefresh(action.payload.expiresAt);
         } else {
           state.expiresAt = null;
           clearTokenRefresh();
         }
 
-        // Zapis do localStorage
+        // Saving to localStorage
         localStorage.setItem("user", JSON.stringify(action.payload.user));
         localStorage.setItem("token", action.payload.token);
       })
@@ -397,7 +376,6 @@ const authSlice = createSlice({
         state.status = "succeeded";
 
         if (action.payload || action.payload.token) {
-          // automatyczne logowanie po rejestracji
           state.user = action.payload.user;
           state.token = action.payload.token;
 
@@ -422,12 +400,12 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.status = "failed";
-        //state.error = action.error.message || "Błąd rejestracji";
+
         state.error = (action.payload as string) || "Registration failed";
         clearTokenRefresh();
       })
 
-      // REGISTER ADMIN — nie nadpisujemy auth (tylko status/error)
+      // REGISTER ADMIN
       .addCase(registerAdmin.pending, (state) => {
         state.status = "loading";
       })
@@ -440,7 +418,7 @@ const authSlice = createSlice({
         state.error =
           (action.payload as string) ||
           action.error.message ||
-          "Błąd rejestracji admina";
+          "Admin registration error";
       })
 
       // LOGOUT
@@ -470,13 +448,13 @@ const authSlice = createSlice({
         state.loading = false;
         state.status = "idle";
         state.success = null;
-        state.error = (action.payload as string) || "Błąd przy wylogowaniu";
+        state.error = (action.payload as string) || "Error logging out";
 
         localStorage.removeItem("user");
         localStorage.removeItem("token");
         localStorage.removeItem("expiresAt");
 
-        // Wyczyść timer odświeżania
+        // Clear refresh timer
         clearTokenRefresh();
       })
       .addCase(logoutAdmin.pending, (state) => {
@@ -523,8 +501,8 @@ const authSlice = createSlice({
 
         state.error =
           action.payload === "unauthorized"
-            ? "Sesja wygasła. Zaloguj się ponownie."
-            : "Błąd autoryzacji";
+            ? "Your session has expired. Please log in again.."
+            : "Authorization error";
         state.status = "failed";
 
         clearTokenRefresh();
@@ -536,9 +514,7 @@ const authSlice = createSlice({
         localStorage.setItem("token", action.payload.token);
         localStorage.setItem("expiresAt", action.payload.expiresAt.toString());
 
-        console.log("Token odświeżony");
-
-        // Ponownie ustaw timer odświeżania z nowym expiresAt
+        // Reset the refresh timer with a new expiresAt
         if (action.payload.expiresAt) {
           setupTokenRefresh(action.payload.expiresAt);
         }
@@ -546,11 +522,11 @@ const authSlice = createSlice({
       .addCase(refreshToken.rejected, (state, action) => {
         const errorMessage = action.payload as string;
 
-        // Zapisujemy błąd aby wyświetlić użytkownikowi
+        // Log the error to display to the user
         state.error = `Nie udało się odświeżyć sesji: ${errorMessage}`;
         state.status = "failed";
 
-        // Log dla developera
+        // Log for developer
         console.error("Refresh token error:", {
           message: errorMessage,
           user: state.user?.email,
@@ -567,7 +543,7 @@ const authSlice = createSlice({
           errorMessage.includes("unauthorized")
         ) {
           setTimeout(() => {
-            // Możesz dodać automatyczne wylogowanie po błędzie
+            // You can add automatic logout on error
             //thunkAPI.dispatch(logoutUser());
           }, 5000);
         }

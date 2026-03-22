@@ -21,14 +21,8 @@ export const requestPasswordReset = createAsyncThunk(
   async (email: string, { rejectWithValue, getState }) => {
     try {
       const state = getState() as any;
-
-      console.log("🔍 State i18n:", state.i18n);
-      console.log("🔍 State auth:", state.auth);
-      console.log("🔍 State language from i18n:", state.i18n?.language);
-      console.log("🔍 State language from auth:", state.auth?.language);
-
       const lang = state.i18n?.language || state.auth?.language || "pl";
-      console.log("Sending reset request with lang:", lang); // Debug
+
       const res = await api.post(
         "/auth/forgot-password",
         { email },
@@ -40,7 +34,9 @@ export const requestPasswordReset = createAsyncThunk(
       );
       return res.data.message;
     } catch (err: any) {
-      return rejectWithValue(err.response?.data?.error || "Błąd resetu hasła");
+      return rejectWithValue(
+        err.response?.data?.error || "Password reset error",
+      );
     }
   },
 );
@@ -56,12 +52,14 @@ export const resetPassword = createAsyncThunk(
   ) => {
     try {
       const state = getState() as any;
-      const lang = state.i18n?.language || "pl"; // Pobierz język z i18n
+      const lang = state.i18n?.language || "pl";
       const res = await api.post("/auth/reset-password", { ...payload, lang });
 
       return res.data.message;
     } catch (err: any) {
-      return rejectWithValue(err.response?.data?.error || "Błąd zmiany hasła");
+      return rejectWithValue(
+        err.response?.data?.error || "Password change error",
+      );
     }
   },
 );
@@ -81,12 +79,11 @@ export const changeEmail = createAsyncThunk(
         return rejectWithValue("Brak tokena autoryzacji");
       }
 
-      // Pobierz język z i18n
       const lang = state.i18n?.language || "pl";
 
       const res = await api.patch(
         "/auth/change-email",
-        { newEmail }, // Dodaj lang do body
+        { newEmail },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -97,9 +94,7 @@ export const changeEmail = createAsyncThunk(
       return res.data.message;
     } catch (err: any) {
       console.error("Change email error:", err.response?.data || err.message);
-      return rejectWithValue(
-        err.response?.data?.error || "Błąd zmiany e-maila",
-      );
+      return rejectWithValue(err.response?.data?.error || "Email change error");
     }
   },
 );

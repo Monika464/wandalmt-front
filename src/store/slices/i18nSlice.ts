@@ -10,7 +10,7 @@ const getInitialLanguage = (): string => {
   if (savedLanguage === "en" || savedLanguage === "pl") {
     return savedLanguage;
   }
-  return "en"; // domyślnie angielski
+  return "en";
 };
 
 const initialState: I18nState = {
@@ -21,7 +21,6 @@ const i18nSlice = createSlice({
   name: "i18n",
   initialState,
   reducers: {
-    // Użyj prostszej składni bez PayloadAction
     setLanguage: (state, action) => {
       state.language = action.payload;
       localStorage.setItem("language", action.payload);
