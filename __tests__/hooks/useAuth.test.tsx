@@ -1,5 +1,5 @@
 // __tests__/hooks/useAuth.test.tsx
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { renderHook } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { useAuth } from "../../src/hooks/useAuth";
@@ -124,7 +124,7 @@ describe("useAuth hook", () => {
     expect(tokenRefreshService.setupTokenRefresh).toHaveBeenCalledTimes(1);
     expect(tokenRefreshService.setupTokenRefresh).toHaveBeenCalledWith(
       mockExpiresAt,
-      expect.any(Function)
+      expect.any(Function),
     );
   });
 

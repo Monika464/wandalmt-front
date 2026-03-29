@@ -1,20 +1,19 @@
 // __tests__/store/slices/authSlice.test.ts
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer, {
-  logoutUser,
-  logoutAdmin,
-} from "../../../src/store/slices/authSlice";
+import authReducer, { logoutUser } from "../../../src/store/slices/authSlice";
 
-// Mock console.error aby nie zaśmiecał outputu testów
 beforeAll(() => {
   jest.spyOn(console, "error").mockImplementation(() => {});
 });
 
 afterAll(() => {
-  (console.error as jest.Mock).mockRestore();
+  jest.restoreAllMocks();
 });
 
-// Mock api - UPROŚĆ
+// afterAll(() => {
+//   (console.error as jest.Mock).mockRestore();
+// });
+
 jest.mock("../../../src/utils/api", () => {
   const mockPost = jest.fn();
   return {
@@ -30,11 +29,9 @@ jest.mock("../../../src/utils/api", () => {
   };
 });
 
-// Zaimportuj mockowany api
 import api from "../../../src/utils/api";
 
 describe("authSlice - logout actions", () => {
-  // Mock localStorage przed wszystkimi testami
   beforeAll(() => {
     Object.defineProperty(window, "localStorage", {
       value: {
@@ -53,12 +50,10 @@ describe("authSlice - logout actions", () => {
 
   describe("logoutUser", () => {
     it("should clear user state on successful logout", async () => {
-      // Mock successful API call
       (api.post as jest.Mock).mockResolvedValue({
         data: { message: "Logged out" },
       });
 
-      // Store z zalogowanym użytkownikiem
       const store = configureStore({
         reducer: { auth: authReducer },
         preloadedState: {
@@ -80,29 +75,24 @@ describe("authSlice - logout actions", () => {
         } as any,
       });
 
-      // Sprawdź stan przed wylogowaniem
       const beforeState = store.getState().auth;
       expect(beforeState.user).not.toBeNull();
       expect(beforeState.token).toBe("user-token-123");
 
-      // Wykonaj wylogowanie
       await store.dispatch(logoutUser());
 
-      // Sprawdź stan po wylogowaniu
       const afterState = store.getState().auth;
       expect(afterState.user).toBeNull();
       expect(afterState.token).toBeNull();
       expect(afterState.expiresAt).toBeNull();
       expect(afterState.status).toBe("idle");
 
-      // Sprawdź czy API zostało wywołane
       expect(api.post).toHaveBeenCalledWith(
         "/auth/logout",
         {},
-        { headers: { Authorization: "Bearer user-token-123" } }
+        { headers: { Authorization: "Bearer user-token-123" } },
       );
 
-      // Sprawdź czy localStorage zostało wyczyszczone
       expect(localStorage.removeItem).toHaveBeenCalledWith("user");
       expect(localStorage.removeItem).toHaveBeenCalledWith("token");
       expect(localStorage.removeItem).toHaveBeenCalledWith("expiresAt");
@@ -136,7 +126,7 @@ describe("authSlice - logout actions", () => {
       await store.dispatch(logoutUser());
 
       const state = store.getState().auth;
-      expect(state.user).toBeNull(); // ← TO MUSI BYĆ NULL!
+      expect(state.user).toBeNull();
       expect(state.token).toBeNull();
       expect(state.expiresAt).toBeNull();
     });

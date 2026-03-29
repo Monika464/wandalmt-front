@@ -24,7 +24,7 @@ jest.mock("react-router-dom", () => ({
   useNavigate: () => mockNavigate,
 }));
 
-// Testowy komponent LogoutButton
+// Test component LogoutButton
 import React from "react";
 const TestLogoutButton = () => {
   const dispatch = useDispatch();
@@ -89,7 +89,7 @@ describe("LogoutButton Component", () => {
         <MemoryRouter>
           <TestLogoutButton />
         </MemoryRouter>
-      </Provider>
+      </Provider>,
     );
 
     expect(screen.getByTestId("logout-button")).toBeInTheDocument();
@@ -104,12 +104,12 @@ describe("LogoutButton Component", () => {
         <MemoryRouter>
           <TestLogoutButton />
         </MemoryRouter>
-      </Provider>
+      </Provider>,
     );
 
     fireEvent.click(screen.getByTestId("logout-button"));
 
-    // Poczekaj na async dispatch
+    // Wait for async dispatch
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith("/login");
     });
@@ -123,7 +123,7 @@ describe("LogoutButton Component", () => {
         <MemoryRouter>
           <TestLogoutButton />
         </MemoryRouter>
-      </Provider>
+      </Provider>,
     );
 
     fireEvent.click(screen.getByTestId("logout-button"));

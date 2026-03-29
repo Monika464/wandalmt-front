@@ -2,13 +2,24 @@
 import "@testing-library/jest-dom";
 import { TextEncoder, TextDecoder } from "util";
 
-// Polyfill dla TextEncoder/TextDecoder
+// Opcjonalnie: wyciszenie console.log podczas testów (odkomentuj jeśli chcesz)
+beforeAll(() => {
+  jest.spyOn(console, "log").mockImplementation(() => {});
+  jest.spyOn(console, "error").mockImplementation(() => {});
+  jest.spyOn(console, "warn").mockImplementation(() => {});
+});
+
+afterAll(() => {
+  jest.restoreAllMocks();
+});
+
+// Polyfill for TextEncoder/TextDecoder
 if (typeof global.TextEncoder === "undefined") {
   global.TextEncoder = TextEncoder;
   global.TextDecoder = TextDecoder;
 }
 
-// Mock dla window
+// Mock for window
 Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: jest.fn().mockImplementation((query) => ({
@@ -23,7 +34,7 @@ Object.defineProperty(window, "matchMedia", {
   })),
 });
 
-// Mock dla ResizeObserver
+// Mock for ResizeObserver
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   unobserve: jest.fn(),
@@ -44,7 +55,7 @@ Object.defineProperty(window, "localStorage", {
   value: localStorageMock,
 });
 
-// Mock dla import.meta.env (Vite)
+// Mock for import.meta.env (Vite)
 Object.defineProperty(global, "import", {
   value: {
     meta: {
@@ -55,7 +66,22 @@ Object.defineProperty(global, "import", {
   },
 });
 
-// Reset mocków przed każdym testem
+// Mock for react-i18next
+jest.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+    i18n: {
+      language: "en",
+      changeLanguage: jest.fn(),
+    },
+  }),
+  initReactI18next: {
+    type: "3rdParty",
+    init: jest.fn(),
+  },
+}));
+
+// Reset macks before each test
 beforeEach(() => {
   jest.clearAllMocks();
   localStorageMock.getItem.mockClear();

@@ -36,6 +36,7 @@ Modern e-commerce frontend application built with React 19, TypeScript, and Vite
 
 ## 📁 Folder Structure
 
+```
 wandalmt-front/
 ├── src/
 │ ├── components/ # Reusable UI components
@@ -75,6 +76,7 @@ wandalmt-front/
 ├── vite.config.ts
 ├── tailwind.config.js
 └── README.md
+```
 
 ## 🚀 Getting Started
 
@@ -122,26 +124,24 @@ VITE_RECAPTCHA_SITE_KEY=your_recaptcha_site_key
 
 4. **Start development server:**
 
-``bash
+```bash
 npm run dev
-
 ```
+
 5. **Open your browser:**
 
-text
-   http://localhost:5173
-
+http://localhost:5173
 
 ##Available Scripts
-|Command	Description|
-| ------------------- |
-| npm run dev |	Start development server |
-| npm run build	| Build for production |
-| npm run preview |	Preview production build |
-| npm run test |	Run tests |
-| npm run test | Run tests with coverage |
-| npm run lint	| Run ESLint |
 
+| Command Description   |
+| --------------------- | ------------------------ |
+| npm run dev           | Start development server |
+| npm run build         | Build for production     |
+| npm run preview       | Preview production build |
+| npm run test          | Run tests                |
+| npm run test:coverage | Run tests with coverage  |
+| npm run lint          | Run ESLint               |
 
 🌍 Internationalization
 
@@ -158,19 +158,17 @@ The app supports English and Polish with automatic language detection.
 typescript
 
 ```
-
 import { useTranslation } from 'react-i18next';
 const { t } = useTranslation();
 return <h1>{t('welcome_message')}</h1>;
-
-````
+```
 
 🧪 Testing
 
 ```bash
 # Run tests
 npm test
-````
+```
 
 # Run tests with coverage
 

@@ -6,7 +6,7 @@ import { MemoryRouter } from "react-router-dom";
 import Login from "../../../src/components/auth/Login";
 import authReducer from "../../../src/store/slices/authSlice";
 import cartReducer from "../../../src/store/slices/cartSlice";
-import type { RootState } from "../../../src/store";
+//import type { RootState } from "../../../src/store";
 
 // PROSTE MOCKI BEZ ZMIENNYCH
 jest.mock("../../../src/hooks/useAuth", () => ({
@@ -81,11 +81,17 @@ describe("Login Component - Simple", () => {
         <MemoryRouter>
           <Login />
         </MemoryRouter>
-      </Provider>
+      </Provider>,
     );
 
-    expect(screen.getByPlaceholderText("Email")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Hasło")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("login.emailPlaceholder"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("login.passwordPlaceholder"),
+    ).toBeInTheDocument();
+    //expect(screen.getByPlaceholderText("Email")).toBeInTheDocument();
+    //expect(screen.getByPlaceholderText("Hasło")).toBeInTheDocument();
   });
 
   test("form inputs work", () => {
@@ -96,11 +102,15 @@ describe("Login Component - Simple", () => {
         <MemoryRouter>
           <Login />
         </MemoryRouter>
-      </Provider>
+      </Provider>,
     );
 
-    const emailInput = screen.getByPlaceholderText("Email");
-    const passwordInput = screen.getByPlaceholderText("Hasło");
+    const emailInput = screen.getByPlaceholderText("login.emailPlaceholder");
+    const passwordInput = screen.getByPlaceholderText(
+      "login.passwordPlaceholder",
+    );
+    //const emailInput = screen.getByPlaceholderText("Email");
+    //const passwordInput = screen.getByPlaceholderText("Hasło");
 
     fireEvent.change(emailInput, { target: { value: "test@test.com" } });
     fireEvent.change(passwordInput, { target: { value: "password123" } });

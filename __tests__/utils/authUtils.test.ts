@@ -18,7 +18,6 @@ describe("authUtils", () => {
       const now = Date.now();
       jest.setSystemTime(now);
 
-      // Token wygasł 5 minut temu
       const expiredTime = now - 5 * 60 * 1000;
       expect(checkTokenExpiry(expiredTime)).toBe(true);
     });
@@ -27,7 +26,6 @@ describe("authUtils", () => {
       const now = Date.now();
       jest.setSystemTime(now);
 
-      // Token ważny przez kolejne 5 minut
       const validTime = now + 5 * 60 * 1000;
       expect(checkTokenExpiry(validTime)).toBe(false);
     });
@@ -44,7 +42,7 @@ describe("authUtils", () => {
 
     it("should format hours and minutes correctly", () => {
       expect(formatTimeRemaining(3 * 60 * 60 * 1000 + 30 * 60 * 1000)).toBe(
-        "3h 30m"
+        "3h 30m",
       );
     });
 

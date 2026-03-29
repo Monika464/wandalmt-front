@@ -44,20 +44,17 @@ describe("API Interceptor - auto logout on 401", () => {
       responseInterceptors.handlers.length > 0
     ) {
       const rejectedHandler = responseInterceptors.handlers.find(
-        (h: any) => h.rejected
+        (h: any) => h.rejected,
       );
 
       if (rejectedHandler) {
-        // Wywołaj handler - może być async, więc obsłuż promise
         const result = rejectedHandler.rejected(error);
         if (result && result.catch) {
-          result.catch(() => {}); // Ignoruj błędy w teście
+          result.catch(() => {});
         }
       }
     }
 
-    // Sprawdź czy dispatch został wywołany
-    // (W zależności od implementacji, może wywołać logoutUser/logoutAdmin)
     expect(mockDispatch).toHaveBeenCalled();
   });
 
@@ -75,11 +72,10 @@ describe("API Interceptor - auto logout on 401", () => {
       responseInterceptors.handlers.length > 0
     ) {
       const rejectedHandler = responseInterceptors.handlers.find(
-        (h: any) => h.rejected
+        (h: any) => h.rejected,
       );
 
       if (rejectedHandler) {
-        // Powinno się wykonać bez crasha nawet bez store
         expect(() => {
           const result = rejectedHandler.rejected(error);
           if (result && result.catch) {

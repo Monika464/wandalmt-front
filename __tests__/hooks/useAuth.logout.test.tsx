@@ -5,7 +5,6 @@ import { configureStore } from "@reduxjs/toolkit";
 import { useAuth } from "../../src/hooks/useAuth";
 import authReducer from "../../src/store/slices/authSlice";
 
-// Proste mocki bez zmiennych - używaj bezpośrednio jest.fn()
 jest.mock("../../src/services/tokenRefreshService", () => ({
   tokenRefreshService: {
     setupTokenRefresh: jest.fn(),
@@ -25,7 +24,6 @@ jest.mock("../../src/utils/api", () => ({
   setStore: jest.fn(),
 }));
 
-// Użyj require do pobrania mockowanych modułów PO zdefiniowaniu mocków
 let mockCheckTokenExpiryValue = false;
 jest.mock("../../src/utils/authUtils", () => ({
   checkTokenExpiry: jest.fn(() => mockCheckTokenExpiryValue),
@@ -72,7 +70,7 @@ describe("useAuth - logout behavior", () => {
 
     expect(tokenRefreshService.setupTokenRefresh).toHaveBeenCalledWith(
       expiresAt,
-      expect.any(Function)
+      expect.any(Function),
     );
   });
 });
