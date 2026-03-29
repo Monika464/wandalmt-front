@@ -1,73 +1,207 @@
-# React + TypeScript + Vite
+# 🎨 Wandalmt Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Modern e-commerce frontend application built with React 19, TypeScript, and Vite.
 
-Currently, two official plugins are available:
+[![React](https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-7.3.1-646CFF?logo=vite)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss)](https://tailwindcss.com/)
+[![License](https://img.shields.io/badge/License-ISC-blue.svg)](LICENSE)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ Features
 
-## React Compiler
+- 🌍 **Internationalization** - Full i18n support with English and Polish
+- 🛒 **Shopping Cart** - Persistent cart with Redux Toolkit
+- 💳 **Stripe Integration** - Secure payment processing
+- 🔐 **Authentication** - JWT-based auth with protected routes
+- 📱 **Responsive Design** - Fully responsive with Tailwind CSS
+- 🧪 **Testing** - Jest and React Testing Library
+- 🎨 **Modern UI** - Lucide React icons and beautiful components
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠 Tech Stack
 
-## Expanding the ESLint configuration
+| Technology       | Version | Purpose              |
+| ---------------- | ------- | -------------------- |
+| React            | 19.1.1  | UI framework         |
+| TypeScript       | 5.8.3   | Type safety          |
+| Vite             | 7.3.1   | Build tool           |
+| Redux Toolkit    | latest  | State management     |
+| RTK Query        | latest  | API caching          |
+| Tailwind CSS     | 4       | Styling              |
+| React Router DOM | latest  | Routing              |
+| Stripe           | latest  | Payments             |
+| i18next          | latest  | Internationalization |
+| Axios            | latest  | HTTP client          |
+| Jest             | latest  | Testing              |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 📁 Folder Structure
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+wandalmt-front/
+├── src/
+│ ├── components/ # Reusable UI components
+│ │ ├── common/ # Buttons, inputs, modals
+│ │ ├── layout/ # Header, Footer
+│ │ ├── product/ # Product cards, details
+│ │ └── cart/ # Cart components
+│ ├── pages/ # Page components
+│ │ ├── Home.tsx
+│ │ ├── Products.tsx
+│ │ ├── ProductDetail.tsx
+│ │ ├── Cart.tsx
+│ │ ├── Checkout.tsx
+│ │ ├── Login.tsx
+│ │ ├── Register.tsx
+│ │ └── Profile.tsx
+│ ├── store/ # Redux store
+│ │ ├── slices/ # Redux slices
+│ │ └── api/ # RTK Query APIs
+│ ├── hooks/ # Custom React hooks
+│ ├── services/ # API service layer
+│ ├── locales/ # Translation files
+│ │ ├── en/ # English
+│ │ └── pl/ # Polish
+│ ├── types/ # TypeScript definitions
+│ ├── utils/ # Helper functions
+│ ├── assets/ # Static assets
+│ ├── styles/ # Global styles
+│ ├── App.tsx
+│ └── main.tsx
+├── public/ # Public assets
+├── tests/ # Test files
+├── .env.example # Environment variables example
+├── index.html
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+├── tailwind.config.js
+└── README.md
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 🚀 Getting Started
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Prerequisites
+
+- **Node.js** >= 18.0.0
+- **npm** or **yarn** or **pnpm**
+- **Backend API** - Running [Wandalmt Backend](https://github.com/Monika464/wandalmt)
+
+### Installation
+
+1. **Clone the repository:**
+
+```bash
+git clone https://github.com/Monika464/wandalmt-front
+cd wandalmt-front
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. **Install dependencies:**
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
+
+3. **Configure environment variables:**
+
+```bash
+cp .env.example .env
+```
+
+Edit .env with your settings:
+env
+
+# API Configuration
+
+VITE_API_URL=http://localhost:3000
+
+# Stripe Configuration
+
+VITE_STRIPE_PUBLIC_KEY=pk_test_your_stripe_public_key
+
+# reCAPTCHA Configuration
+
+VITE_RECAPTCHA_SITE_KEY=your_recaptcha_site_key
+
+4. **Start development server:**
+
+``bash
+npm run dev
+
+```
+5. **Open your browser:**
+
+text
+   http://localhost:5173
+
+
+##Available Scripts
+|Command	Description|
+| ------------------- |
+| npm run dev |	Start development server |
+| npm run build	| Build for production |
+| npm run preview |	Preview production build |
+| npm run test |	Run tests |
+| npm run test | Run tests with coverage |
+| npm run lint	| Run ESLint |
+
+
+🌍 Internationalization
+
+The app supports English and Polish with automatic language detection.
+
+## Adding New Translations
+
+    1.Add translation keys to src/locales/en/common.json
+
+    2.Add Polish translations to src/locales/pl/common.json
+
+    3.Use in components:
+
+typescript
+
+```
+
+import { useTranslation } from 'react-i18next';
+const { t } = useTranslation();
+return <h1>{t('welcome_message')}</h1>;
+
+````
+
+🧪 Testing
+
+```bash
+# Run tests
+npm test
+````
+
+# Run tests with coverage
+
+npm run test:coverage
+
+📦 Building for Production
+
+```bash
+npm run build
+```
+
+The build artifacts will be in the dist/ directory.
+
+🔗 Related Repositories
+
+    Backend API: Wandalmt Backend
+
+    Live Demo: https://club.boxingonline.eu
+
+📄 License
+
+ISC © 2026 Monika K.
+
+🤝 Contributing
+
+    Fork the repository
+
+    Create your feature branch (git checkout -b feature/amazing)
+
+    Commit your changes (git commit -m 'Add amazing feature')
+
+    Push to the branch (git push origin feature/amazing)
+
+    Open a Pull Request
