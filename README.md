@@ -110,17 +110,17 @@ cp .env.example .env
 Edit .env with your settings:
 env
 
-# API Configuration
+#### API Configuration
 
-VITE_API_URL=http://localhost:3000
+`VITE_API_URL=http://localhost:3000`
 
-# Stripe Configuration
+#### Stripe Configuration
 
-VITE_STRIPE_PUBLIC_KEY=pk_test_your_stripe_public_key
+`VITE_STRIPE_PUBLIC_KEY=pk_test_your_stripe_public_key`
 
-# reCAPTCHA Configuration
+#### reCAPTCHA Configuration
 
-VITE_RECAPTCHA_SITE_KEY=your_recaptcha_site_key
+`VITE_RECAPTCHA_SITE_KEY=your_recaptcha_site_key`
 
 4. **Start development server:**
 
@@ -132,30 +132,28 @@ npm run dev
 
 http://localhost:5173
 
-##Available Scripts
+#### Available Scripts
 
-| Command Description   |
-| --------------------- | ------------------------ |
-| npm run dev           | Start development server |
-| npm run build         | Build for production     |
-| npm run preview       | Preview production build |
-| npm run test          | Run tests                |
-| npm run test:coverage | Run tests with coverage  |
-| npm run lint          | Run ESLint               |
+Command Description  
+| --------------------------------------------- |
+| npm run dev | Start development server |
+| npm run build | Build for production |
+| npm run preview | Preview production build |
+| npm run test | Run tests |
+| npm run test:coverage | Run tests with coverage |
+| npm run lint | Run ESLint |
 
-🌍 Internationalization
+## 🌍 Internationalization
 
 The app supports English and Polish with automatic language detection.
 
-## Adding New Translations
+#### Adding New Translations
 
     1.Add translation keys to src/locales/en/common.json
 
     2.Add Polish translations to src/locales/pl/common.json
 
-    3.Use in components:
-
-typescript
+    3.Use in components
 
 ```
 import { useTranslation } from 'react-i18next';
@@ -163,18 +161,22 @@ const { t } = useTranslation();
 return <h1>{t('welcome_message')}</h1>;
 ```
 
-🧪 Testing
+## 🧪 Testing
+
+### Run tests
 
 ```bash
 # Run tests
 npm test
 ```
 
-# Run tests with coverage
+#### Run tests with coverage
 
+```bash
 npm run test:coverage
+```
 
-📦 Building for Production
+## 📦 Building for Production
 
 ```bash
 npm run build
@@ -182,17 +184,16 @@ npm run build
 
 The build artifacts will be in the dist/ directory.
 
-🔗 Related Repositories
+## 🔗 Related Repositories
 
-    Backend API: Wandalmt Backend
+- [Backend API](https://github.com/Monika464/wandalmt)
+- [Live Demo](https://club.boxingonline.eu)
 
-    Live Demo: https://club.boxingonline.eu
-
-📄 License
+## 📄 License
 
 ISC © 2026 Monika K.
 
-🤝 Contributing
+## 🤝 Contributing
 
     Fork the repository
 
