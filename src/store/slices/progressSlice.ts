@@ -62,7 +62,7 @@ export const markChapterAsCompleted = createAsyncThunk<
         method: "POST",
       },
     );
-    console.log("Response from markChapterAsCompleted:", res);
+    //console.log("Response from markChapterAsCompleted:", res);
     return res.progress;
   } catch (error: any) {
     return thunkApi.rejectWithValue(error);

@@ -13,6 +13,9 @@ export default {
       animation: {
         fadeIn: "fadeIn 0.2s ease-out",
       },
+      screens: {
+        xs: "475px",
+      },
     },
   },
   plugins: [],

@@ -141,25 +141,14 @@ export const fetchResourceByProductId = createAsyncThunk<
   { productId: string; language?: string }
 >("resources/fetchByProductId", async ({ productId, language }, thunkApi) => {
   try {
-    console.log(
-      "🔍 Fetching resource for product:",
-      productId,
-      "language:",
-      language,
-    );
-
     const url = language
       ? `/admin/resources/product/${productId}?language=${language}`
       : `/admin/resources/product/${productId}`;
-
-    console.log("📡 Request URL:", url);
 
     const resource = await authorizedRequest<IResource>(thunkApi, {
       url: url,
       method: "GET",
     });
-
-    console.log("✅ Resource fetched:", resource);
 
     if (resource?.chapters) {
       resource.chapters = resource.chapters.map(transformChapterFromApi);
@@ -193,7 +182,6 @@ export const createResource = createAsyncThunk<
       resource.chapters = resource.chapters.map(transformChapterFromApi);
     }
 
-    // console.log("✅ Resource created:", resource._id);
     return resource;
   } catch (error: any) {
     console.error("❌ Error creating resource:", error);
@@ -220,7 +208,6 @@ export const editResource = createAsyncThunk<
       resource.chapters = resource.chapters.map(transformChapterFromApi);
     }
 
-    console.log("✅ Resource updated:", resource._id);
     return resource;
   } catch (error: any) {
     console.error("❌ Error editing resource:", error);
@@ -237,7 +224,6 @@ export const deleteResource = createAsyncThunk<string, string>(
         method: "DELETE",
       });
 
-      console.log("🗑️ Resource deleted:", id);
       return id;
     } catch (error: any) {
       console.error("❌ Error deleting resource:", error);
@@ -265,7 +251,7 @@ export const addChapter = createAsyncThunk<IResource, AddChapterPayload>(
         resource.chapters = resource.chapters.map(transformChapterFromApi);
       }
 
-      console.log("✅ Chapter added to resource:", resourceId);
+      //console.log("✅ Chapter added to resource:", resourceId);
       return resource;
     } catch (error: any) {
       console.error("❌ Error adding chapter:", error);
@@ -282,7 +268,7 @@ export const deleteChapter = createAsyncThunk<
   "resources/deleteChapter",
   async ({ resourceId, chapterId, videoId }, thunkApi) => {
     try {
-      console.log("🗑️ Deleting chapter:", chapterId, "with videoId:", videoId);
+      //console.log("🗑️ Deleting chapter:", chapterId, "with videoId:", videoId);
       await authorizedRequest(thunkApi, {
         url: `/api/stream/videos/${videoId}`,
         method: "DELETE",
@@ -293,7 +279,7 @@ export const deleteChapter = createAsyncThunk<
         method: "DELETE",
       });
 
-      console.log("🗑️ Chapter deleted:", chapterId);
+      //console.log("🗑️ Chapter deleted:", chapterId);
       return { resourceId, chapterId };
     } catch (error: any) {
       console.error("❌ Error deleting chapter:", error);
@@ -328,7 +314,7 @@ export const editChapter = createAsyncThunk<
         resource.chapters = resource.chapters.map(transformChapterFromApi);
       }
 
-      console.log("✅ Chapter edited:", chapterId);
+      //console.log("✅ Chapter edited:", chapterId);
       return resource;
     } catch (error: any) {
       console.error("❌ Error editing chapter:", error);
@@ -391,7 +377,7 @@ export const setChapterVideo = createAsyncThunk<
         resource.chapters = resource.chapters.map(transformChapterFromApi);
       }
 
-      console.log("✅ Chapter video set:", chapterId);
+      //console.log("✅ Chapter video set:", chapterId);
       return resource;
     } catch (error: any) {
       console.error("❌ Error setting chapter video:", error);

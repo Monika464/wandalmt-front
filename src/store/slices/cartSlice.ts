@@ -174,14 +174,14 @@ const cartSlice = createSlice({
         console.error("❌ CartSlice: Error resetting cart:", err);
       }
 
-      console.log("🔄 CartSlice: Cart fully reset");
+      //console.log("🔄 CartSlice: Cart fully reset");
     },
 
     //  removes the product completely, regardless of the quantity
     removeItemCompletely: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter((i) => i._id !== action.payload);
       saveCartToStorage(state.items);
-      console.log(`🗑️ Product ${action.payload} completely removed from cart`);
+      //console.log(`🗑️ Product ${action.payload} completely removed from cart`);
     },
   },
 });
@@ -189,14 +189,14 @@ const cartSlice = createSlice({
 // Add login middleware (optional)
 export const cartMiddleware = (store: any) => (next: any) => (action: any) => {
   if (action.type === "cart/clearCart") {
-    console.log("🎯 Cart Middleware: clearCart action detected");
-    console.log("Before:", store.getState().cart.items.length, "items");
+    // console.log("🎯 Cart Middleware: clearCart action detected");
+    // console.log("Before:", store.getState().cart.items.length, "items");
   }
 
   const result = next(action);
 
   if (action.type === "cart/clearCart") {
-    console.log("After:", store.getState().cart.items.length, "items");
+    //console.log("After:", store.getState().cart.items.length, "items");
   }
 
   return result;

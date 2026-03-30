@@ -11,7 +11,7 @@ export const useVideoNavigation = () => {
         return;
       }
 
-      console.log("Navigating to video:", chapter.videoId);
+      //console.log("Navigating to video:", chapter.videoId);
       navigate(`/watch/${chapter.videoId}`);
     } catch (error) {
       console.error("Failed to navigate to video:", error);

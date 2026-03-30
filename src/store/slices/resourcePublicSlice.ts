@@ -29,12 +29,11 @@ export const fetchResourceByProductId = createAsyncThunk<
 >(
   "resources/fetchByProductId",
   async (productId, { rejectWithValue, signal }) => {
-    //console.log(`🔄 Fetching resource ${resourceId}`);
     try {
       const res = await api.get(`/resources/${productId}`, {
         signal,
       });
-      //console.log("Fetched resource by ID:", res.data);
+
       return res.data as IResource;
     } catch (error: any) {
       if (axios.isCancel(error) || error.name === "CanceledError") {

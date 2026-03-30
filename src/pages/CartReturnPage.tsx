@@ -35,7 +35,7 @@ const CartReturnPage: React.FC = () => {
       const canceled = searchParams.get("canceled");
       const orderId = searchParams.get("orderId");
 
-      console.log("Payment params:", { sessionId, success, canceled, orderId }); // Debug
+      //console.log("Payment params:", { sessionId, success, canceled, orderId }); // Debug
 
       if (canceled === "true") {
         setStatus("error");
@@ -50,7 +50,7 @@ const CartReturnPage: React.FC = () => {
       }
 
       try {
-        console.log("Calling API with session_id:", sessionId); // Debug
+        //console.log("Calling API with session_id:", sessionId); // Debug
 
         const response = await axios.get(
           `${API_BASE_URL}/api/cart-session-status?session_id=${sessionId}`,
@@ -62,7 +62,7 @@ const CartReturnPage: React.FC = () => {
           },
         );
 
-        console.log("API Response:", response.data); // Debug - sprawdź czy invoiceUrl jest w odpowiedzi
+        //console.log("API Response:", response.data); // Debug - sprawdź czy invoiceUrl jest w odpowiedzi
 
         if (response.data.status === "complete") {
           setStatus("success");

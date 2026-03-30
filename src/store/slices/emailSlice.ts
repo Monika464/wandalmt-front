@@ -70,7 +70,7 @@ export const resetPassword = createAsyncThunk(
 export const changeEmail = createAsyncThunk(
   "email/changeEmail",
   async (newEmail: string, { getState, rejectWithValue }) => {
-    console.log("Thunk changeEmail called with:", newEmail);
+    //console.log("Thunk changeEmail called with:", newEmail);
     try {
       const state = getState() as any;
       const token = state.auth.token;

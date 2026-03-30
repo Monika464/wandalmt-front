@@ -77,7 +77,7 @@ const EditResourceForm: React.FC<Props> = ({ resource, onClose }) => {
   };
 
   const handleAddChapter = async () => {
-    console.log("Adding new chapter:", newChapter);
+    //console.log("Adding new chapter:", newChapter);
     if (!newChapter.title) {
       alert("Chapter title is required");
       return;
