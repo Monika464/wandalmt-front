@@ -1,25 +1,44 @@
 import { useDispatch } from "react-redux";
 import type { ProductItemProps } from "../../types/types";
 import type { AppDispatch } from "../../store";
-import { deleteProduct } from "../../store/slices/productSlice";
-import { formatCurrency } from "../../utils/formatcurremcy";
+import { deleteProduct, fetchProducts } from "../../store/slices/productSlice";
+//import { formatCurrency } from "../../utils/formatcurremcy";
+import { useCurrency } from "../../hooks/useCurrency";
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
 
 const ProductItem: React.FC<ProductItemProps> = ({
   _id,
   title,
   description,
   price,
-
   imageUrl,
   onEdit,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { t } = useTranslation();
+  const { formatPrice } = useCurrency(); // ✅ ZMIANA: użyj hooka
+  const [isDeleting, setIsDeleting] = useState(false); // ✅ DODAJ dla UX
 
-  const handleDelete = () => {
+  // const handleDelete = () => {
+  //   if (window.confirm(t("product.confirmDelete"))) {
+  //     dispatch(deleteProduct(_id));
+  //   }
+  // };
+
+  const handleDelete = async () => {
+    // ✅ ZMIANA: async
     if (window.confirm(t("product.confirmDelete"))) {
-      dispatch(deleteProduct(_id));
+      setIsDeleting(true);
+      try {
+        await dispatch(deleteProduct(_id)).unwrap();
+        // Odśwież listę po usunięciu
+        await dispatch(fetchProducts({})).unwrap();
+      } catch (error) {
+        console.error("Failed to delete product:", error);
+      } finally {
+        setIsDeleting(false);
+      }
     }
   };
 
@@ -42,7 +61,8 @@ const ProductItem: React.FC<ProductItemProps> = ({
 
       {/* Product Price */}
       <p className="font-bold text-lg text-blue-600 mb-4">
-        {formatCurrency(price)}
+        {/* {formatCurrency(price)} */}
+        {formatPrice(price)}
       </p>
 
       {/* Action Buttons */}

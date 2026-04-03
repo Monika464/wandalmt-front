@@ -5,9 +5,11 @@ import { fetchProductById } from "../store/slices/productPublicSlice";
 import { fetchResourceByProductId } from "../store/slices/resourcePublicSlice";
 import { useTranslation } from "react-i18next";
 
+import { useCurrency } from "../hooks/useCurrency";
+
 import type { Product, IResource } from "../types/types";
 import type { RootState, AppDispatch } from "../store";
-import { formatCurrency } from "../utils/formatcurremcy";
+//import { formatCurrency } from "../utils/formatcurremcy";
 import ViewPublicResource from "../components/resources/ViewPublicResource";
 import AddToCartButton from "../components/orders/AddToCartButton";
 import { ArrowLeft, BookOpen, Calendar } from "lucide-react";
@@ -17,6 +19,7 @@ export default function ProductResourcePage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const [showResource, setShowResource] = useState(false);
+  const { formatPrice } = useCurrency();
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -134,7 +137,8 @@ export default function ProductResourcePage() {
 
             {/* Price */}
             <div className="text-3xl font-bold text-blue-600 mb-6">
-              {formatCurrency(product.price)}
+              {/* {formatCurrency(product.price)} */}
+              {formatPrice(product.price)}
             </div>
 
             {/* Action buttons */}

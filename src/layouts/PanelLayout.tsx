@@ -4,7 +4,7 @@ import { Outlet, NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store";
 import Navbar from "../components/elements/Navbar";
-import { useTranslation } from "react-i18next"; // 👈 Dodaj import
+import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard,
   Package,
@@ -17,7 +17,7 @@ import {
 
 const PanelLayout = () => {
   const { user } = useSelector((state: RootState) => state.auth);
-  const { t } = useTranslation(); // 👈 Inicjalizacja
+  const { t } = useTranslation();
 
   // Admin menu
   const adminMenu = [

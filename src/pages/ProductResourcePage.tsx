@@ -11,9 +11,12 @@ import ViewResource from "../components/resources/ViewResource";
 import EditResourceForm from "../components/resources/EditResourceForm";
 import CreateResourceForm from "../components/resources/CreateResourceForm";
 
+import { useCurrency } from "../hooks/useCurrency";
+
 export default function ProductResourcePage() {
   const { productId } = useParams<{ productId: string }>();
   const { i18n, t } = useTranslation();
+  const { formatPrice } = useCurrency();
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -96,7 +99,7 @@ export default function ProductResourcePage() {
 
       {/* Product Price */}
       <p className="font-bold text-lg text-blue-600 mb-2">
-        {formatCurrency(product.price)}
+        {formatPrice(product.price)}
       </p>
 
       {/* Information about product language */}

@@ -9,6 +9,12 @@ const ProductPublicItem: React.FC<ProductPublicItemProps> = ({
   imageUrl,
 }) => {
   const { formatPrice } = useCurrency();
+  // console.log("Rendering ProductPublicItem:", {
+  //   title,
+  //   description,
+  //   price,
+  //   imageUrl,
+  // });
   return (
     <div className="p-4 border rounded-lg shadow-sm bg-white">
       <h2 className="text-lg font-bold text-center mb-3">{title}</h2>

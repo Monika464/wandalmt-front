@@ -10,7 +10,7 @@ export interface CurrencyState {
     symbol: string;
   }>;
   selectedCurrency: string;
-  baseCurrency: string; // PLN
+  baseCurrency: string;
   loading: boolean;
   error: string | null;
 }
@@ -44,6 +44,9 @@ export const fetchExchangeRates = createAsyncThunk(
   },
 );
 
+console.log("Initial Currency State:", initialState);
+console.log("Fetch Exchange Rates Thunk:", fetchExchangeRates);
+console.log("selectedCurrency:", initialState.selectedCurrency);
 const currencySlice = createSlice({
   name: "currency",
   initialState,
