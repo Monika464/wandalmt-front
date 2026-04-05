@@ -2,12 +2,6 @@
 
 Modern e-commerce frontend application built with React 19, TypeScript, and Vite.
 
-## 🎥 Project Demo
-
-<a href="https://www.youtube.com/watch?v=7WXJMmEW7So">
-  <img src="https://img.youtube.com/vi/7WXJMmEW7So/maxresdefault.jpg" width="400">
-</a>
-
 [![React](https://img.shields.io/badge/React-19.1.1-61DAFB?logo=react)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-7.3.1-646CFF?logo=vite)](https://vitejs.dev/)
@@ -193,6 +187,13 @@ The build artifacts will be in the dist/ directory.
 ## 🔗 Related Repositories
 
 - [Backend API](https://github.com/Monika464/wandalmt)
+
+## 🎥 Project Demo
+
+<a href="https://www.youtube.com/watch?v=7WXJMmEW7So">
+  <img src="https://img.youtube.com/vi/7WXJMmEW7So/maxresdefault.jpg" width="400">
+</a>
+
 - [Live Demo](https://club.boxingonline.eu)
 
 ## 📄 License
