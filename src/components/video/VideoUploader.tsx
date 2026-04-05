@@ -197,8 +197,6 @@ export default function VideoUploader({ onUploaded, existingVideoId }: Props) {
         },
       );
 
-      //console.log("Create video response:", response.data);
-
       if (response.data?.video) {
         response.data.video.title = response.data.video.title || videoTitle;
       }

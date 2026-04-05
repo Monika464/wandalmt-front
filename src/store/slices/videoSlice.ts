@@ -21,7 +21,7 @@ export const fetchVideoUrl = createAsyncThunk(
   "video/fetchUrl",
   async (videoId: string) => {
     const res = await api.get(`/api/stream/${videoId}`);
-    console.log("Fetched video URL:", res.data);
+
     return res.data;
   },
 );

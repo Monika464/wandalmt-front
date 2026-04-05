@@ -30,7 +30,7 @@ const ProductResources: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { t } = useTranslation();
 
-  console.log("InlineVideoPlayer render - productId:", productId);
+  //console.log("InlineVideoPlayer render - productId:", productId);
 
   // States
   const [currentChapter, setCurrentChapter] = useState<Chapter | null>(null);
@@ -175,23 +175,23 @@ const ProductResources: React.FC = () => {
 
     //if (!currentChapter || !productId || !user?._id) return;
     if (!currentChapter || !productId || !user?._id) {
-      console.log("❌ Brakuje danych:", { currentChapter, productId, user });
+      console.log("❌ Missing data:", { currentChapter, productId, user });
       return;
     }
 
-    // Sprawdź czy już nie jest ukończony
+    // is already completed?
     const alreadyCompleted = isChapterCompleted(productId, currentChapter._id);
-    console.log("📊 Czy już ukończony?", alreadyCompleted);
+    console.log("📊 Is completed?", alreadyCompleted);
 
     if (alreadyCompleted) {
-      console.log("⚠️ Rozdział już ukończony, pomijam");
+      console.log("⚠️ Chapter already completed, skipping...");
       return;
     }
 
-    console.log("✅ Oznaczam rozdział jako ukończony");
+    console.log("✅ Marking chapter as completed");
     completeChapter(productId, currentChapter._id);
 
-    console.log("🔄 Przeładowuję postęp");
+    console.log("🔄 Reloading progress");
     await loadProgress(productId);
 
     console.log("✅ Toast");

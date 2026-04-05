@@ -27,7 +27,7 @@ export default function ResourceListComponent() {
   const [deleteInput, setDeleteInput] = useState("");
 
   const handlePlayVideo = (chapter: IChapter) => {
-    console.log("handlePlayVideo called with chapter:", chapter);
+    //console.log("handlePlayVideo called with chapter:", chapter);
     if (chapter.videoId) {
       console.log("Navigating to video:", chapter.videoId);
       navigate(`/watch/${chapter.videoId}`);
@@ -56,7 +56,7 @@ export default function ResourceListComponent() {
       setConfirmingDeleteId(null);
       setDeleteInput("");
     } else {
-      alert(t("resource.deleteConfirmationMessage")); // 👈 Tłumaczenie
+      alert(t("resource.deleteConfirmationMessage"));
     }
   };
 

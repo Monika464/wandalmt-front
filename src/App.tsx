@@ -38,11 +38,8 @@ import AuthLayout from "./layouts/AuthLayout";
 import AdminOrdersSummary from "./components/orders/AdminOrdersSummary";
 import UserProfile from "./components/orders/UserProfile";
 import { useLanguageSync } from "./hooks/useLanguageSync";
-import { useCurrency } from "./hooks/useCurrency";
 
 const App = () => {
-  const { selectedCurrency } = useCurrency();
-  console.log("Current Currency in App Component:", selectedCurrency);
   useAutoRefresh();
   useLanguageSync();
 
