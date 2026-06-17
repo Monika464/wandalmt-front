@@ -69,7 +69,7 @@ const BunnyPlayer: React.FC<BunnyPlayerProps> = ({
             }
           });
 
-          player.on("timeupdate", (data: any) => {
+          player.on("timeupdate", () => {
             if (!isMounted) return;
             // Optional - log every 30 seconds
             // if (data && Math.floor(data.seconds) % 30 === 0) {

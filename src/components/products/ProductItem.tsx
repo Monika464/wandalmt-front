@@ -17,14 +17,15 @@ const ProductItem: React.FC<ProductItemProps> = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { t } = useTranslation();
-  const { formatPrice } = useCurrency(); // ✅ ZMIANA: użyj hooka
-  const [isDeleting, setIsDeleting] = useState(false); // ✅ DODAJ dla UX
+  const { formatPrice } = useCurrency(); 
+  const [isDeleting, setIsDeleting] = useState(false); 
 
   // const handleDelete = () => {
   //   if (window.confirm(t("product.confirmDelete"))) {
   //     dispatch(deleteProduct(_id));
   //   }
   // };
+  console.log("isDeleting", isDeleting)
 
   const handleDelete = async () => {
     // ✅ ZMIANA: async

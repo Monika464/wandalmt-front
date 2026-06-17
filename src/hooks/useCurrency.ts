@@ -7,7 +7,7 @@ import { useEffect } from "react";
 
 export const useCurrency = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { availableCurrencies, selectedCurrency, loading } = useSelector(
+  const { availableCurrencies, selectedCurrency, loading,error } = useSelector(
     (state: RootState) => state.currency,
   );
 
@@ -87,6 +87,7 @@ export const useCurrency = () => {
     selectedCurrency,
     availableCurrencies,
     loading,
+    error,
     setCurrency: (code: string) => dispatch(setCurrency(code)),
     getConvertedPrice,
     getFormattedPrice,

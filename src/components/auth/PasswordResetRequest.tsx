@@ -10,7 +10,7 @@ import { Mail, Send, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 
 const PasswordResetRequest: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { t, i18n } = useTranslation();
+  const { t} = useTranslation();
   const { loading, error, success } = useSelector(
     (state: RootState) => state.email,
   );

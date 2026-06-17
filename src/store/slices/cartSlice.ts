@@ -187,7 +187,7 @@ const cartSlice = createSlice({
 });
 
 // Add login middleware (optional)
-export const cartMiddleware = (store: any) => (next: any) => (action: any) => {
+export const cartMiddleware = () => (next: any) => (action: any) => {
   if (action.type === "cart/clearCart") {
     // console.log("🎯 Cart Middleware: clearCart action detected");
     // console.log("Before:", store.getState().cart.items.length, "items");

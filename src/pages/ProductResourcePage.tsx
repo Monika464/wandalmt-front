@@ -6,7 +6,6 @@ import { fetchResourceByProductId } from "../store/slices/resourceSlice";
 import { useTranslation } from "react-i18next";
 import type { Product, IResource } from "../types/types";
 import type { RootState, AppDispatch } from "../store";
-import { formatCurrency } from "../utils/formatcurremcy";
 import ViewResource from "../components/resources/ViewResource";
 import EditResourceForm from "../components/resources/EditResourceForm";
 import CreateResourceForm from "../components/resources/CreateResourceForm";
